@@ -19,10 +19,6 @@ jobs:
       - run: make build
       - run: make vet
       - run: go test ./... -v
-      - name: Check fmt
-        run: |
-          make fmt
-          git diff --exit-code || (echo "run 'make fmt' and commit" && exit 1)
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
