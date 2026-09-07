@@ -68,9 +68,9 @@ func runView(args []string) {
 // loadScript runs the file fresh: declarations in, Timeline out. Errors
 // carry run/build context so the preview shows them instead of stale art.
 func loadScript(path string) (kyfram.Timeline, error) {
-	source, err := os.ReadFile(path)
+	source, err := kyfram.LoadScript(path)
 	if err != nil {
-		return kyfram.Timeline{}, fmt.Errorf("read: %w", err)
+		return kyfram.Timeline{}, fmt.Errorf("load: %w", err)
 	}
 	vm := newVM()
 	var b kyfram.Builder

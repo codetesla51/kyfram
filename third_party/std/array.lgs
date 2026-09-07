@@ -1,0 +1,129 @@
+let map = fn(arr, func) {
+    let result = []
+    for item in arr {
+        result = push(result, func(item))
+    }
+    return result
+}
+let filter = fn(arr, func) {
+    let result = []
+    for item in arr {
+        if func(item) {
+            result = push(result, item)
+        }
+    }
+    return result
+}
+let reduce = fn(arr, func, initial) {
+    let acc = initial
+    for item in arr {
+        acc = func(acc, item)
+    }
+    return acc
+}
+let unique = fn(arr) {
+    let result = []
+    for item in arr {
+        if !contains(result, item) {
+            result = push(result, item)
+        }
+    }
+    return result
+}
+let flat = fn(arr) {
+    let result = []
+    for item in arr {
+        if type(item) == "ARRAY" {
+            let inner = flat(item)
+            for el in inner {
+                result = push(result, el)
+            }
+        } else {
+            result = push(result, item)
+        }
+    }
+    return result
+}
+let copy = fn(arr) {
+    let result = []
+    for item in arr {
+        result = push(result, item)
+    }
+    return result
+}
+let sum = fn(arr) {
+    let sum = 0
+    for item in arr {
+        sum = sum + item
+    }
+    return sum
+}
+let min = fn(arr) {
+    if len(arr) == 0 {
+        print("error: min() called on empty array")
+        exit(1)
+    }
+    let min = first(arr)
+    for item in arr {
+        if item < min {
+            min = item
+        }
+    }
+    return min
+}
+let max = fn(arr) {
+    if len(arr) == 0 {
+        print("error: max() called on empty array")
+        exit(1)
+    }
+    let max = first(arr)
+    for item in arr {
+        if item > max {
+            max = item
+        }
+    }
+    return max
+}
+let containsAll = fn(arr, items) {
+    for item in items {
+        if !contains(arr, item) {
+            return false
+        }
+    }
+    return true
+}
+let chunk = fn(arr, size) {
+    let result = []
+    let i = 0
+    for i < len(arr) {
+        let end = i + size
+        if end > len(arr) {
+            end = len(arr)
+        }
+        result = push(result, slice(arr, i, end))
+        i = i + size
+    }
+    return result
+}
+let indexOf = fn(arr, val) {
+    let i = 0
+    for item in arr {
+        if item == val {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+let arrayMap = map
+let arrayFilter = filter
+let arrayReduce = reduce
+let arrayUnique = unique
+let arrayFlat = flat
+let arrayCopy = copy
+let arraySum = sum
+let arrayMin = min
+let arrayMax = max
+let arrayContainsAll = containsAll
+let arrayChunk = chunk
+let arrayIndexOf = indexOf

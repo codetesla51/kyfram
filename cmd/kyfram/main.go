@@ -15,7 +15,7 @@ import (
 // file IO, network, shell, exit — kyfram itself provides narrow builtins
 // (text_file) where file access is wanted.
 func newVM() *interpreter.Interpreter {
-	return interpreter.NewInterpreter(interpreter.SandboxConfig{
+	return interpreter.NewInterpreter(kyfram.StdLib(), interpreter.SandboxConfig{
 		AllowFileIO:  false,
 		AllowNetwork: false,
 		AllowShell:   false,
@@ -64,9 +64,9 @@ func runRender(args []string) {
 			os.Exit(1)
 		}
 	}
-	source, err := os.ReadFile(fs.Arg(0))
+	source, err := kyfram.LoadScript(fs.Arg(0))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "read:", err)
+		fmt.Fprintln(os.Stderr, "load:", err)
 		os.Exit(1)
 	}
 	vm := newVM()
