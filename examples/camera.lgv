@@ -1,0 +1,27 @@
+scene(4, 30)
+
+camera(table{
+  "0": table{x: 200, y: 180, zoom: 1},
+  "2": table{x: 320, y: 180, zoom: 1.6, ease: "sine"},
+  "4": table{x: 440, y: 180, zoom: 1}
+})
+
+shape("left", "circle", table{
+  "0": table{x: 200, y: 180, r: 50, color: "coral"},
+  "4": table{x: 200, y: 180, r: 50, color: "coral"}
+})
+
+shape("mid", "rect", table{
+  "0": table{x: 270, y: 130, w: 100, h: 100, gradFrom: "sky", gradTo: "navy", gradAngle: 90},
+  "4": table{x: 270, y: 130, w: 100, h: 100, gradFrom: "sky", gradTo: "navy", gradAngle: 90}
+})
+
+shape("right", "circle", table{
+  "0": table{x: 440, y: 180, r: 50, color: "mint"},
+  "4": table{x: 440, y: 180, r: 50, color: "mint"}
+})
+
+text("cap", table{
+  "0": table{content: "pan and zoom", x: 320, y: 320, size: 18, color: "silver"},
+  "4": table{content: "pan and zoom", x: 320, y: 320, size: 18, color: "silver"}
+})

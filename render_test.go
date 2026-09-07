@@ -515,3 +515,39 @@ func TestRenderCamera(t *testing.T) {
 		t.Fatal("zoom 2: ball edge should reach 80px out")
 	}
 }
+
+// Glyphs ride the path: horizontal text paints its band, diagonal text
+// reaches where horizontal never could.
+func TestRenderTextOnPath(t *testing.T) {
+	bright := func(img image.Image, x0, y0, x1, y1 int) int {
+		n := 0
+		for y := y0; y < y1; y += 2 {
+			for x := x0; x < x1; x += 2 {
+				if r, _, _, _ := img.At(x, y).RGBA(); r>>8 > 60 {
+					n++
+				}
+			}
+		}
+		return n
+	}
+	mk := func(pts []any) image.Image {
+		return RenderFrame(Timeline{Entities: []Entity{
+			{Name: "t", Kind: "text", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{
+					"content": "oooo", "size": 28.0, "color": "#ffffff", "points": pts,
+				}},
+			}},
+		}}, 0).Image()
+	}
+	flat := mk([]any{200.0, 180.0, 440.0, 180.0})
+	if n := bright(flat, 200, 160, 320, 200); n < 50 {
+		t.Fatalf("flat path text painted %d pixels, want a word", n)
+	}
+	diag := mk([]any{200.0, 260.0, 320.0, 180.0})
+	if n := bright(diag, 230, 200, 280, 240); n < 20 {
+		t.Fatalf("diagonal text reached %d pixels up-right, want the climb", n)
+	}
+	if n := bright(flat, 230, 200, 280, 240); n > 0 {
+		t.Fatalf("flat text leaked %d pixels up-right", n)
+	}
+}

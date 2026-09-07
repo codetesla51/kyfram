@@ -47,14 +47,18 @@ text("caption", table{
 - **Declarative keyframes** — `scene()` / `shape()` / `text()` / `audio()` builtins; scripts compute freely, the builder keeps only declarations
 - **Interpolator** — numbers lerp, hex colors lerp per channel, strings snap to the earlier key; out-of-range holds the edge, never extrapolates
 - **Easing** — `linear | easeIn | easeOut | easeInOut | cubicIn | cubicOut | cubicInOut | sine` per segment, declared on the earlier key
-- **Primitives** — circle, rect, line, arc, image, font-backed text; every vector kind takes `rotate` (degrees), `scale`, `layer`, `alpha`
+- **Primitives** — circle, rect, line, arc, wave, path, image, font-backed text; every vector kind takes `rotate` (degrees), `scale`, `layer`, `alpha`
 - **Zero-disk render path** — raw RGBA bytes piped to ffmpeg's stdin (`-f rawvideo`); PNG sequences exist only as a debug path
 - **Audio mux** — `audio(path, offset?, loop?)` tracks mixed under the video, beeps land on visual beats via `-itsoffset`
 - **Preview server** — scrub slider, play button, hot reload (every request re-reads the script)
 - **Sandboxed scripts** — file IO, network, shell, and exit are blocked; "declarations only" is convention, the builder ignores the rest
 - **Multi-file scripts** — `use "lib"` inlines `lib.lgv` from beside the script; `std/` still resolves (vendored under `third_party/`)
 - **Templates** — `render --var key=value` feeds script variables; `text_file(path)` reads long copy from disk (1MB cap)
+- **Camera** — keyframed `camera()` pans and zooms the whole scene
 - **Named colors** — `red gold slate mint` and 20 more resolve and lerp exactly like hex
+- **Blend modes** — `multiply | screen | add` per entity
+- **Gradients** — `gradFrom/gradTo/gradAngle` fills on circle and rect
+- **Text on path** — `points` on a text lays glyphs along the polyline
 
 ## Examples
 
@@ -72,6 +76,8 @@ text("caption", table{
 | `examples/bounce.lgv` | gravity bounces (easeIn down, easeOut up) + sloshing lines |
 | `examples/spinner.lgv` | ring + rotating arc hand |
 | `examples/vars.lgv` | `--var` templating + `text_file` copy |
+| `examples/wave.lgv` | morphing wave, gradient sun, blend halo, path sail, text on path |
+| `examples/camera.lgv` | keyframed pan and zoom |
 
 ## How it works
 
@@ -108,8 +114,14 @@ Kinds and their props (`x`/`y` in pixels, origin top-left):
 - `rect`: `x y` (top-left) `w h color`
 - `line`: `x1 y1 x2 y2 width color`
 - `arc`: `x y` (center) `r start end` (degrees) `width color` — `0..360` is a ring
+- `wave`: `x y` (left baseline) `width amplitude frequency` (cycles) `phase` (degrees) `thickness color` — engine owns the sine
+- `path`: `points` flat `[x1,y1,…]` `width color filled?` — same-length lists morph
 - `image`: `path x y` (centered)
-- `text`: `content x y size color font?`
+- `text`: `content x y size color font?` — `points` lays glyphs along the polyline
+
+Gradients on circle/rect: `gradFrom gradTo` (names or hex) + `gradAngle`.
+Blend on any entity: `blend: "multiply" | "screen" | "add"`.
+Camera as a declaration: `camera(table{"0": table{x: 320, y: 180, zoom: 1}, …})`.
 
 Every vector kind also takes `alpha` (0–1, default 1) for real fades,
 `rotate` (degrees about its center), `scale`, and `layer` (paint order,
@@ -152,6 +164,7 @@ third_party/       vendored Logos stdlib (.lgs) the VM resolves `use "std/..."` 
 
 - 2D screen space only. No camera, no 3D, no streaming, no GUI editor.
 - Fixed prop vocabulary per kind; no groups (nesting) yet — `layer` covers ordering.
+- Gradient fills on circle/rect only; strokes and images stay flat.
 - `ffmpeg` and the default font are system dependencies, not embedded. Fonts must be `.ttf` (TrueType outlines) — `.otf`/CFF fails to load and the text is skipped.
 - Audio loops whole files; no per-section repeat.
 - Scripts are "declarations only" by convention — the sandbox can't block `for`/`if`, the builder just ignores them.

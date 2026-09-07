@@ -1,0 +1,26 @@
+scene(4, 30)
+
+shape("sea", "wave", table{
+  "0": table{x: 0, y: 200, width: 640, amplitude: 10, frequency: 2, phase: 0, thickness: 3, color: "sky"},
+  "4": table{x: 0, y: 200, width: 640, amplitude: 50, frequency: 4, phase: 360, thickness: 3, color: "sky"}
+})
+
+shape("sun", "circle", table{
+  "0": table{x: 520, y: 90, r: 45, gradFrom: "gold", gradTo: "coral", gradAngle: 90},
+  "4": table{x: 520, y: 90, r: 45, gradFrom: "gold", gradTo: "coral", gradAngle: 90}
+})
+
+shape("glow", "circle", table{
+  "0": table{x: 520, y: 90, r: 70, color: "gold", alpha: 0.35, blend: "screen"},
+  "4": table{x: 520, y: 90, r: 70, color: "gold", alpha: 0.35, blend: "screen"}
+})
+
+shape("sail", "path", table{
+  "0": table{points: [270, 260, 370, 260, 320, 170], filled: true, color: "white"},
+  "4": table{points: [270, 260, 370, 260, 320, 140], filled: true, color: "white"}
+})
+
+text("song", table{
+  "0": table{content: "ride the sine", size: 26, color: "mint", points: [80, 120, 320, 60, 560, 120]},
+  "4": table{content: "ride the sine", size: 26, color: "mint", points: [80, 120, 320, 60, 560, 120]}
+})

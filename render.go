@@ -98,7 +98,13 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		}
 		spin(dc, cx, cy, props, func() {
 			paint(dc, props)
-			dc.DrawStringAnchored(propStr(props, "content", ""), cx, cy, 0.5, 0.5)
+			content := propStr(props, "content", "")
+			// A points list turns the line into a path the glyphs ride.
+			if pts, ok := props["points"].([]any); ok {
+				drawTextOnPath(dc, content, pts)
+				return
+			}
+			dc.DrawStringAnchored(content, cx, cy, 0.5, 0.5)
 		})
 	case "rect":
 		// x,y is the top-left corner; w,h default to a 100px square.
@@ -573,4 +579,57 @@ func frameCamera(dc *gg.Context, tl Timeline, w, h int, t float64) {
 	dc.Translate(float64(w)/2, float64(h)/2)
 	dc.Scale(zoom, zoom)
 	dc.Translate(-propNum(cam, "x", float64(w)/2), -propNum(cam, "y", float64(h)/2))
+}
+
+// drawTextOnPath lays runes along a flat [x1,y1,...] polyline, each
+// rotated to its segment, glyph centers walking arc-length from the
+// path start. Bad point lists and empty strings draw nothing; runes
+// past the path end are dropped, not wrapped.
+func drawTextOnPath(dc *gg.Context, s string, raw []any) {
+	pts := make([]float64, 0, len(raw))
+	for _, v := range raw {
+		f, ok := toFloat(v)
+		if !ok {
+			return
+		}
+		pts = append(pts, f)
+	}
+	if len(pts) < 4 || len(pts)%2 != 0 || s == "" {
+		return
+	}
+	type seg struct{ x, y, ang, len float64 }
+	segs := make([]seg, 0, len(pts)/2-1)
+	for i := 0; i+3 < len(pts); i += 2 {
+		dx, dy := pts[i+2]-pts[i], pts[i+3]-pts[i+1]
+		segs = append(segs, seg{pts[i], pts[i+1], math.Atan2(dy, dx), math.Hypot(dx, dy)})
+	}
+	si := 0
+	used := 0.0
+	at := func(dist float64) (float64, float64, float64, bool) {
+		for si < len(segs) && used+segs[si].len < dist {
+			used += segs[si].len
+			si++
+		}
+		if si >= len(segs) {
+			return 0, 0, 0, false
+		}
+		g := segs[si]
+		d := dist - used
+		return g.x + math.Cos(g.ang)*d, g.y + math.Sin(g.ang)*d, g.ang, true
+	}
+	cursor := 0.0
+	for _, r := range s {
+		ch := string(r)
+		w, _ := dc.MeasureString(ch)
+		px, py, ang, ok := at(cursor + w/2)
+		if !ok {
+			return
+		}
+		dc.Push()
+		dc.Translate(px, py)
+		dc.Rotate(ang)
+		dc.DrawStringAnchored(ch, 0, 0, 0.5, 0.5)
+		dc.Pop()
+		cursor += w
+	}
 }
