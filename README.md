@@ -11,7 +11,30 @@
 
 > Keyframe-driven rendering engine — declare what shapes look like at specific times, Go renders to `mp4`/`png` via `gg` + `ffmpeg`.
 
-**Docs → [kyfram.dev](https://kyfram.dev)** — full reference, examples, and API live there. This README is just the quick start.
+**Docs → [kyfram.dev](https://kyfram.dev)** — full reference, examples, and API. This README is the quick pitch.
+
+## What is kyfram?
+
+`kyfram` is a small, opinionated engine for motion graphics. You write a `.lgv` script in [Logos](https://github.com/codetesla51/logos) declaring states-at-times — `scene()`, `shape()`, `text()`, `group()`, `camera()`, `audio()` — and Go owns the tweening: `Timeline → Interpolate(t) → gg canvas → ffmpeg`. Same lineage as `logos2d`, but for batch video/stills instead of a live window.
+
+Think CSS `@keyframes` for video: retiming is editing a number, not re-directing callbacks.
+
+## Pronunciation
+
+**kyfram** — *KAI-fram* /kaɪ.fræm/, like **keyframe** without the *e*.
+
+## Features
+
+- **Declarative keyframes** — times are quoted strings (`"0"`, `"1.5"`), engine lerps numbers/colors/arrays and snaps text.
+- **Easing per segment** — `linear`, `easeIn/Out/InOut`, `cubicIn/Out/InOut`, `sine`.
+- **Rich primitives** — `circle`, `rect`, `roundRect`, `polygon`, `star`, `ellipse`, `line`, `arc`, `wave`, `path`, `image`, `text`.
+- **Groups** — `group()` with local `x/y`, keyframed `x y scale rotate alpha layer`.
+- **Camera** — keyframed pan/zoom for the whole scene.
+- **Style** — gradients (`gradFrom`/`gradTo`), blend modes, alpha/rotate/scale/layer per entity.
+- **Audio + TTS** — `audio()` mux and `tts()` (Edge neural → `espeak-ng` → beeps) with word timings for synced text.
+- **Preview + templates** — `kyfram view` hot-reload, `render --var k=v` and `text_file()` for batch renders.
+
+See docs for the full scripting reference.
 
 ## Quick start
 
@@ -30,4 +53,4 @@ go run ./cmd/kyfram render examples/intro.lgv --out out.mp4
 go run ./cmd/kyfram view examples/intro.lgv   # http://localhost:8080
 ```
 
-Requires Go 1.27+ and `ffmpeg` on `PATH`. See docs for install, CLI flags, and scripting.
+Requires Go 1.27+ and `ffmpeg` on `PATH`. See docs for install and CLI flags.
