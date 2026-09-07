@@ -128,10 +128,8 @@ func keyframesArg(obj interpreter.Object) ([]Keyframe, error) {
 			if !ok {
 				return nil, fmt.Errorf("keyframe %q: ease must be a string", ks)
 			}
-			switch ease {
-			case "linear", "easeIn", "easeOut", "easeInOut":
-			default:
-				return nil, fmt.Errorf("keyframe %q: unknown ease %q", ks, ease)
+			if !validEase(ease) {
+				return nil, fmt.Errorf("keyframe %q: unknown ease %q (want one of %v)", ks, ease, easeNames)
 			}
 		}
 		kfs = append(kfs, Keyframe{Time: t, Props: props, Ease: ease})

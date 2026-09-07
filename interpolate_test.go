@@ -64,3 +64,27 @@ func TestInterpolateEase(t *testing.T) {
 		}
 	}
 }
+
+// New curves bend correctly at the midpoint; sine lands exactly halfway.
+func TestInterpolateEaseCurves(t *testing.T) {
+	mk := func(ease string) []Keyframe {
+		return []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 0.0}, Ease: ease},
+			{Time: 2, Props: map[string]any{"x": 100.0}},
+		}
+	}
+	for _, c := range []struct {
+		ease string
+		want float64
+	}{
+		{"cubicIn", 12.5},
+		{"cubicOut", 87.5},
+		{"cubicInOut", 50.0},
+		{"sine", 50.0},
+	} {
+		got, _ := Interpolate(mk(c.ease), 1)["x"].(float64)
+		if got < c.want-1e-9 || got > c.want+1e-9 {
+			t.Fatalf("ease %q at t=1 = %v, want %v", c.ease, got, c.want)
+		}
+	}
+}

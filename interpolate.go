@@ -2,6 +2,7 @@ package kyfram
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -57,6 +58,23 @@ func spanFrac(t0, t1, t float64) float64 {
 	return 0
 }
 
+// easeNames lists every curve applyEase understands. Bindings validate
+// against this so scripts fail fast on typos instead of silently linear.
+var easeNames = []string{
+	"linear", "easeIn", "easeOut", "easeInOut",
+	"cubicIn", "cubicOut", "cubicInOut", "sine",
+}
+
+// validEase reports whether name is a known curve.
+func validEase(name string) bool {
+	for _, e := range easeNames {
+		if e == name {
+			return true
+		}
+	}
+	return false
+}
+
 // applyEase reshapes the linear fraction into a named curve. Unknown
 // names fall back to linear; bindings reject them earlier so this is
 // only a backstop for hand-built timelines.
@@ -73,6 +91,17 @@ func applyEase(name string, f float64) float64 {
 			return 2 * f * f
 		}
 		return 1 - 2*(1-f)*(1-f)
+	case "cubicIn":
+		return f * f * f
+	case "cubicOut":
+		return 1 - (1-f)*(1-f)*(1-f)
+	case "cubicInOut":
+		if f < 0.5 {
+			return 4 * f * f * f
+		}
+		return 1 - 4*(1-f)*(1-f)*(1-f)
+	case "sine":
+		return 0.5 - 0.5*math.Cos(math.Pi*f)
 	}
 	return f
 }
