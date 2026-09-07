@@ -146,6 +146,17 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		b.tl.Camera = kfs
 		return interpreter.NULL
 	})
+	vm.Register("transparent", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) != 1 {
+			return &interpreter.Error{Message: fmt.Sprintf("transparent() takes 1 argument, got %d", len(args))}
+		}
+		bval, err := boolArg(args[0], "transparent")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		b.tl.Transparent = bval
+		return interpreter.NULL
+	})
 	vm.Register("text_file", func(args ...interpreter.Object) interpreter.Object {
 		if len(args) != 1 {
 			return &interpreter.Error{Message: fmt.Sprintf("text_file() takes 1 argument, got %d", len(args))}

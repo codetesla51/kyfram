@@ -34,8 +34,13 @@ const (
 func RenderFrame(tl Timeline, t float64) *gg.Context {
 	w, h := tl.size()
 	dc := gg.NewContext(w, h)
-	dc.SetRGB(0.1, 0.1, 0.12)
-	dc.Clear()
+	if tl.Transparent {
+		dc.SetRGBA(0, 0, 0, 0)
+		dc.Clear()
+	} else {
+		dc.SetRGB(0.1, 0.1, 0.12)
+		dc.Clear()
+	}
 
 	// Camera reframes the world (see frameCamera); the background clear
 	// stays put while entities travel.

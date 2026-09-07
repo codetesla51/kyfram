@@ -10,6 +10,7 @@ type Timeline struct {
 	Width    int
 	Height   int
 	Font     string
+	Transparent bool
 	Entities []Entity
 	Groups   []Group
 	Audio    []AudioTrack

@@ -1,5 +1,9 @@
 # kyfram
 
+<p align="center">
+  <img src="logo.png" width="320" alt="kyfram logo — two states connected by an eased trail with frame ticks">
+</p>
+
 > Keyframe-driven rendering engine (video + still frames) — the video is written in Logos and Go is only the runtime underneath.
 
 `kyfram` is a small, opinionated engine for building motion-graphics clips and stills. You declare what shapes look like at specific times in a `.lgv` script — Go interpolates between keyframes, rasterizes each frame in memory with `gg` (pure Go, no GPU/window), and pipes raw pixels to `ffmpeg` for video or writes a single `png` for stills. Same lineage as `logos2d` (sibling repo, live 2D games); this one is batch rendering instead of a live window.
