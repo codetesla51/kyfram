@@ -88,3 +88,17 @@ func TestInterpolateEaseCurves(t *testing.T) {
 		}
 	}
 }
+
+// Named colors resolve and lerp like hex; unknown words still snap.
+func TestInterpolateColorNames(t *testing.T) {
+	kfs := []Keyframe{
+		{Time: 0, Props: map[string]any{"c": "red", "w": "hello"}},
+		{Time: 2, Props: map[string]any{"c": "blue", "w": "world"}},
+	}
+	if got := Interpolate(kfs, 1)["c"]; got != "#800080" {
+		t.Fatalf("red->blue at t=1 = %v, want #800080", got)
+	}
+	if got := Interpolate(kfs, 1)["w"]; got != "hello" {
+		t.Fatalf("words at t=1 = %v, want hello", got)
+	}
+}

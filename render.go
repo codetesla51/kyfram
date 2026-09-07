@@ -206,7 +206,7 @@ func paint(dc *gg.Context, props map[string]any) {
 	if a < 0 {
 		a = 0
 	}
-	c, err := parseHex(col)
+	c, err := parseColor(col)
 	if err != nil {
 		dc.SetHexColor(col)
 		return

@@ -116,8 +116,8 @@ func blend(a, b any, f float64) any {
 	}
 	if as, ok := a.(string); ok {
 		if bs, ok := b.(string); ok {
-			if ac, err := parseHex(as); err == nil {
-				if bc, err := parseHex(bs); err == nil {
+			if ac, err := parseColor(as); err == nil {
+				if bc, err := parseColor(bs); err == nil {
 					return mixHex(ac, bc, f)
 				}
 			}
@@ -140,6 +140,28 @@ func toFloat(v any) (float64, bool) {
 		return float64(n), true
 	}
 	return 0, false
+}
+
+// colorNames maps friendly names to hex so scripts read "gold" instead
+// of "#e6c040". Names resolve before blending, so they lerp exactly
+// like hex. Case-insensitive; unknown strings are not colors.
+var colorNames = map[string]string{
+	"black": "#000000", "white": "#ffffff",
+	"red": "#ff0000", "green": "#00ff00", "blue": "#0000ff",
+	"yellow": "#ffff00", "cyan": "#00ffff", "magenta": "#ff00ff",
+	"orange": "#ffa500", "purple": "#800080", "pink": "#ffc0cb",
+	"teal": "#008080", "navy": "#000080", "gray": "#808080",
+	"grey": "#808080", "dark": "#14141c", "gold": "#e6c040",
+	"coral": "#e64c40", "sky": "#40a0e6", "mint": "#40e680",
+	"lavender": "#b080e6", "slate": "#404040", "silver": "#888888",
+}
+
+// parseColor reads #rrggbb, #rgb, or a color name into 0-255 channels.
+func parseColor(s string) ([3]float64, error) {
+	if hex, ok := colorNames[strings.ToLower(strings.TrimSpace(s))]; ok {
+		s = hex
+	}
+	return parseHex(s)
 }
 
 // parseHex reads #rrggbb and #rgb into 0-255 channels.
