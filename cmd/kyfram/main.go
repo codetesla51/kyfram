@@ -24,16 +24,33 @@ func newVM() *interpreter.Interpreter {
 }
 
 func main() {
-	if len(os.Args) < 2 || os.Args[1] != "render" {
-		fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] <script.lgv>")
-		os.Exit(1)
+	if len(os.Args) < 2 {
+		usage()
 	}
+	switch os.Args[1] {
+	case "render":
+		runRender(os.Args[2:])
+	case "view":
+		runView(os.Args[2:])
+	default:
+		usage()
+	}
+}
+
+func usage() {
+	fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] <script.lgv>")
+	fmt.Fprintln(os.Stderr, "       kyfram view [--port n] <script.lgv>")
+	os.Exit(1)
+}
+
+// runRender renders one script file to a video.
+func runRender(args []string) {
 	fs := flag.NewFlagSet("render", flag.ExitOnError)
 	out := fs.String("out", "out.mp4", "output video path")
 	fps := fs.Int("fps", 0, "override scene fps")
 	width := fs.Int("width", 0, "override canvas width")
 	height := fs.Int("height", 0, "override canvas height")
-	if err := fs.Parse(os.Args[2:]); err != nil {
+	if err := fs.Parse(args); err != nil {
 		fmt.Fprintln(os.Stderr, "flags:", err)
 		os.Exit(1)
 	}
