@@ -23,7 +23,9 @@ const (
 
 	// defaultFont is the fallback typeface: a Timeline Font or text font
 	// prop wins whenever set, so no script is stuck with this path.
-	defaultFont = "/usr/share/fonts/noto/NotoSans-Regular.ttf"
+	// Archivo Black is the product face; Noto stays as a system fallback
+	// if the bundled file is missing at runtime.
+	defaultFont = "examples/assets/fonts/ArchivoBlack-Regular.ttf"
 )
 
 // RenderFrame paints every entity at time t onto one canvas: resolve
