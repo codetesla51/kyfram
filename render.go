@@ -73,6 +73,19 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 				propNum(props, "y2", float64(h)/2),
 			)
 			dc.Stroke()
+		case "arc":
+			// Angles are degrees in scripts (gg wants radians); a full
+			// 0..360 sweep is a ring, partial sweeps are loader hands.
+			paint(dc, props)
+			dc.SetLineWidth(propNum(props, "width", 4))
+			dc.DrawArc(
+				propNum(props, "x", float64(w)/2),
+				propNum(props, "y", float64(h)/2),
+				propNum(props, "r", 50),
+				gg.Radians(propNum(props, "start", 0)),
+				gg.Radians(propNum(props, "end", 360)),
+			)
+			dc.Stroke()
 		case "image":
 			// ponytail: decoded from disk every frame; cache by path if slow.
 			path := propStr(props, "path", "")

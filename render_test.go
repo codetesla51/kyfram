@@ -232,3 +232,25 @@ func TestRenderAlpha(t *testing.T) {
 		t.Fatalf("alpha 1 pixel = #%02x%02x%02x, want #ff0000", r>>8, g>>8, b>>8)
 	}
 }
+
+// A 0..90 degree arc passes through the 45-degree point; outside the
+// sweep stays background.
+func TestRenderArc(t *testing.T) {
+	tl := Timeline{Entities: []Entity{
+		{Name: "a", Kind: "arc", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{
+				"x": 320.0, "y": 180.0, "r": 80.0,
+				"start": 0.0, "end": 90.0, "width": 12.0, "color": "#ffffff",
+			}},
+		}},
+	}}
+	img := RenderFrame(tl, 0).Image()
+	r, g, b, _ := img.At(377, 237).RGBA()
+	if r>>8 != 0xff || g>>8 != 0xff || b>>8 != 0xff {
+		t.Fatalf("arc 45deg = #%02x%02x%02x, want #ffffff", r>>8, g>>8, b>>8)
+	}
+	r, g, b, _ = img.At(263, 123).RGBA()
+	if r>>8 == 0xff && g>>8 == 0xff && b>>8 == 0xff {
+		t.Fatal("arc 225deg painted, want background")
+	}
+}
