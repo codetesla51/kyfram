@@ -1,0 +1,11 @@
+scene(2, 30)
+
+text("title", table{
+  "0": table{content: "small", x: 320, y: 150, size: 24, color: "#ffffff"},
+  "2": table{content: "BIG", x: 320, y: 150, size: 64, color: "#e6c040"}
+})
+
+text("sub", table{
+  "0": table{content: "watch it grow", x: 320, y: 250, size: 20, color: "#888888"},
+  "2": table{content: "watch it grow", x: 320, y: 250, size: 20, color: "#888888"}
+})

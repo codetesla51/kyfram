@@ -1,10 +1,13 @@
 package kyfram
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/fogleman/gg"
 )
 
 // Hand-built Timeline must render: right size, circle paint lands at
@@ -78,6 +81,53 @@ func TestRenderSequence(t *testing.T) {
 		}
 		if fi.Size() == 0 {
 			t.Fatalf("%s is empty", name)
+		}
+	}
+}
+
+// Rect, line, and image kinds must all paint at their declared spots;
+// a missing image path sketches nothing instead of crashing.
+func TestRenderVocabulary(t *testing.T) {
+	asset := filepath.Join(t.TempDir(), "dot.png")
+	dot := gg.NewContext(40, 40)
+	dot.SetHexColor("#ffffff")
+	dot.Clear()
+	if err := dot.SavePNG(asset); err != nil {
+		t.Fatalf("asset: %v", err)
+	}
+
+	tl := Timeline{
+		Duration: 1,
+		FPS:      10,
+		Entities: []Entity{
+			{Name: "box", Kind: "rect", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"x": 100.0, "y": 100.0, "w": 80.0, "h": 60.0, "color": "#ff0000"}},
+			}},
+			{Name: "rule", Kind: "line", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"x1": 0.0, "y1": 300.0, "x2": 640.0, "y2": 300.0, "width": 6.0, "color": "#ffffff"}},
+			}},
+			{Name: "pic", Kind: "image", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"path": asset, "x": 320.0, "y": 180.0}},
+			}},
+			{Name: "ghost", Kind: "image", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{}},
+			}},
+		},
+	}
+
+	img := RenderFrame(tl, 0).Image()
+	for _, c := range []struct {
+		name, want string
+		x, y       int
+	}{
+		{"rect", "#ff0000", 140, 130},
+		{"line", "#ffffff", 100, 300},
+		{"image", "#ffffff", 320, 180},
+	} {
+		r, g, b, _ := img.At(c.x, c.y).RGBA()
+		got := fmt.Sprintf("#%02x%02x%02x", r>>8, g>>8, b>>8)
+		if got != c.want {
+			t.Fatalf("%s pixel = %s, want %s", c.name, got, c.want)
 		}
 	}
 }

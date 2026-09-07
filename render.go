@@ -42,7 +42,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			)
 			dc.Fill()
 		case "text":
-			if err := dc.LoadFontFace(frameFont, propNum(props, "size", 28)); err != nil {
+			if err := dc.LoadFontFace(propStr(props, "font", frameFont), propNum(props, "size", 28)); err != nil {
 				continue
 			}
 			dc.SetHexColor(propStr(props, "color", "#ffffff"))
@@ -52,6 +52,37 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 				propNum(props, "y", frameH/2),
 				0.5, 0.5,
 			)
+		case "rect":
+			// x,y is the top-left corner; w,h default to a 100px square.
+			dc.SetHexColor(propStr(props, "color", "#ffffff"))
+			dc.DrawRectangle(
+				propNum(props, "x", frameW/2-50),
+				propNum(props, "y", frameH/2-50),
+				propNum(props, "w", 100),
+				propNum(props, "h", 100),
+			)
+			dc.Fill()
+		case "line":
+			dc.SetHexColor(propStr(props, "color", "#ffffff"))
+			dc.SetLineWidth(propNum(props, "width", 2))
+			dc.DrawLine(
+				propNum(props, "x1", 0),
+				propNum(props, "y1", frameH/2),
+				propNum(props, "x2", frameW),
+				propNum(props, "y2", frameH/2),
+			)
+			dc.Stroke()
+		case "image":
+			// ponytail: decoded from disk every frame; cache by path if slow.
+			path := propStr(props, "path", "")
+			if path == "" {
+				continue
+			}
+			im, err := gg.LoadImage(path)
+			if err != nil {
+				continue
+			}
+			dc.DrawImageAnchored(im, int(propNum(props, "x", frameW/2)), int(propNum(props, "y", frameH/2)), 0.5, 0.5)
 		}
 	}
 	return dc
