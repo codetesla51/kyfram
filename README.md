@@ -309,8 +309,6 @@ make view    # preview intro_voice.lgv → :8080
 make clean   # rm -f out.mp4 intro_voice.mp4 /tmp/*.mp4
 ```
 
-Formatter notes: `lgs fmt` only walks `*.lgs` — for `.lgv` run `logos fmt examples/*.lgv` or `go run github.com/codetesla51/logos@v0.4.10 fmt examples/*.lgv`. Fixed in `v0.4.10` to preserve `for i, w in` index; older versions drop `i`.
-
 ## Limitations
 
 - 2D screen space only. No 3D, streaming, or GUI editor.
