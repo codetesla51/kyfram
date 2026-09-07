@@ -10,10 +10,6 @@ import (
 )
 
 // newVM creates the sandboxed Logos VM used by kyfram.
-// Raw *interpreter.Interpreter (not the logos.VM wrapper) because the
-// bindings read keyframe tables back as logos.Objects. Sandbox blocks
-// file IO, network, shell, exit — kyfram itself provides narrow builtins
-// (text_file) where file access is wanted.
 func newVM() *interpreter.Interpreter {
 	return interpreter.NewInterpreter(kyfram.StdLib(), interpreter.SandboxConfig{
 		AllowFileIO:  false,
@@ -57,7 +53,7 @@ func main() {
 		}
 		runView(os.Args[2:])
 	default:
-		fmt.Fprintf(os.Stderr, "%s unknown command %q\n\n", bold("kyfram"), os.Args[1])
+		fmt.Fprintf(os.Stderr, "kyfram: unknown command %q\n\n", os.Args[1])
 		printHelp()
 		os.Exit(1)
 	}
@@ -72,66 +68,61 @@ func hasHelp(args []string) bool {
 	return false
 }
 
-const (
-	cReset = "\033[0m"
-	cBold  = "\033[1m"
-	cDim   = "\033[2m"
-	cCyan  = "\033[36m"
-	cYell  = "\033[33m"
-	cGreen = "\033[32m"
-)
-
-func bold(s string) string  { return cBold + s + cReset }
-func cyan(s string) string  { return cCyan + s + cReset }
-func dim(s string) string   { return cDim + s + cReset }
-func yellow(s string) string { return cYell + s + cReset }
-
 func printHelp() {
-	fmt.Printf(`%s %s
-`, bold(cyan("kyfram")), dim("— keyframe-driven rendering engine"))
-	fmt.Printf("  %s\n\n", dim("declare states at times, Go renders to mp4/png via gg + ffmpeg"))
-	fmt.Printf("%s\n", bold("USAGE:"))
-	fmt.Printf("  %s %s %s\n\n", bold("kyfram"), cyan("<command>"), dim("[options]"))
-	fmt.Printf("%s\n", bold("COMMANDS:"))
-	fmt.Printf("  %s  %s\n", cyan("render"), "Render a .lgv script to video or image")
-	fmt.Printf("  %s    %s\n", cyan("view"), "Live preview with scrub + hot reload")
-	fmt.Printf("  %s    %s\n\n", cyan("help"), "Show help (try "+yellow("help render")+")")
-	fmt.Printf("%s\n", bold("OPTIONS:"))
-	fmt.Printf("  %s, %s    %s\n", yellow("-h"), yellow("--help"), "Show help")
-	fmt.Printf("  %s, %s %s\n", yellow("-v"), yellow("--version"), dim("Show version"))
-	fmt.Printf("\nRun %s for details.\n", bold("kyfram help <command>"))
+	fmt.Println("kyfram — keyframe-driven rendering engine")
+	fmt.Println("  declare states at times, Go renders to mp4/png via gg + ffmpeg")
+	fmt.Println()
+	fmt.Println("USAGE:")
+	fmt.Println("  kyfram <command> [options]")
+	fmt.Println()
+	fmt.Println("COMMANDS:")
+	fmt.Println("  render    Render a .lgv script to video or image")
+	fmt.Println("  view      Live preview with scrub + hot reload")
+	fmt.Println("  help      Show help (try \"help render\")")
+	fmt.Println()
+	fmt.Println("OPTIONS:")
+	fmt.Println("  -h, --help       Show help")
+	fmt.Println("  -v, --version    Show version")
+	fmt.Println()
+	fmt.Println("Run \"kyfram help <command>\" for details.")
 }
 
 func printHelpRender() {
-	fmt.Printf("%s %s\n", bold(cyan("kyfram render")), dim("— render a script to mp4/png"))
-	fmt.Printf("\n%s\n", bold("USAGE:"))
-	fmt.Printf("  %s %s %s %s\n", bold("kyfram render"), dim("[options]"), cyan("<script.lgv>"), dim(""))
-	fmt.Printf("\n%s\n", bold("OPTIONS:"))
-	fmt.Printf("  %s %s   %s (default %s)\n", yellow("--out"), dim("FILE"), "Output path", dim("out.mp4"))
-	fmt.Printf("  %s %s    %s\n", yellow("--fps"), dim("N"), "Override scene FPS")
-	fmt.Printf("  %s %s  %s\n", yellow("--width"), dim("N"), "Override canvas width")
-	fmt.Printf("  %s %s %s\n", yellow("--height"), dim("N"), "Override canvas height")
-	fmt.Printf("  %s %s   %s\n", yellow("--font"), dim("FILE"), "Default typeface")
-	fmt.Printf("  %s %s    %s (18 high, 23 default)\n", yellow("--crf"), dim("N"), "x264 quality 0-51")
-	fmt.Printf("  %s %s %s\n", yellow("--preset"), dim("S"), "x264 preset "+dim("ultrafast..veryslow"))
-	fmt.Printf("  %s %s %s\n", yellow("--format"), dim("FMT"), "Output format "+dim("mp4|png"))
-	fmt.Printf("  %s %s    %s\n", yellow("--var"), dim("K=V"), "Template var (repeatable)")
-	fmt.Printf("  %s, %s      %s\n", yellow("-h"), yellow("--help"), "Show this help")
-	fmt.Printf("\n%s\n", bold("EXAMPLES:"))
-	fmt.Printf("  %s\n", dim("kyfram render examples/intro.lgv --out out.mp4"))
-	fmt.Printf("  %s\n", dim("kyfram render --crf 18 --preset slow examples/intro.lgv"))
-	fmt.Printf("  %s\n", dim("kyfram render --format png --out frame.png examples/intro.lgv"))
+	fmt.Println("kyfram render — render a script to mp4/png")
+	fmt.Println()
+	fmt.Println("USAGE:")
+	fmt.Println("  kyfram render [options] <script.lgv>")
+	fmt.Println()
+	fmt.Println("OPTIONS:")
+	fmt.Println("  --out FILE     Output path (default out.mp4)")
+	fmt.Println("  --fps N        Override scene FPS")
+	fmt.Println("  --width N      Override canvas width")
+	fmt.Println("  --height N     Override canvas height")
+	fmt.Println("  --font FILE    Default typeface")
+	fmt.Println("  --crf N        x264 quality 0-51 (18 high, 23 default)")
+	fmt.Println("  --preset S     x264 preset (ultrafast..veryslow)")
+	fmt.Println("  --format FMT   Output format (mp4|png)")
+	fmt.Println("  --var K=V      Template var (repeatable)")
+	fmt.Println("  -h, --help     Show this help")
+	fmt.Println()
+	fmt.Println("EXAMPLES:")
+	fmt.Println("  kyfram render examples/intro.lgv --out out.mp4")
+	fmt.Println("  kyfram render --crf 18 --preset slow examples/intro.lgv")
+	fmt.Println("  kyfram render --format png --out frame.png examples/intro.lgv")
 }
 
 func printHelpView() {
-	fmt.Printf("%s %s\n", bold(cyan("kyfram view")), dim("— live preview"))
-	fmt.Printf("\n%s\n", bold("USAGE:"))
-	fmt.Printf("  %s %s %s\n", bold("kyfram view"), dim("[options]"), cyan("<script.lgv>"))
-	fmt.Printf("\n%s\n", bold("OPTIONS:"))
-	fmt.Printf("  %s %s   %s (default %s)\n", yellow("--port"), dim("N"), "Preview port", dim("8080"))
-	fmt.Printf("  %s %s   %s\n", yellow("--font"), dim("FILE"), "Default typeface")
-	fmt.Printf("  %s, %s      %s\n", yellow("-h"), yellow("--help"), "Show this help")
-	fmt.Printf("\n%s\n", dim("then open http://localhost:8080"))
+	fmt.Println("kyfram view — live preview")
+	fmt.Println()
+	fmt.Println("USAGE:")
+	fmt.Println("  kyfram view [options] <script.lgv>")
+	fmt.Println()
+	fmt.Println("OPTIONS:")
+	fmt.Println("  --port N       Preview port (default 8080)")
+	fmt.Println("  --font FILE    Default typeface")
+	fmt.Println("  -h, --help     Show this help")
+	fmt.Println()
+	fmt.Println("then open http://localhost:8080")
 }
 
 func usage() { printHelp(); os.Exit(1) }
@@ -204,8 +195,6 @@ func runRender(args []string) {
 	vm := newVM()
 	var b kyfram.Builder
 	b.Bind(vm)
-	// Template variables land in the script env before Run, so one .lgv
-	// renders many videos with different names, titles, copy.
 	for _, v := range vars {
 		key, val, ok := splitVar(v)
 		if !ok {
@@ -236,7 +225,6 @@ func runRender(args []string) {
 		tl.Font = *font
 	}
 	if *format == "png" {
-		// single frame at t=0, no ffmpeg needed
 		if err := kyfram.RenderFrame(tl, 0).SavePNG(*out); err != nil {
 			fmt.Fprintln(os.Stderr, "png:", err)
 			os.Exit(1)
