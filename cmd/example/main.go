@@ -35,10 +35,19 @@ func main() {
 
 	// With a directory argument, dump the whole PNG sequence there
 	// (flip through to check motion); otherwise one frame to out.png.
+	// A second argument encodes the timeline straight to that mp4 path.
 	if len(os.Args) > 1 {
 		if err := kyfram.RenderSequence(tl, os.Args[1]); err != nil {
 			log.Fatalf("sequence: %v", err)
 		}
+	}
+	if len(os.Args) > 2 {
+		if err := kyfram.Encode(tl, os.Args[2]); err != nil {
+			log.Fatalf("encode: %v", err)
+		}
+		return
+	}
+	if len(os.Args) > 1 {
 		return
 	}
 	if err := kyfram.RenderFrame(tl, 2).SavePNG("out.png"); err != nil {

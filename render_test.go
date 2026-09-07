@@ -2,6 +2,7 @@ package kyfram
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 )
@@ -78,5 +79,39 @@ func TestRenderSequence(t *testing.T) {
 		if fi.Size() == 0 {
 			t.Fatalf("%s is empty", name)
 		}
+	}
+}
+
+// Two frames at 10fps must encode to a non-empty out.mp4 (skipped
+// where no ffmpeg binary exists).
+func TestEncode(t *testing.T) {
+	if _, err := exec.LookPath("ffmpeg"); err != nil {
+		t.Skip("no ffmpeg")
+	}
+	tl := Timeline{
+		Duration: 0.2,
+		FPS:      10,
+		Entities: []Entity{
+			{
+				Name: "ball",
+				Kind: "circle",
+				Keyframes: []Keyframe{
+					{Time: 0, Props: map[string]any{"x": 100.0}},
+					{Time: 0.2, Props: map[string]any{"x": 200.0}},
+				},
+			},
+		},
+	}
+
+	out := filepath.Join(t.TempDir(), "out.mp4")
+	if err := Encode(tl, out); err != nil {
+		t.Fatalf("Encode: %v", err)
+	}
+	fi, err := os.Stat(out)
+	if err != nil {
+		t.Fatalf("stat out.mp4: %v", err)
+	}
+	if fi.Size() == 0 {
+		t.Fatal("out.mp4 is empty")
 	}
 }

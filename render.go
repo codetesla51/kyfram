@@ -1,9 +1,14 @@
 package kyfram
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/draw"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 
 	"github.com/fogleman/gg"
 )
@@ -60,10 +65,7 @@ func RenderSequence(tl Timeline, dir string) error {
 	if tl.FPS <= 0 {
 		return fmt.Errorf("fps %d: must be positive", tl.FPS)
 	}
-	n := int(tl.Duration*float64(tl.FPS) + 0.5)
-	if n < 1 {
-		n = 1
-	}
+	n := frameCount(tl)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("mkdir %s: %w", dir, err)
 	}
@@ -73,6 +75,69 @@ func RenderSequence(tl Timeline, dir string) error {
 		}
 	}
 	return nil
+}
+
+// frameCount converts Duration*FPS to a frame total (minimum 1), so a
+// zero-length timeline still yields one still instead of nothing.
+func frameCount(tl Timeline) int {
+	n := int(tl.Duration*float64(tl.FPS) + 0.5)
+	if n < 1 {
+		n = 1
+	}
+	return n
+}
+
+// Encode renders tl and pipes raw RGBA frames to ffmpeg's stdin, which
+// encodes out.mp4. Pixel format, size, and fps must match the flags
+// exactly or the output corrupts — so failures report the exact command
+// plus ffmpeg's own stderr instead of a bare exit code.
+func Encode(tl Timeline, outPath string) error {
+	if tl.FPS <= 0 {
+		return fmt.Errorf("fps %d: must be positive", tl.FPS)
+	}
+	args := []string{
+		"-y",
+		"-f", "rawvideo", "-pix_fmt", "rgba",
+		"-s", fmt.Sprintf("%dx%d", frameW, frameH),
+		"-r", strconv.Itoa(tl.FPS),
+		"-i", "-",
+		"-c:v", "libx264", "-pix_fmt", "yuv420p",
+		outPath,
+	}
+	cmd := exec.Command("ffmpeg", args...)
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return fmt.Errorf("ffmpeg stdin: %w", err)
+	}
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("ffmpeg start (%s): %w", cmd.String(), err)
+	}
+	for i := range frameCount(tl) {
+		if _, err := stdin.Write(rgbaBytes(RenderFrame(tl, float64(i)/float64(tl.FPS)).Image())); err != nil {
+			stdin.Close()
+			cmd.Wait()
+			return fmt.Errorf("frame %d: %w", i, err)
+		}
+	}
+	stdin.Close()
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("ffmpeg (%s): %w\n%s", cmd.String(), err, stderr.String())
+	}
+	return nil
+}
+
+// rgbaBytes exposes the canvas pixels for the ffmpeg pipe. gg canvases
+// are *image.RGBA already; anything else gets converted rather than
+// misread as raw bytes with the wrong stride.
+func rgbaBytes(img image.Image) []byte {
+	if rgba, ok := img.(*image.RGBA); ok {
+		return rgba.Pix
+	}
+	dst := image.NewRGBA(img.Bounds())
+	draw.Draw(dst, img.Bounds(), img, image.Point{}, draw.Src)
+	return dst.Pix
 }
 
 // propNum reads a numeric prop with a default, so entities missing a
