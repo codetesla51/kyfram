@@ -2,6 +2,7 @@ package kyfram
 
 import (
 	"fmt"
+	"image"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -374,5 +375,39 @@ func TestRenderFontOverride(t *testing.T) {
 	}
 	if n := mk("/usr/share/fonts/TTF/FiraCodeNerdFont-Bold.ttf"); n < 100 {
 		t.Fatalf("override font painted %d pixels, want a real word", n)
+	}
+}
+
+// A one-cycle wave peaks and troughs where the sine says; zero
+// amplitude is a straight line.
+func TestRenderWave(t *testing.T) {
+	mk := func(amp float64) image.Image {
+		return RenderFrame(Timeline{Entities: []Entity{
+			{Name: "w", Kind: "wave", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{
+					"x": 220.0, "y": 180.0, "width": 200.0,
+					"amplitude": amp, "frequency": 1.0, "phase": 0.0,
+					"thickness": 8.0, "color": "#ffffff",
+				}},
+			}},
+		}}, 0).Image()
+	}
+	at := func(img image.Image, x, y int) string {
+		r, g, b, _ := img.At(x, y).RGBA()
+		return fmt.Sprintf("#%02x%02x%02x", r>>8, g>>8, b>>8)
+	}
+	img := mk(40)
+	if got := at(img, 270, 220); got != "#ffffff" {
+		t.Fatalf("wave peak = %s, want #ffffff", got)
+	}
+	if got := at(img, 370, 140); got != "#ffffff" {
+		t.Fatalf("wave trough = %s, want #ffffff", got)
+	}
+	flat := mk(0)
+	if got := at(flat, 320, 180); got != "#ffffff" {
+		t.Fatalf("flat wave = %s, want #ffffff", got)
+	}
+	if got := at(flat, 320, 140); got == "#ffffff" {
+		t.Fatal("flat wave painted off-line")
 	}
 }

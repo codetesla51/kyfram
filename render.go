@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -122,10 +123,57 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		spin(dc, cx, cy, props, func() {
 			dc.DrawImageAnchored(im, int(cx), int(cy), 0.5, 0.5)
 		})
+	case "wave":
+		// The engine owns the sine: scripts declare endpoints and
+		// shaping numbers, all keyframeable, so waves morph like any
+		// other prop. Frequency is cycles across the width, phase is
+		// degrees. Zero amplitude is a straight line, for free.
+		spin(dc, cx, cy, props, func() {
+			paint(dc, props)
+			dc.SetLineWidth(propNum(props, "thickness", 3))
+			drawWave(dc, props, float64(w))
+			dc.Stroke()
+		})
 	}
 }
 
-// spin wraps drawing with centered rotation (degrees) and scale when
+// drawWave strokes y = amp*sin(2π(freq*s/width + phase/360)) from x to
+// x+width, sampled every few pixels. Negative widths draw backwards —
+// the math doesn't care about direction.
+func drawWave(dc *gg.Context, props map[string]any, canvasW float64) {
+	x := propNum(props, "x", 0)
+	y := propNum(props, "y", 180)
+	width := propNum(props, "width", canvasW)
+	if width == 0 {
+		return
+	}
+	amp := propNum(props, "amplitude", 30)
+	freq := propNum(props, "frequency", 1)
+	cyc := propNum(props, "phase", 0) / 360
+	step := 3.0
+	if width < 0 {
+		step = -step
+	}
+	first := true
+	for s := 0.0; ; s += step {
+		done := (step > 0 && s >= width) || (step < 0 && s <= width)
+		if done {
+			s = width
+		}
+		px := x + s
+		py := y + amp*math.Sin(2*math.Pi*(freq*s/width+cyc))
+		if first {
+			dc.MoveTo(px, py)
+			first = false
+		} else {
+			dc.LineTo(px, py)
+		}
+		if done {
+			break
+		}
+	}
+}
+
 // requested, passing straight through otherwise so the common path
 // costs nothing. Rotation needs no per-kind math: the canvas moves,
 // the shape code stays naive.
