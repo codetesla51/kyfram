@@ -1,4 +1,4 @@
-package main
+package kyfram
 
 import (
 	"github.com/fogleman/gg"

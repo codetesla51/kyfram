@@ -1,4 +1,4 @@
-package main
+package kyfram
 
 // Timeline is the full scene description: how long the video runs,
 // at what frame rate, and every animated entity in it.
