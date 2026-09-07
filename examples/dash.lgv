@@ -1,0 +1,55 @@
+scene(8, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
+  "8": table{x: 0, y: 0, w: 640, h: 360, color: "#120a24"}
+})
+
+shape("ground", "line", table{
+  "0": table{x1: 0, y1: 310, x2: 640, y2: 310, width: 3, color: "cyan"},
+  "8": table{x1: 0, y1: 310, x2: 640, y2: 310, width: 3, color: "cyan"}
+})
+
+shape("wave1", "wave", table{
+  "0": table{x: 0, y: 80, width: 640, amplitude: 15, frequency: 3, phase: 0, thickness: 2, color: "slate"},
+  "8": table{x: 0, y: 80, width: 640, amplitude: 15, frequency: 3, phase: 720, thickness: 2, color: "slate"}
+})
+
+shape("cube", "rect", table{
+  "0": table{x: 120, y: 270, w: 40, h: 40, color: "mint"},
+  "2.5": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 180, ease: "easeOut"},
+  "2.9": table{x: 120, y: 160, w: 40, h: 40, color: "gold", rotate: 270, ease: "easeIn"},
+  "3.3": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 360, ease: "linear"},
+  "3.6": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 360, ease: "easeOut"},
+  "4.0": table{x: 120, y: 160, w: 40, h: 40, color: "gold", rotate: 450, ease: "easeIn"},
+  "4.4": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 540, ease: "linear"},
+  "5.0": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 540, ease: "easeOut"},
+  "5.45": table{x: 120, y: 160, w: 40, h: 40, color: "gold", rotate: 630, ease: "easeIn"},
+  "5.9": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 720},
+  "8": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 720}
+})
+
+shape("spike1", "path", table{
+  "0": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "coral"},
+  "4": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "coral"}
+})
+
+shape("spike2", "path", table{
+  "1": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "coral"},
+  "5": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "coral"}
+})
+
+shape("spike3", "path", table{
+  "2.5": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "coral"},
+  "6.5": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "coral"}
+})
+
+text("title", table{
+  "0": table{content: "dash.", x: 480, y: 60, size: 44, color: "white"},
+  "8": table{content: "dash.", x: 480, y: 60, size: 44, color: "white"}
+})
+
+text("sub", table{
+  "0": table{content: "no inputs. pure keyframes.", x: 480, y: 100, size: 15, color: "silver"},
+  "8": table{content: "no inputs. pure keyframes.", x: 480, y: 100, size: 15, color: "silver"}
+})
