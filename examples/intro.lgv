@@ -1,5 +1,11 @@
-let title = "hello kyfram"
+scene(2, 30)
 
-fn on_load() {
-    print("loaded: " + title)
-}
+shape("ball", "circle", table{
+  "0": table{x: 100, y: 160, r: 80, color: "#e64c40"},
+  "2": table{x: 320, y: 160, r: 80, color: "#e64c40"}
+})
+
+text("caption", table{
+  "0": table{content: "hello kyfram", x: 320, y: 300, size: 28, color: "#ffffff"},
+  "2": table{content: "hello kyfram", x: 320, y: 300, size: 28, color: "#ffffff"}
+})
