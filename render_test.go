@@ -458,3 +458,33 @@ func TestRenderGradient(t *testing.T) {
 		t.Fatalf("gradient right = %d, want bright", rr>>8)
 	}
 }
+
+// Blend ops combine full-canvas rects exactly: multiply keeps red on
+// white, screen keeps blue on black, add makes magenta from red+blue.
+func TestRenderBlend(t *testing.T) {
+	full := func(col, blend string, layer float64) Entity {
+		return Entity{Name: "r", Kind: "rect", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{
+				"x": 0.0, "y": 0.0, "w": 640.0, "h": 360.0,
+				"color": col, "blend": blend, "layer": layer,
+			}},
+		}}
+	}
+	cases := []struct {
+		name      string
+		base, top Entity
+		want      string
+	}{
+		{"multiply", full("#ffffff", "", 0), full("#ff0000", "multiply", 1), "#ff0000"},
+		{"screen", full("#000000", "", 0), full("#0000ff", "screen", 1), "#0000ff"},
+		{"add", full("#0000ff", "", 0), full("#ff0000", "add", 1), "#ff00ff"},
+		{"unknown falls back", full("#000000", "", 0), full("#00ff00", "bogus", 1), "#00ff00"},
+	}
+	for _, c := range cases {
+		tl := Timeline{Entities: []Entity{c.base, c.top}}
+		r, g, b, _ := RenderFrame(tl, 0).Image().At(320, 180).RGBA()
+		if got := fmt.Sprintf("#%02x%02x%02x", r>>8, g>>8, b>>8); got != c.want {
+			t.Fatalf("%s = %s, want %s", c.name, got, c.want)
+		}
+	}
+}

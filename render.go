@@ -49,6 +49,14 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 	}
 	sort.SliceStable(framed_, func(i, j int) bool { return framed_[i].layer < framed_[j].layer })
 	for _, f := range framed_ {
+		// Blend modes composite offscreen then merge pixelwise;
+		// everything else paints straight onto the canvas.
+		if mode, ok := f.props["blend"].(string); ok && blendModes[mode] {
+			layer := gg.NewContext(w, h)
+			drawEntity(layer, w, h, f.kind, f.props, defaultFace(tl))
+			composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
+			continue
+		}
 		drawEntity(dc, w, h, f.kind, f.props, defaultFace(tl))
 	}
 	return dc
@@ -503,4 +511,44 @@ func gradientFill(dc *gg.Context, x0, y0, x1, y1 float64, props map[string]any) 
 	g.AddColorStop(1, stop(tc))
 	dc.SetFillStyle(g)
 	return true
+}
+
+// blendModes names the per-entity compositing ops. Unknown names fall
+// back to normal painting where they're read.
+var blendModes = map[string]bool{"multiply": true, "screen": true, "add": true}
+
+// composite merges src onto dst pixelwise under one op. Bytes are read
+// as straight RGBA (exact for opaque art, approximate on translucent
+// edges) and transparent src pixels are skipped outright.
+func composite(dst, src *image.RGBA, mode string) {
+	mix := func(s, d float64) float64 {
+		switch mode {
+		case "multiply":
+			return s * d
+		case "screen":
+			return 1 - (1-s)*(1-d)
+		default: // add
+			if s+d > 1 {
+				return 1
+			}
+			return s + d
+		}
+	}
+	for i := 0; i+3 < len(dst.Pix) && i+3 < len(src.Pix); i += 4 {
+		sa := float64(src.Pix[i+3]) / 255
+		if sa == 0 {
+			continue
+		}
+		da := float64(dst.Pix[i+3]) / 255
+		oa := sa + da*(1-sa)
+		if oa == 0 {
+			continue
+		}
+		sr, sg, sb := float64(src.Pix[i])/255, float64(src.Pix[i+1])/255, float64(src.Pix[i+2])/255
+		dr, dg, db := float64(dst.Pix[i])/255, float64(dst.Pix[i+1])/255, float64(dst.Pix[i+2])/255
+		dst.Pix[i] = uint8((mix(sr, dr)*sa + dr*da*(1-sa)) / oa * 255)
+		dst.Pix[i+1] = uint8((mix(sg, dg)*sa + dg*da*(1-sa)) / oa * 255)
+		dst.Pix[i+2] = uint8((mix(sb, db)*sa + db*da*(1-sa)) / oa * 255)
+		dst.Pix[i+3] = uint8(oa*255 + 0.5)
+	}
 }
