@@ -28,9 +28,12 @@ shape("wave1", "wave", table{
 
 camera(table{
   "0": table{x: 320, y: 180, zoom: 1},
+  "2": table{x: 315, y: 175, zoom: 1.06, ease: "sine"},
+  "4": table{x: 325, y: 185, zoom: 1, ease: "sine"},
   "5.50": table{x: 320, y: 180, zoom: 1, ease: "sine"},
-  "6.50": table{x: 320, y: 200, zoom: 1.2, ease: "sine"},
-  "8.50": table{x: 320, y: 180, zoom: 1},
+  "6.50": table{x: 318, y: 200, zoom: 1.22, ease: "sine"},
+  "7.50": table{x: 322, y: 190, zoom: 1.08, ease: "sine"},
+  "8.50": table{x: 320, y: 180, zoom: 1, ease: "sine"},
   "10": table{x: 320, y: 180, zoom: 1}
 })
 

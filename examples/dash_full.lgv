@@ -17,6 +17,23 @@ shape("wave1", "wave", table{
   "198": table{x: 0, y: 80, width: 640, amplitude: 12, frequency: 3, phase: 792, thickness: 2, color: "slate"}
 })
 
+camera(table{
+  "0": table{x: 320, y: 180, zoom: 1},
+  "15": table{x: 315, y: 175, zoom: 1.06, ease: "sine"},
+  "30": table{x: 325, y: 185, zoom: 1, ease: "sine"},
+  "45": table{x: 318, y: 180, zoom: 1.04, ease: "sine"},
+  "60": table{x: 322, y: 175, zoom: 1.07, ease: "sine"},
+  "75": table{x: 320, y: 185, zoom: 1, ease: "sine"},
+  "90": table{x: 316, y: 180, zoom: 1.05, ease: "sine"},
+  "105": table{x: 324, y: 175, zoom: 1, ease: "sine"},
+  "120": table{x: 320, y: 180, zoom: 1.06, ease: "sine"},
+  "135": table{x: 318, y: 190, zoom: 1, ease: "sine"},
+  "150": table{x: 322, y: 180, zoom: 1.08, ease: "sine"},
+  "165": table{x: 320, y: 175, zoom: 1, ease: "sine"},
+  "180": table{x: 316, y: 185, zoom: 1.05, ease: "sine"},
+  "198": table{x: 320, y: 180, zoom: 1}
+})
+
 shape("cube", "rect", table{
   "0": table{x: 120, y: 270, w: 40, h: 40, color: "mint"},
   "1.15": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 90, ease: "easeOut"},
