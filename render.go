@@ -399,11 +399,23 @@ func frameCount(tl Timeline) int {
 	return n
 }
 
+// EncodeOpts controls x264 quality. CRF 0-51 lower is better (18 high, 23 default, 28 small),
+// Preset is speed/quality tradeoff: ultrafast..veryslow (medium default).
+type EncodeOpts struct {
+	CRF    int
+	Preset string
+}
+
 // Encode renders tl and pipes raw RGBA frames to ffmpeg's stdin, which
 // encodes out.mp4. Pixel format, size, and fps must match the flags
 // exactly or the output corrupts — so failures report the exact command
 // plus ffmpeg's own stderr instead of a bare exit code.
 func Encode(tl Timeline, outPath string) error {
+	return EncodeWithOpts(tl, outPath, EncodeOpts{CRF: 23, Preset: "medium"})
+}
+
+// EncodeWithOpts is Encode with explicit CRF/preset. CRF 0-51, Preset as above.
+func EncodeWithOpts(tl Timeline, outPath string, opts EncodeOpts) error {
 	if tl.FPS <= 0 {
 		return fmt.Errorf("fps %d: must be positive", tl.FPS)
 	}
@@ -429,7 +441,18 @@ func Encode(tl Timeline, outPath string) error {
 		}
 		args = append(args, "-i", a.Path)
 	}
-	args = append(args, "-c:v", "libx264", "-pix_fmt", "yuv420p")
+	crf := opts.CRF
+	if crf < 0 {
+		crf = 23
+	}
+	if crf > 51 {
+		crf = 51
+	}
+	preset := opts.Preset
+	if preset == "" {
+		preset = "medium"
+	}
+	args = append(args, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", strconv.Itoa(crf), "-preset", preset)
 	switch len(tl.Audio) {
 	case 0:
 	case 1:

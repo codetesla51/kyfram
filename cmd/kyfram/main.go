@@ -38,7 +38,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--var k=v ...] <script.lgv>")
+	fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--var k=v ...] <script.lgv>")
 	fmt.Fprintln(os.Stderr, "       kyfram view [--port n] <script.lgv>")
 	os.Exit(1)
 }
@@ -63,14 +63,17 @@ func splitVar(s string) (string, string, bool) {
 	return "", "", false
 }
 
-// runRender renders one script file to a video.
+// runRender renders one script file to a video or single PNG.
 func runRender(args []string) {
 	fs := flag.NewFlagSet("render", flag.ExitOnError)
-	out := fs.String("out", "out.mp4", "output video path")
+	out := fs.String("out", "out.mp4", "output file path")
 	fps := fs.Int("fps", 0, "override scene fps")
 	width := fs.Int("width", 0, "override canvas width")
 	height := fs.Int("height", 0, "override canvas height")
 	font := fs.String("font", "", "default typeface path")
+	crf := fs.Int("crf", 23, "x264 CRF quality 0-51, lower is better (18 high, 28 small)")
+	preset := fs.String("preset", "medium", "x264 preset: ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
+	format := fs.String("format", "mp4", "output format: mp4 or png (single frame at t=0)")
 	var vars varFlags
 	fs.Var(&vars, "var", "template variable as key=value (repeatable)")
 	if err := fs.Parse(args); err != nil {
@@ -78,7 +81,7 @@ func runRender(args []string) {
 		os.Exit(1)
 	}
 	if fs.NArg() != 1 {
-		fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--var k=v ...] <script.lgv>")
+		fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--var k=v ...] <script.lgv>")
 		os.Exit(1)
 	}
 	for _, v := range []int{*fps, *width, *height} {
@@ -86,6 +89,19 @@ func runRender(args []string) {
 			fmt.Fprintln(os.Stderr, "flags: sizes must be positive")
 			os.Exit(1)
 		}
+	}
+	if *crf < 0 || *crf > 51 {
+		fmt.Fprintln(os.Stderr, "crf must be 0-51")
+		os.Exit(1)
+	}
+	validPreset := map[string]bool{"ultrafast": true, "superfast": true, "veryfast": true, "faster": true, "fast": true, "medium": true, "slow": true, "slower": true, "veryslow": true}
+	if !validPreset[*preset] {
+		fmt.Fprintln(os.Stderr, "preset must be one of ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
+		os.Exit(1)
+	}
+	if *format != "mp4" && *format != "png" {
+		fmt.Fprintln(os.Stderr, "format must be mp4 or png")
+		os.Exit(1)
 	}
 	source, err := kyfram.LoadScript(fs.Arg(0))
 	if err != nil {
@@ -126,7 +142,16 @@ func runRender(args []string) {
 	if *font != "" {
 		tl.Font = *font
 	}
-	if err := kyfram.Encode(tl, *out); err != nil {
+	if *format == "png" {
+		// single frame at t=0, no ffmpeg needed
+		if err := kyfram.RenderFrame(tl, 0).SavePNG(*out); err != nil {
+			fmt.Fprintln(os.Stderr, "png:", err)
+			os.Exit(1)
+		}
+		fmt.Println("ok:", *out)
+		return
+	}
+	if err := kyfram.EncodeWithOpts(tl, *out, kyfram.EncodeOpts{CRF: *crf, Preset: *preset}); err != nil {
 		fmt.Fprintln(os.Stderr, "encode:", err)
 		os.Exit(1)
 	}
