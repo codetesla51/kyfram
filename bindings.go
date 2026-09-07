@@ -70,6 +70,27 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: "text", Keyframes: kfs})
 		return interpreter.NULL
 	})
+	vm.Register("audio", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) < 1 || len(args) > 2 {
+			return &interpreter.Error{Message: fmt.Sprintf("audio() takes a path and optional offset, got %d arguments", len(args))}
+		}
+		path, err := strArg(args[0], "path")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		offset := 0.0
+		if len(args) == 2 {
+			offset, err = numArg(args[1], "offset")
+			if err != nil {
+				return &interpreter.Error{Message: err.Error()}
+			}
+			if offset < 0 {
+				return &interpreter.Error{Message: "offset must not be negative"}
+			}
+		}
+		b.tl.Audio = append(b.tl.Audio, AudioTrack{Path: path, Offset: offset})
+		return interpreter.NULL
+	})
 }
 
 // Build returns the declared Timeline. A script with entities but no

@@ -65,3 +65,28 @@ func TestBindingsNoScene(t *testing.T) {
 		t.Fatal("Build without scene() should error")
 	}
 }
+
+// audio() collects tracks with offsets; path-only defaults to zero.
+func TestBindingsAudio(t *testing.T) {
+	vm := interpreter.NewInterpreter(interpreter.SandboxConfig{})
+	var b Builder
+	b.Bind(vm)
+	src := `
+scene(1, 10)
+audio("a.mp3")
+audio("b.mp3", 1.5)
+`
+	if err := vm.Run(src); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	tl, err := b.Build()
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+	if len(tl.Audio) != 2 {
+		t.Fatalf("tracks = %d, want 2", len(tl.Audio))
+	}
+	if tl.Audio[0].Offset != 0 || tl.Audio[1].Offset != 1.5 {
+		t.Fatalf("tracks = %+v", tl.Audio)
+	}
+}

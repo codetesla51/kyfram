@@ -9,6 +9,14 @@ type Timeline struct {
 	Width    int
 	Height   int
 	Entities []Entity
+	Audio    []AudioTrack
+}
+
+// AudioTrack lays one sound file under the video at Offset seconds.
+// Looping is future work; keep assets covering the duration for now.
+type AudioTrack struct {
+	Path   string
+	Offset float64
 }
 
 // Entity is one drawable thing (circle, rect, text...). Kind names

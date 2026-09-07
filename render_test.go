@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/fogleman/gg"
@@ -163,5 +164,45 @@ func TestEncode(t *testing.T) {
 	}
 	if fi.Size() == 0 {
 		t.Fatal("out.mp4 is empty")
+	}
+}
+
+// A declared beep must come out as a real audio stream in the mp4.
+func TestEncodeAudio(t *testing.T) {
+	if _, err := exec.LookPath("ffmpeg"); err != nil {
+		t.Skip("no ffmpeg")
+	}
+	if _, err := exec.LookPath("ffprobe"); err != nil {
+		t.Skip("no ffprobe")
+	}
+	dir := t.TempDir()
+	beep := filepath.Join(dir, "beep.mp3")
+	gen := exec.Command("ffmpeg", "-y", "-v", "error",
+		"-f", "lavfi", "-i", "sine=frequency=880:duration=0.2",
+		"-c:a", "libmp3lame", beep)
+	if out, err := gen.CombinedOutput(); err != nil {
+		t.Fatalf("tone: %v %s", err, out)
+	}
+
+	tl := Timeline{
+		Duration: 0.5,
+		FPS:      10,
+		Entities: []Entity{{Name: "b", Kind: "circle", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{}},
+		}}},
+		Audio: []AudioTrack{{Path: beep, Offset: 0.1}},
+	}
+	out := filepath.Join(dir, "out.mp4")
+	if err := Encode(tl, out); err != nil {
+		t.Fatalf("Encode: %v", err)
+	}
+	probe := exec.Command("ffprobe", "-v", "error",
+		"-show_entries", "stream=codec_type", "-of", "csv", out)
+	streams, err := probe.Output()
+	if err != nil {
+		t.Fatalf("probe: %v", err)
+	}
+	if !strings.Contains(string(streams), "audio") {
+		t.Fatalf("no audio stream:\n%s", streams)
 	}
 }

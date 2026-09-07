@@ -134,9 +134,29 @@ func Encode(tl Timeline, outPath string) error {
 		"-s", fmt.Sprintf("%dx%d", w, h),
 		"-r", strconv.Itoa(tl.FPS),
 		"-i", "-",
-		"-c:v", "libx264", "-pix_fmt", "yuv420p",
-		outPath,
 	}
+	// itsoffset shifts an input forward, so a beep lands on a visual
+	// beat instead of the file start. Missing files fail inside ffmpeg
+	// with its stderr attached below — no pre-check needed here.
+	for _, a := range tl.Audio {
+		if a.Offset != 0 {
+			args = append(args, "-itsoffset", strconv.FormatFloat(a.Offset, 'f', 3, 64))
+		}
+		args = append(args, "-i", a.Path)
+	}
+	args = append(args, "-c:v", "libx264", "-pix_fmt", "yuv420p")
+	switch len(tl.Audio) {
+	case 0:
+	case 1:
+		// apad stretches short audio to the video end; -shortest then
+		// caps exactly at the last frame instead of the last sample.
+		args = append(args, "-af", "apad", "-c:a", "aac", "-shortest")
+	default:
+		args = append(args,
+			"-filter_complex", fmt.Sprintf("amix=inputs=%d,apad", len(tl.Audio)),
+			"-c:a", "aac", "-shortest")
+	}
+	args = append(args, outPath)
 	cmd := exec.Command("ffmpeg", args...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -150,8 +170,8 @@ func Encode(tl Timeline, outPath string) error {
 	for i := range frameCount(tl) {
 		if _, err := stdin.Write(rgbaBytes(RenderFrame(tl, float64(i)/float64(tl.FPS)).Image())); err != nil {
 			stdin.Close()
-			cmd.Wait()
-			return fmt.Errorf("frame %d: %w", i, err)
+			waitErr := cmd.Wait()
+			return fmt.Errorf("frame %d: %w (ffmpeg: %v\n%s)", i, err, waitErr, stderr.String())
 		}
 	}
 	stdin.Close()
