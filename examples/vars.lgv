@@ -1,0 +1,11 @@
+scene(2, 30)
+
+text("title", table{
+  "0": table{content: title, x: 320, y: 150, size: 44, color: "gold"},
+  "2": table{content: title, x: 320, y: 150, size: 44, color: "gold"}
+})
+
+text("note", table{
+  "0": table{content: text_file("examples/assets/note.txt"), x: 320, y: 220, size: 18, color: "silver"},
+  "2": table{content: text_file("examples/assets/note.txt"), x: 320, y: 220, size: 18, color: "silver"}
+})

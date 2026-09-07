@@ -1,6 +1,9 @@
 package kyfram
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/codetesla51/logos/interpreter"
@@ -92,5 +95,31 @@ audio("c.mp3", 0, true)
 	}
 	if !tl.Audio[2].Loop {
 		t.Fatalf("third track should loop: %+v", tl.Audio[2])
+	}
+}
+
+// text_file returns file content as a string; missing files fail the run.
+func TestBindingsTextFile(t *testing.T) {
+	dir := t.TempDir()
+	note := filepath.Join(dir, "note.txt")
+	if err := os.WriteFile(note, []byte("dear viewer"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	vm := interpreter.NewInterpreter(interpreter.SandboxConfig{})
+	var b Builder
+	b.Bind(vm)
+	if err := vm.Run(fmt.Sprintf(`let t = text_file(%q)`, note)); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if got := vm.GetVar("t"); got != "dear viewer" {
+		t.Fatalf("t = %v", got)
+	}
+
+	vm2 := interpreter.NewInterpreter(interpreter.SandboxConfig{})
+	var b2 Builder
+	b2.Bind(vm2)
+	if err := vm2.Run(`text_file("nope-missing.txt")`); err == nil {
+		t.Fatal("missing file should error")
 	}
 }

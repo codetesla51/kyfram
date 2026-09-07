@@ -2,6 +2,8 @@ package kyfram
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"sort"
 	"strconv"
 
@@ -96,6 +98,26 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		}
 		b.tl.Audio = append(b.tl.Audio, track)
 		return interpreter.NULL
+	})
+	vm.Register("text_file", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) != 1 {
+			return &interpreter.Error{Message: fmt.Sprintf("text_file() takes 1 argument, got %d", len(args))}
+		}
+		path, err := strArg(args[0], "path")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		// Capped so a stray huge file can't flood the script heap.
+		f, err := os.Open(path)
+		if err != nil {
+			return &interpreter.Error{Message: fmt.Sprintf("text_file: %v", err)}
+		}
+		defer f.Close()
+		data, err := io.ReadAll(io.LimitReader(f, 1<<20))
+		if err != nil {
+			return &interpreter.Error{Message: fmt.Sprintf("text_file: %v", err)}
+		}
+		return &interpreter.String{Value: string(data)}
 	})
 }
 
