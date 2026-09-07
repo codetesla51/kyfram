@@ -46,12 +46,15 @@ text("caption", table{
 
 - **Declarative keyframes** — `scene()` / `shape()` / `text()` / `audio()` builtins; scripts compute freely, the builder keeps only declarations
 - **Interpolator** — numbers lerp, hex colors lerp per channel, strings snap to the earlier key; out-of-range holds the edge, never extrapolates
-- **Easing** — `ease: "linear" | "easeIn" | "easeOut" | "easeInOut"` per segment, declared on the earlier key
-- **Primitives** — circle, rect, line, image, font-backed text
+- **Easing** — `linear | easeIn | easeOut | easeInOut | cubicIn | cubicOut | cubicInOut | sine` per segment, declared on the earlier key
+- **Primitives** — circle, rect, line, arc, image, font-backed text; every vector kind takes `rotate` (degrees), `scale`, `layer`, `alpha`
 - **Zero-disk render path** — raw RGBA bytes piped to ffmpeg's stdin (`-f rawvideo`); PNG sequences exist only as a debug path
-- **Audio mux** — `audio(path, offset?)` tracks mixed under the video, beeps land on visual beats via `-itsoffset`
+- **Audio mux** — `audio(path, offset?, loop?)` tracks mixed under the video, beeps land on visual beats via `-itsoffset`
 - **Preview server** — scrub slider, play button, hot reload (every request re-reads the script)
 - **Sandboxed scripts** — file IO, network, shell, and exit are blocked; "declarations only" is convention, the builder ignores the rest
+- **Multi-file scripts** — `use "lib"` inlines `lib.lgv` from beside the script; `std/` still resolves (vendored under `third_party/`)
+- **Templates** — `render --var key=value` feeds script variables; `text_file(path)` reads long copy from disk (1MB cap)
+- **Named colors** — `red gold slate mint` and 20 more resolve and lerp exactly like hex
 
 ## Examples
 
@@ -67,6 +70,8 @@ text("caption", table{
 | `examples/audio.lgv` | beep aligned to center crossing |
 | `examples/hello.lgv` | 2-minute greeting + loader + outro (alpha fades) |
 | `examples/bounce.lgv` | gravity bounces (easeIn down, easeOut up) + sloshing lines |
+| `examples/spinner.lgv` | ring + rotating arc hand |
+| `examples/vars.lgv` | `--var` templating + `text_file` copy |
 
 ## How it works
 
@@ -94,7 +99,7 @@ shape("b", "circle", table{               // name, kind, keyframes
 text("t", table{                          // kind implied
   "0": table{content: "go", x: 320, y: 60, size: 48, color: "#ffffff", font: "/path/to.ttf"},
 })
-audio("assets/beep.mp3", 1.0)             // path, optional offset seconds
+audio("assets/beep.mp3", 1.0)             // path, offset seconds, optional loop bool
 ```
 
 Kinds and their props (`x`/`y` in pixels, origin top-left):
@@ -102,11 +107,13 @@ Kinds and their props (`x`/`y` in pixels, origin top-left):
 - `circle`: `x y r color`
 - `rect`: `x y` (top-left) `w h color`
 - `line`: `x1 y1 x2 y2 width color`
+- `arc`: `x y` (center) `r start end` (degrees) `width color` — `0..360` is a ring
 - `image`: `path x y` (centered)
 - `text`: `content x y size color font?`
 
-Every vector kind also takes `alpha` (0–1, default 1) for real fades.
-Images ignore it.
+Every vector kind also takes `alpha` (0–1, default 1) for real fades,
+`rotate` (degrees about its center), `scale`, and `layer` (paint order,
+lower first). Images take `rotate`/`scale`/`layer` but ignore `alpha`.
 
 Missing numeric props fall back to canvas-centered defaults; missing
 `path` or unloadable font skips that entity for the frame.
@@ -114,9 +121,14 @@ Missing numeric props fall back to canvas-centered defaults; missing
 ## CLI reference
 
 ```
-kyfram render [--out f] [--fps n] [--width n] [--height n] <script.lgv>
+kyfram render [--out f] [--fps n] [--width n] [--height n] [--var k=v ...] <script.lgv>
 kyfram view [--port n] <script.lgv>
 ```
+
+One script, many videos: leave names and copy as bare variables and feed
+them per render — `kyfram render --var title="Batch Alice" examples/vars.lgv`.
+`text_file(path)` covers copy too long for flags. Split big scripts with
+`use "lib"` (`lib.lgv` beside the main file).
 
 `render` writes a video (default `out.mp4`). `view` serves a preview page:
 scrub slider, play button, script errors shown inline; save the file and
@@ -133,14 +145,13 @@ cmd/kyfram/      render + view commands, sandboxed VM init
 cmd/example/     throwaway manual probe (sequence/mp4 dumping)
 examples/        one .lgv per feature + assets/
 logos_reference.md  pinned Logos v0.4.9 notes (local only, gitignored)
+third_party/       vendored Logos stdlib (.lgs) the VM resolves `use "std/..."` against
 ```
 
 ## Limitations
 
 - 2D screen space only. No camera, no 3D, no streaming, no GUI editor.
-- Fixed prop vocabulary per kind; no rotation, scale, or groups yet.
+- Fixed prop vocabulary per kind; no groups (nesting) yet — `layer` covers ordering.
 - `ffmpeg` and the default font are system dependencies, not embedded.
-- Images decode from disk per frame (marked `ponytail:` in `render.go`); cache if it measures slow.
-- Audio has offsets but no looping — keep assets covering the duration.
-- Colors are hex (`#rrggbb`/`#rgb`); a name→hex mapper is planned so scripts read friendlier.
+- Audio loops whole files; no per-section repeat.
 - Scripts are "declarations only" by convention — the sandbox can't block `for`/`if`, the builder just ignores them.

@@ -1,0 +1,22 @@
+scene(3, 30)
+
+shape("ring", "arc", table{
+  "0": table{x: 320, y: 180, r: 90, start: 0, end: 360, width: 6, color: "slate"},
+  "3": table{x: 320, y: 180, r: 90, start: 0, end: 360, width: 6, color: "slate"}
+})
+
+shape("hand", "arc", table{
+  "0": table{x: 320, y: 180, r: 90, start: -90, end: -30, width: 10, color: "gold", rotate: 0},
+  "3": table{x: 320, y: 180, r: 90, start: -90, end: -30, width: 10, color: "gold", rotate: 720}
+})
+
+shape("hub", "circle", table{
+  "0": table{x: 320, y: 180, r: 12, color: "white"},
+  "3": table{x: 320, y: 180, r: 12, color: "white"}
+})
+
+text("pct", table{
+  "0": table{content: "warming up", x: 320, y: 300, size: 20, color: "silver"},
+  "1.5": table{content: "halfway", x: 320, y: 300, size: 20, color: "silver"},
+  "3": table{content: "ready", x: 320, y: 300, size: 20, color: "mint"}
+})
