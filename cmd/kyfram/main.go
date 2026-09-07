@@ -38,7 +38,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--var k=v ...] <script.lgv>")
+	fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--var k=v ...] <script.lgv>")
 	fmt.Fprintln(os.Stderr, "       kyfram view [--port n] <script.lgv>")
 	os.Exit(1)
 }
@@ -70,6 +70,7 @@ func runRender(args []string) {
 	fps := fs.Int("fps", 0, "override scene fps")
 	width := fs.Int("width", 0, "override canvas width")
 	height := fs.Int("height", 0, "override canvas height")
+	font := fs.String("font", "", "default typeface path")
 	var vars varFlags
 	fs.Var(&vars, "var", "template variable as key=value (repeatable)")
 	if err := fs.Parse(args); err != nil {
@@ -77,7 +78,7 @@ func runRender(args []string) {
 		os.Exit(1)
 	}
 	if fs.NArg() != 1 {
-		fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--var k=v ...] <script.lgv>")
+		fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--var k=v ...] <script.lgv>")
 		os.Exit(1)
 	}
 	for _, v := range []int{*fps, *width, *height} {
@@ -121,6 +122,9 @@ func runRender(args []string) {
 	}
 	if *height > 0 {
 		tl.Height = *height
+	}
+	if *font != "" {
+		tl.Font = *font
 	}
 	if err := kyfram.Encode(tl, *out); err != nil {
 		fmt.Fprintln(os.Stderr, "encode:", err)

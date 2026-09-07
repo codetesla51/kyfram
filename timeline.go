@@ -3,11 +3,13 @@ package kyfram
 // Timeline is the full scene description: how long the video runs,
 // at what frame rate, and every animated entity in it. Width/Height
 // of zero mean the default canvas (CLI flags or scene defaults win).
+// Empty Font means the built-in default typeface.
 type Timeline struct {
 	Duration float64
 	FPS      int
 	Width    int
 	Height   int
+	Font     string
 	Entities []Entity
 	Audio    []AudioTrack
 }

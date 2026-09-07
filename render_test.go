@@ -348,3 +348,31 @@ func TestEncodeLoop(t *testing.T) {
 		t.Fatalf("looped audio duration = %vs, want ~1s", seconds)
 	}
 }
+
+// A Timeline font flows into text rendering: bogus leaves background,
+// valid paints glyphs.
+func TestRenderFontOverride(t *testing.T) {
+	mk := func(font string) int {
+		tl := Timeline{Font: font, Entities: []Entity{
+			{Name: "t", Kind: "text", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"content": "hello", "x": 320.0, "y": 180.0, "size": 64.0, "color": "#ffffff"}},
+			}},
+		}}
+		img := RenderFrame(tl, 0).Image()
+		n := 0
+		for y := 100; y < 260; y += 4 {
+			for x := 200; x < 440; x += 4 {
+				if r, _, _, _ := img.At(x, y).RGBA(); r>>8 > 30 {
+					n++
+				}
+			}
+		}
+		return n
+	}
+	if n := mk("/nope-missing.ttf"); n != 0 {
+		t.Fatalf("bogus font painted %d pixels", n)
+	}
+	if n := mk("/usr/share/fonts/TTF/FiraCodeNerdFont-Bold.ttf"); n < 100 {
+		t.Fatalf("override font painted %d pixels, want a real word", n)
+	}
+}

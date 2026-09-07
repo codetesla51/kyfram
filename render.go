@@ -19,9 +19,9 @@ const (
 	frameW = 640
 	frameH = 360
 
-	// Only font proven in step 1; configurable fonts arrive with the
-	// text vocabulary (step 8). CLI flags own the size later (step 10).
-	frameFont = "/usr/share/fonts/noto/NotoSans-Regular.ttf"
+	// defaultFont is the fallback typeface: a Timeline Font or text font
+	// prop wins whenever set, so no script is stuck with this path.
+	defaultFont = "/usr/share/fonts/noto/NotoSans-Regular.ttf"
 )
 
 // RenderFrame paints every entity at time t onto one canvas: resolve
@@ -47,14 +47,23 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 	}
 	sort.SliceStable(framed_, func(i, j int) bool { return framed_[i].layer < framed_[j].layer })
 	for _, f := range framed_ {
-		drawEntity(dc, w, h, f.kind, f.props)
+		drawEntity(dc, w, h, f.kind, f.props, defaultFace(tl))
 	}
 	return dc
 }
 
+// defaultFace resolves the fallback typeface: explicit Timeline font
+// wins, otherwise the built-in default.
+func defaultFace(tl Timeline) string {
+	if tl.Font != "" {
+		return tl.Font
+	}
+	return defaultFont
+}
+
 // drawEntity paints one entity. Unknown kinds and unloadable assets
 // return silently so one experimental entity can't kill the frame.
-func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any) {
+func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, face string) {
 	cx := propNum(props, "x", float64(w)/2)
 	cy := propNum(props, "y", float64(h)/2)
 	switch kind {
@@ -65,7 +74,7 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any) {
 			dc.Fill()
 		})
 	case "text":
-		if err := dc.LoadFontFace(propStr(props, "font", frameFont), propNum(props, "size", 28)); err != nil {
+		if err := dc.LoadFontFace(propStr(props, "font", face), propNum(props, "size", 28)); err != nil {
 			return
 		}
 		spin(dc, cx, cy, props, func() {

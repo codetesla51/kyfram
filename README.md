@@ -121,7 +121,7 @@ Missing numeric props fall back to canvas-centered defaults; missing
 ## CLI reference
 
 ```
-kyfram render [--out f] [--fps n] [--width n] [--height n] [--var k=v ...] <script.lgv>
+kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--var k=v ...] <script.lgv>
 kyfram view [--port n] <script.lgv>
 ```
 
@@ -152,6 +152,6 @@ third_party/       vendored Logos stdlib (.lgs) the VM resolves `use "std/..."` 
 
 - 2D screen space only. No camera, no 3D, no streaming, no GUI editor.
 - Fixed prop vocabulary per kind; no groups (nesting) yet — `layer` covers ordering.
-- `ffmpeg` and the default font are system dependencies, not embedded.
+- `ffmpeg` and the default font are system dependencies, not embedded. Fonts must be `.ttf` (TrueType outlines) — `.otf`/CFF fails to load and the text is skipped.
 - Audio loops whole files; no per-section repeat.
 - Scripts are "declarations only" by convention — the sandbox can't block `for`/`if`, the builder just ignores them.
