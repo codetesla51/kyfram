@@ -35,7 +35,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		props := Interpolate(e.Keyframes, t)
 		switch e.Kind {
 		case "circle":
-			dc.SetHexColor(propStr(props, "color", "#ffffff"))
+			paint(dc, props)
 			dc.DrawCircle(
 				propNum(props, "x", float64(w)/2),
 				propNum(props, "y", float64(h)/2),
@@ -46,7 +46,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			if err := dc.LoadFontFace(propStr(props, "font", frameFont), propNum(props, "size", 28)); err != nil {
 				continue
 			}
-			dc.SetHexColor(propStr(props, "color", "#ffffff"))
+			paint(dc, props)
 			dc.DrawStringAnchored(
 				propStr(props, "content", ""),
 				propNum(props, "x", float64(w)/2),
@@ -55,7 +55,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			)
 		case "rect":
 			// x,y is the top-left corner; w,h default to a 100px square.
-			dc.SetHexColor(propStr(props, "color", "#ffffff"))
+			paint(dc, props)
 			dc.DrawRectangle(
 				propNum(props, "x", float64(w)/2-50),
 				propNum(props, "y", float64(h)/2-50),
@@ -64,7 +64,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			)
 			dc.Fill()
 		case "line":
-			dc.SetHexColor(propStr(props, "color", "#ffffff"))
+			paint(dc, props)
 			dc.SetLineWidth(propNum(props, "width", 2))
 			dc.DrawLine(
 				propNum(props, "x1", 0),
@@ -191,6 +191,27 @@ func rgbaBytes(img image.Image) []byte {
 	dst := image.NewRGBA(img.Bounds())
 	draw.Draw(dst, img.Bounds(), img, image.Point{}, draw.Src)
 	return dst.Pix
+}
+
+// paint sets the entity color with the alpha prop applied, so fades are
+// real transparency instead of bg-color matching (which ghosts over other
+// entities). Images ignore alpha: gg has no per-draw opacity for them.
+func paint(dc *gg.Context, props map[string]any) {
+	col := propStr(props, "color", "#ffffff")
+	a := propNum(props, "alpha", 1)
+	if a >= 1 {
+		dc.SetHexColor(col)
+		return
+	}
+	if a < 0 {
+		a = 0
+	}
+	c, err := parseHex(col)
+	if err != nil {
+		dc.SetHexColor(col)
+		return
+	}
+	dc.SetRGBA(c[0]/255, c[1]/255, c[2]/255, a)
 }
 
 // propNum reads a numeric prop with a default, so entities missing a

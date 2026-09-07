@@ -206,3 +206,29 @@ func TestEncodeAudio(t *testing.T) {
 		t.Fatalf("no audio stream:\n%s", streams)
 	}
 }
+
+// Alpha 0 must show the background through the entity; alpha 1 is solid.
+func TestRenderAlpha(t *testing.T) {
+	bg := RenderFrame(Timeline{Entities: []Entity{}}, 0).Image()
+	br, bgc, bb, _ := bg.At(320, 180).RGBA()
+
+	ghost := RenderFrame(Timeline{Entities: []Entity{
+		{Name: "b", Kind: "circle", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 320.0, "y": 180.0, "r": 80.0, "color": "#ff0000", "alpha": 0.0}},
+		}},
+	}}, 0).Image()
+	r, g, b, _ := ghost.At(320, 180).RGBA()
+	if r != br || g != bgc || b != bb {
+		t.Fatalf("alpha 0 pixel = #%02x%02x%02x, want background", r>>8, g>>8, b>>8)
+	}
+
+	solid := RenderFrame(Timeline{Entities: []Entity{
+		{Name: "b", Kind: "circle", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 320.0, "y": 180.0, "r": 80.0, "color": "#ff0000", "alpha": 1.0}},
+		}},
+	}}, 0).Image()
+	r, g, b, _ = solid.At(320, 180).RGBA()
+	if r>>8 != 0xff || g>>8 != 0x00 || b>>8 != 0x00 {
+		t.Fatalf("alpha 1 pixel = #%02x%02x%02x, want #ff0000", r>>8, g>>8, b>>8)
+	}
+}

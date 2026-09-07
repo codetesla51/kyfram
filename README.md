@@ -65,6 +65,7 @@ text("caption", table{
 | `examples/text.lgv` | growing text + snapping content |
 | `examples/ease.lgv` | linear vs `easeIn`, side by side |
 | `examples/audio.lgv` | beep aligned to center crossing |
+| `examples/hello.lgv` | 2-minute greeting + loader + outro (alpha fades) |
 
 ## How it works
 
@@ -102,6 +103,9 @@ Kinds and their props (`x`/`y` in pixels, origin top-left):
 - `line`: `x1 y1 x2 y2 width color`
 - `image`: `path x y` (centered)
 - `text`: `content x y size color font?`
+
+Every vector kind also takes `alpha` (0–1, default 1) for real fades.
+Images ignore it.
 
 Missing numeric props fall back to canvas-centered defaults; missing
 `path` or unloadable font skips that entity for the frame.
