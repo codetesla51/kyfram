@@ -75,6 +75,7 @@ func TestBindingsAudio(t *testing.T) {
 scene(1, 10)
 audio("a.mp3")
 audio("b.mp3", 1.5)
+audio("c.mp3", 0, true)
 `
 	if err := vm.Run(src); err != nil {
 		t.Fatalf("Run: %v", err)
@@ -83,10 +84,13 @@ audio("b.mp3", 1.5)
 	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
-	if len(tl.Audio) != 2 {
-		t.Fatalf("tracks = %d, want 2", len(tl.Audio))
+	if len(tl.Audio) != 3 {
+		t.Fatalf("tracks = %d, want 3", len(tl.Audio))
 	}
 	if tl.Audio[0].Offset != 0 || tl.Audio[1].Offset != 1.5 {
 		t.Fatalf("tracks = %+v", tl.Audio)
+	}
+	if !tl.Audio[2].Loop {
+		t.Fatalf("third track should loop: %+v", tl.Audio[2])
 	}
 }

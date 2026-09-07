@@ -303,3 +303,48 @@ func TestRenderSpin(t *testing.T) {
 		t.Fatal("scaled circle: radius-25 pixel not painted")
 	}
 }
+
+// A looped 0.2s beep must still sound at the end of a 1s video.
+func TestEncodeLoop(t *testing.T) {
+	if _, err := exec.LookPath("ffmpeg"); err != nil {
+		t.Skip("no ffmpeg")
+	}
+	if _, err := exec.LookPath("ffprobe"); err != nil {
+		t.Skip("no ffprobe")
+	}
+	dir := t.TempDir()
+	beep := filepath.Join(dir, "beep.mp3")
+	gen := exec.Command("ffmpeg", "-y", "-v", "error",
+		"-f", "lavfi", "-i", "sine=frequency=880:duration=0.2",
+		"-c:a", "libmp3lame", beep)
+	if out, err := gen.CombinedOutput(); err != nil {
+		t.Fatalf("tone: %v %s", err, out)
+	}
+
+	tl := Timeline{
+		Duration: 1,
+		FPS:      10,
+		Entities: []Entity{{Name: "b", Kind: "circle", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{}},
+		}}},
+		Audio: []AudioTrack{{Path: beep, Loop: true}},
+	}
+	out := filepath.Join(dir, "out.mp4")
+	if err := Encode(tl, out); err != nil {
+		t.Fatalf("Encode: %v", err)
+	}
+	probe := exec.Command("ffprobe", "-v", "error",
+		"-select_streams", "a", "-show_entries", "stream=duration",
+		"-of", "default=noprint_wrappers=1:nokey=1", out)
+	dur, err := probe.Output()
+	if err != nil {
+		t.Fatalf("probe: %v", err)
+	}
+	var seconds float64
+	if _, err := fmt.Sscanf(string(dur), "%f", &seconds); err != nil {
+		t.Fatalf("parse %q: %v", dur, err)
+	}
+	if seconds < 0.9 {
+		t.Fatalf("looped audio duration = %vs, want ~1s", seconds)
+	}
+}

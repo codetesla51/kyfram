@@ -71,24 +71,30 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		return interpreter.NULL
 	})
 	vm.Register("audio", func(args ...interpreter.Object) interpreter.Object {
-		if len(args) < 1 || len(args) > 2 {
-			return &interpreter.Error{Message: fmt.Sprintf("audio() takes a path and optional offset, got %d arguments", len(args))}
+		if len(args) < 1 || len(args) > 3 {
+			return &interpreter.Error{Message: fmt.Sprintf("audio() takes a path, optional offset, optional loop, got %d arguments", len(args))}
 		}
 		path, err := strArg(args[0], "path")
 		if err != nil {
 			return &interpreter.Error{Message: err.Error()}
 		}
-		offset := 0.0
-		if len(args) == 2 {
-			offset, err = numArg(args[1], "offset")
+		track := AudioTrack{Path: path}
+		if len(args) >= 2 {
+			track.Offset, err = numArg(args[1], "offset")
 			if err != nil {
 				return &interpreter.Error{Message: err.Error()}
 			}
-			if offset < 0 {
+			if track.Offset < 0 {
 				return &interpreter.Error{Message: "offset must not be negative"}
 			}
 		}
-		b.tl.Audio = append(b.tl.Audio, AudioTrack{Path: path, Offset: offset})
+		if len(args) == 3 {
+			track.Loop, err = boolArg(args[2], "loop")
+			if err != nil {
+				return &interpreter.Error{Message: err.Error()}
+			}
+		}
+		b.tl.Audio = append(b.tl.Audio, track)
 		return interpreter.NULL
 	})
 }
@@ -154,4 +160,13 @@ func numArg(obj interpreter.Object, what string) (float64, error) {
 		return 0, fmt.Errorf("%s must be a number", what)
 	}
 	return f, nil
+}
+
+// boolArg unwraps a Logos boolean for flag positions like loop.
+func boolArg(obj interpreter.Object, what string) (bool, error) {
+	b, ok := interpreter.ObjectToGo(obj).(bool)
+	if !ok {
+		return false, fmt.Errorf("%s must be a boolean", what)
+	}
+	return b, nil
 }

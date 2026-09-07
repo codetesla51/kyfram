@@ -13,10 +13,11 @@ type Timeline struct {
 }
 
 // AudioTrack lays one sound file under the video at Offset seconds.
-// Looping is future work; keep assets covering the duration for now.
+// Loop repeats short sounds to the last frame instead of going silent.
 type AudioTrack struct {
 	Path   string
 	Offset float64
+	Loop   bool
 }
 
 // Entity is one drawable thing (circle, rect, text...). Kind names

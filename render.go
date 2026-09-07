@@ -186,6 +186,11 @@ func Encode(tl Timeline, outPath string) error {
 	// beat instead of the file start. Missing files fail inside ffmpeg
 	// with its stderr attached below — no pre-check needed here.
 	for _, a := range tl.Audio {
+		// stream_loop repeats the input forever; apad+shortest below
+		// still cap the mix at the last video frame.
+		if a.Loop {
+			args = append(args, "-stream_loop", "-1")
+		}
 		if a.Offset != 0 {
 			args = append(args, "-itsoffset", strconv.FormatFloat(a.Offset, 'f', 3, 64))
 		}
