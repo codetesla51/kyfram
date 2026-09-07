@@ -1,62 +1,306 @@
 scene(120, 30)
-
 shape("bg", "rect", table{
-  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#14141c"},
-  "120": table{x: 0, y: 0, w: 640, h: 360, color: "#14141c"}
+    "0": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#14141c",
+    },
+    "120": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#14141c",
+    },
 })
-
 text("hello", table{
-  "0": table{content: "hey.", x: 320, y: 150, size: 24, color: "#ffffff", ease: "easeOut"},
-  "2": table{content: "hey, my name is uthman.", x: 320, y: 150, size: 40, color: "#ffffff"},
-  "8": table{content: "hey, my name is uthman.", x: 320, y: 150, size: 40, color: "#ffffff", alpha: 1},
-  "10": table{content: "hey, my name is uthman.", x: 320, y: 150, size: 40, color: "#ffffff", alpha: 0}
+    "0": table{
+        content: "hey.",
+        x: 320,
+        y: 150,
+        size: 24,
+        color: "#ffffff",
+        ease: "easeOut",
+    },
+    "2": table{
+        content: "hey, my name is uthman.",
+        x: 320,
+        y: 150,
+        size: 40,
+        color: "#ffffff",
+    },
+    "8": table{
+        content: "hey, my name is uthman.",
+        x: 320,
+        y: 150,
+        size: 40,
+        color: "#ffffff",
+        alpha: 1,
+    },
+    "10": table{
+        content: "hey, my name is uthman.",
+        x: 320,
+        y: 150,
+        size: 40,
+        color: "#ffffff",
+        alpha: 0,
+    },
 })
-
 text("sub", table{
-  "3": table{content: "this video was declared, not directed.", x: 320, y: 210, size: 18, color: "#888888", alpha: 1},
-  "8": table{content: "this video was declared, not directed.", x: 320, y: 210, size: 18, color: "#888888", alpha: 1},
-  "10": table{content: "this video was declared, not directed.", x: 320, y: 210, size: 18, color: "#888888", alpha: 0}
+    "3": table{
+        content: "this video was declared, not directed.",
+        x: 320,
+        y: 210,
+        size: 18,
+        color: "#888888",
+        alpha: 1,
+    },
+    "8": table{
+        content: "this video was declared, not directed.",
+        x: 320,
+        y: 210,
+        size: 18,
+        color: "#888888",
+        alpha: 1,
+    },
+    "10": table{
+        content: "this video was declared, not directed.",
+        x: 320,
+        y: 210,
+        size: 18,
+        color: "#888888",
+        alpha: 0,
+    },
 })
-
 shape("bar", "rect", table{
-  "11.9": table{x: 20, y: 165, w: 10, h: 30, color: "#40a0e6", alpha: 0},
-  "12": table{x: 20, y: 165, w: 10, h: 30, color: "#40a0e6", alpha: 1},
-  "112": table{x: 20, y: 165, w: 600, h: 30, color: "#40e680", alpha: 1},
-  "114": table{x: 20, y: 165, w: 600, h: 30, color: "#40e680", alpha: 0}
+    "11.9": table{
+        x: 20,
+        y: 165,
+        w: 10,
+        h: 30,
+        color: "#40a0e6",
+        alpha: 0,
+    },
+    "12": table{
+        x: 20,
+        y: 165,
+        w: 10,
+        h: 30,
+        color: "#40a0e6",
+        alpha: 1,
+    },
+    "112": table{
+        x: 20,
+        y: 165,
+        w: 600,
+        h: 30,
+        color: "#40e680",
+        alpha: 1,
+    },
+    "114": table{
+        x: 20,
+        y: 165,
+        w: 600,
+        h: 30,
+        color: "#40e680",
+        alpha: 0,
+    },
 })
-
 shape("shuttle", "circle", table{
-  "11.9": table{x: 60, y: 260, r: 20, color: "#e6c040", alpha: 0},
-  "12": table{x: 60, y: 260, r: 20, color: "#e6c040", alpha: 1},
-  "25": table{x: 580, y: 260, r: 20, color: "#e6c040"},
-  "38": table{x: 60, y: 260, r: 20, color: "#e6c040"},
-  "51": table{x: 580, y: 260, r: 20, color: "#e6c040"},
-  "64": table{x: 60, y: 260, r: 20, color: "#e6c040"},
-  "77": table{x: 580, y: 260, r: 20, color: "#e6c040"},
-  "90": table{x: 60, y: 260, r: 20, color: "#e6c040"},
-  "103": table{x: 580, y: 260, r: 20, color: "#e6c040"},
-  "112": table{x: 60, y: 260, r: 20, color: "#e6c040", alpha: 1},
-  "114": table{x: 60, y: 260, r: 20, color: "#e6c040", alpha: 0}
+    "11.9": table{
+        x: 60,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+        alpha: 0,
+    },
+    "12": table{
+        x: 60,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+        alpha: 1,
+    },
+    "25": table{
+        x: 580,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+    },
+    "38": table{
+        x: 60,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+    },
+    "51": table{
+        x: 580,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+    },
+    "64": table{
+        x: 60,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+    },
+    "77": table{
+        x: 580,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+    },
+    "90": table{
+        x: 60,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+    },
+    "103": table{
+        x: 580,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+    },
+    "112": table{
+        x: 60,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+        alpha: 1,
+    },
+    "114": table{
+        x: 60,
+        y: 260,
+        r: 20,
+        color: "#e6c040",
+        alpha: 0,
+    },
 })
-
 text("pct", table{
-  "11.9": table{content: "loading 0%", x: 320, y: 120, size: 24, color: "#ffffff", alpha: 0},
-  "12": table{content: "loading 0%", x: 320, y: 120, size: 24, color: "#ffffff", alpha: 1},
-  "22": table{content: "loading 10%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "32": table{content: "loading 20%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "42": table{content: "loading 30%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "52": table{content: "loading 40%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "62": table{content: "loading 50%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "72": table{content: "loading 60%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "82": table{content: "loading 70%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "92": table{content: "loading 80%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "102": table{content: "loading 90%", x: 320, y: 120, size: 24, color: "#ffffff"},
-  "112": table{content: "loading 100%", x: 320, y: 120, size: 24, color: "#ffffff", alpha: 1},
-  "114": table{content: "loading 100%", x: 320, y: 120, size: 24, color: "#ffffff", alpha: 0}
+    "11.9": table{
+        content: "loading 0%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+        alpha: 0,
+    },
+    "12": table{
+        content: "loading 0%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+        alpha: 1,
+    },
+    "22": table{
+        content: "loading 10%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "32": table{
+        content: "loading 20%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "42": table{
+        content: "loading 30%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "52": table{
+        content: "loading 40%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "62": table{
+        content: "loading 50%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "72": table{
+        content: "loading 60%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "82": table{
+        content: "loading 70%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "92": table{
+        content: "loading 80%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "102": table{
+        content: "loading 90%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+    },
+    "112": table{
+        content: "loading 100%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+        alpha: 1,
+    },
+    "114": table{
+        content: "loading 100%",
+        x: 320,
+        y: 120,
+        size: 24,
+        color: "#ffffff",
+        alpha: 0,
+    },
 })
-
 text("outro", table{
-  "113": table{content: "done. let's build.", x: 320, y: 170, size: 20, color: "#ffffff", alpha: 0, ease: "easeOut"},
-  "116": table{content: "done. let's build.", x: 320, y: 170, size: 44, color: "#ffffff", alpha: 1},
-  "120": table{content: "done. let's build.", x: 320, y: 170, size: 44, color: "#ffffff", alpha: 1}
+    "113": table{
+        content: "done. let's build.",
+        x: 320,
+        y: 170,
+        size: 20,
+        color: "#ffffff",
+        alpha: 0,
+        ease: "easeOut",
+    },
+    "116": table{
+        content: "done. let's build.",
+        x: 320,
+        y: 170,
+        size: 44,
+        color: "#ffffff",
+        alpha: 1,
+    },
+    "120": table{
+        content: "done. let's build.",
+        x: 320,
+        y: 170,
+        size: 44,
+        color: "#ffffff",
+        alpha: 1,
+    },
 })

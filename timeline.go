@@ -11,6 +11,7 @@ type Timeline struct {
 	Height   int
 	Font     string
 	Entities []Entity
+	Groups   []Group
 	Audio    []AudioTrack
 	// Camera holds x/y/zoom keyframes; empty means a locked frame.
 	Camera []Keyframe
@@ -29,6 +30,16 @@ type AudioTrack struct {
 type Entity struct {
 	Name      string
 	Kind      string
+	Keyframes []Keyframe
+	Group     string // optional group membership; empty means root
+}
+
+// Group is a transform container for children. Its keyframes hold
+// x, y, scale, rotate, alpha, layer. Children are entities whose
+// Group == Name; they keep local x/y and animate independently.
+// World transform = group * child. Nested groups are future: flat for now.
+type Group struct {
+	Name      string
 	Keyframes []Keyframe
 }
 

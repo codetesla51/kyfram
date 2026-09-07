@@ -1,14 +1,34 @@
 scene(2, 30)
-
-// The beep lands at t=1, exactly when the ball crosses screen center.
 audio("examples/assets/beep.mp3", 1.0)
-
 shape("ball", "circle", table{
-  "0": table{x: 80, y: 180, r: 40, color: "#e64c40"},
-  "2": table{x: 560, y: 180, r: 40, color: "#e64c40"}
+    "0": table{
+        x: 80,
+        y: 180,
+        r: 40,
+        color: "#e64c40",
+    },
+    "2": table{
+        x: 560,
+        y: 180,
+        r: 40,
+        color: "#e64c40",
+    },
 })
-
 shape("mark", "line", table{
-  "0": table{x1: 320, y1: 100, x2: 320, y2: 260, width: 2, color: "#404040"},
-  "2": table{x1: 320, y1: 100, x2: 320, y2: 260, width: 2, color: "#404040"}
+    "0": table{
+        x1: 320,
+        y1: 100,
+        x2: 320,
+        y2: 260,
+        width: 2,
+        color: "#404040",
+    },
+    "2": table{
+        x1: 320,
+        y1: 100,
+        x2: 320,
+        y2: 260,
+        width: 2,
+        color: "#404040",
+    },
 })

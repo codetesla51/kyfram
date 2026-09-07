@@ -1,0 +1,17 @@
+scene(3, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
+  "3": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"}
+})
+
+shape("tri", "polygon", table{
+  "0": table{points: [320, 60, 500, 300, 140, 300], color: "#e64c40"},
+  "1.5": table{points: [320, 90, 470, 270, 170, 270], color: "#40e680"},
+  "3": table{points: [320, 60, 500, 300, 140, 300], color: "#e64c40"}
+})
+
+shape("quad", "polygon", table{
+  "0": table{points: [100, 100, 200, 100, 200, 200, 100, 200], color: "gold", alpha: 0.9},
+  "3": table{points: [80, 80, 220, 80, 220, 220, 80, 220], color: "gold", alpha: 0.9}
+})

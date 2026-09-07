@@ -1,0 +1,17 @@
+scene(3, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
+  "3": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"}
+})
+
+shape("e", "ellipse", table{
+  "0": table{x: 320, y: 180, rx: 60, ry: 30, color: "cyan"},
+  "1.5": table{x: 320, y: 180, rx: 120, ry: 50, color: "sky"},
+  "3": table{x: 320, y: 180, rx: 60, ry: 30, color: "cyan"}
+})
+
+shape("circle", "circle", table{
+  "0": table{x: 100, y: 180, r: 30, color: "mint"},
+  "3": table{x: 100, y: 180, r: 40, color: "mint"}
+})

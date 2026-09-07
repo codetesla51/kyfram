@@ -1,0 +1,28 @@
+scene(3, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
+  "3": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"}
+})
+
+// group g orbits and scales, children keep local offsets
+group("g", table{
+  "0": table{x: 320, y: 180, scale: 1, rotate: 0, alpha: 1},
+  "1.5": table{x: 380, y: 180, scale: 1.4, rotate: 45, alpha: 1},
+  "3": table{x: 320, y: 180, scale: 1, rotate: 90, alpha: 1}
+})
+
+shape("c", "circle", table{
+  "0": table{x: 0, y: 0, r: 30, color: "coral"},
+  "3": table{x: 0, y: 0, r: 40, color: "coral"}
+}, "g")
+
+shape("r", "rect", table{
+  "0": table{x: -40, y: -40, w: 30, h: 30, color: "mint"},
+  "3": table{x: 40, y: 40, w: 40, h: 40, color: "mint"}
+}, "g")
+
+text("label", table{
+  "0": table{content: "group", x: 0, y: 60, size: 18, color: "white", alpha: 0.9},
+  "3": table{content: "group", x: 0, y: 60, size: 18, color: "white", alpha: 0.9}
+}, "g")

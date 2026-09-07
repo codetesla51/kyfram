@@ -41,30 +41,109 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 	// stays put while entities travel.
 	frameCamera(dc, tl, w, h, t)
 
-	// Layers are paint order: lower draws first. Stable sort keeps
-	// declaration order within a layer, so old scripts behave the same.
+	// Group transforms: map name -> interpolated props
+	groupProps := make(map[string]map[string]any, len(tl.Groups))
+	groupLayer := make(map[string]float64, len(tl.Groups))
+	for _, g := range tl.Groups {
+		props := Interpolate(g.Keyframes, t)
+		groupProps[g.Name] = props
+		groupLayer[g.Name] = propNum(props, "layer", 0)
+	}
+
+	// Partition entities into root and grouped
 	type framed struct {
 		kind  string
 		props map[string]any
 		layer float64
+		group string
 	}
-	framed_ := make([]framed, 0, len(tl.Entities))
+	var root []framed
+	grouped := make(map[string][]framed)
 	for _, e := range tl.Entities {
 		props := Interpolate(e.Keyframes, t)
-		framed_ = append(framed_, framed{e.Kind, props, propNum(props, "layer", 0)})
-	}
-	sort.SliceStable(framed_, func(i, j int) bool { return framed_[i].layer < framed_[j].layer })
-	for _, f := range framed_ {
-		// Blend modes composite offscreen then merge pixelwise;
-		// everything else paints straight onto the canvas.
-		if mode, ok := f.props["blend"].(string); ok && blendModes[mode] {
-			layer := gg.NewContext(w, h)
-			frameCamera(layer, tl, w, h, t)
-			drawEntity(layer, w, h, f.kind, f.props, defaultFace(tl))
-			composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
-			continue
+		f := framed{e.Kind, props, propNum(props, "layer", 0), e.Group}
+		if e.Group != "" {
+			if _, ok := groupProps[e.Group]; ok {
+				grouped[e.Group] = append(grouped[e.Group], f)
+				continue
+			}
+			// unknown group -> treat as root
 		}
-		drawEntity(dc, w, h, f.kind, f.props, defaultFace(tl))
+		root = append(root, f)
+	}
+	// Sort root by layer, groups by layer, and within each group by layer
+	sort.SliceStable(root, func(i, j int) bool { return root[i].layer < root[j].layer })
+	for g := range grouped {
+		sort.SliceStable(grouped[g], func(i, j int) bool { return grouped[g][i].layer < grouped[g][j].layer })
+	}
+	// Build draw order: interleave root entities and groups by layer
+	type drawItem struct {
+		isGroup bool
+		layer   float64
+		name    string // group name if isGroup
+		framed  framed  // if !isGroup
+	}
+	var order []drawItem
+	for _, f := range root {
+		order = append(order, drawItem{isGroup: false, layer: f.layer, framed: f})
+	}
+	for _, g := range tl.Groups {
+		order = append(order, drawItem{isGroup: true, layer: groupLayer[g.Name], name: g.Name})
+	}
+	sort.SliceStable(order, func(i, j int) bool { return order[i].layer < order[j].layer })
+
+	for _, it := range order {
+		if it.isGroup {
+			gProps := groupProps[it.name]
+			if gProps == nil {
+				continue
+			}
+			// Group alpha multiplies children
+			gAlpha := propNum(gProps, "alpha", 1)
+			gx := propNum(gProps, "x", float64(w)/2)
+			gy := propNum(gProps, "y", float64(h)/2)
+			gRot := propNum(gProps, "rotate", 0)
+			gScale := propNum(gProps, "scale", 1)
+			// Push group transform
+			dc.Push()
+			dc.Translate(gx, gy)
+			dc.Rotate(gg.Radians(gRot))
+			dc.Scale(gScale, gScale)
+			dc.Translate(-gx, -gy)
+			// Draw children with group alpha applied
+			for _, f := range grouped[it.name] {
+				props := copyProps(f.props)
+				if gAlpha < 1 {
+					props["alpha"] = propNum(props, "alpha", 1) * gAlpha
+				}
+				if mode, ok := props["blend"].(string); ok && blendModes[mode] {
+					layer := gg.NewContext(w, h)
+					frameCamera(layer, tl, w, h, t)
+					// re-apply group transform to offscreen
+					layer.Push()
+					layer.Translate(gx, gy)
+					layer.Rotate(gg.Radians(gRot))
+					layer.Scale(gScale, gScale)
+					layer.Translate(-gx, -gy)
+					drawEntity(layer, w, h, f.kind, props, defaultFace(tl))
+					layer.Pop()
+					composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
+					continue
+				}
+				drawEntity(dc, w, h, f.kind, props, defaultFace(tl))
+			}
+			dc.Pop()
+		} else {
+			f := it.framed
+			if mode, ok := f.props["blend"].(string); ok && blendModes[mode] {
+				layer := gg.NewContext(w, h)
+				frameCamera(layer, tl, w, h, t)
+				drawEntity(layer, w, h, f.kind, f.props, defaultFace(tl))
+				composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
+				continue
+			}
+			drawEntity(dc, w, h, f.kind, f.props, defaultFace(tl))
+		}
 	}
 	dc.Pop()
 	return dc
@@ -164,8 +243,8 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		})
 	case "path":
 		// Flat point list [x1,y1,x2,y2...]: stroke it, or fill it
-		// closed when filled is set. Same-length lists morph (see
-		// blend); mismatched ones snap like strings.
+		// closed when filled/closed is set. Same-length lists morph (see
+		// blend); mismatched ones snap like strings. Cap/join via cap/join props.
 		pcx, pcy, ok := pathCenter(props)
 		if !ok {
 			pcx, pcy = cx, cy
@@ -173,6 +252,52 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		spin(dc, pcx, pcy, props, func() {
 			paint(dc, props)
 			drawPath(dc, props)
+		})
+	case "polygon":
+		pcx, pcy, ok := pathCenter(props)
+		if !ok {
+			pcx, pcy = cx, cy
+		}
+		// gradient bbox from points if available
+		x0, y0, x1, y1 := pcx-50, pcy-50, pcx+50, pcy+50
+		if pts, ok := props["points"].([]any); ok && len(pts) >= 4 {
+			if bx0, by0, bx1, by1, ok := pointsBBox(pts); ok {
+				x0, y0, x1, y1 = bx0, by0, bx1, by1
+			}
+		}
+		spin(dc, pcx, pcy, props, func() {
+			if !gradientFill(dc, x0, y0, x1, y1, props) {
+				paint(dc, props)
+			}
+			drawPolygon(dc, props)
+		})
+	case "roundRect":
+		rx, ry := propNum(props, "x", float64(w)/2-50), propNum(props, "y", float64(h)/2-50)
+		rw, rh := propNum(props, "w", 100), propNum(props, "h", 100)
+		radius := propNum(props, "radius", 10)
+		spin(dc, rx+rw/2, ry+rh/2, props, func() {
+			if !gradientFill(dc, rx, ry, rx+rw, ry+rh, props) {
+				paint(dc, props)
+			}
+			dc.DrawRoundedRectangle(rx, ry, rw, rh, radius)
+			dc.Fill()
+		})
+	case "star":
+		// star: x,y (center) r (outer), points (int), inner (0-1), color
+		spin(dc, cx, cy, props, func() {
+			paint(dc, props)
+			drawStar(dc, props, cx, cy)
+		})
+	case "ellipse":
+		// ellipse: x,y center, rx,ry radii (if ry missing, use rx)
+		rx := propNum(props, "rx", propNum(props, "r", 50))
+		ry := propNum(props, "ry", rx)
+		spin(dc, cx, cy, props, func() {
+			if !gradientFill(dc, cx-rx, cy-ry, cx+rx, cy+ry, props) {
+				paint(dc, props)
+			}
+			dc.DrawEllipse(cx, cy, rx, ry)
+			dc.Fill()
 		})
 	}
 }
@@ -414,9 +539,59 @@ func propStr(props map[string]any, key, def string) string {
 
 // drawPath strokes (or closed-fills) a flat [x1,y1,...] point list.
 // Short or non-numeric lists draw nothing instead of half a shape.
+// Cap/join via cap: "round"|"butt"|"square", join: "round"|"bevel"|"miter".
+// Closed via closed or filled (filled implies closed).
 func drawPath(dc *gg.Context, props map[string]any) {
 	raw, ok := props["points"].([]any)
 	if !ok || len(raw) < 4 || len(raw)%2 != 0 {
+		return
+	}
+	pts := make([]float64, len(raw))
+	for i, v := range raw {
+		f, ok := toFloat(v)
+		if !ok {
+			return
+		}
+		pts[i] = f
+	}
+	if capStr, ok := props["cap"].(string); ok {
+		switch capStr {
+		case "round":
+			dc.SetLineCap(gg.LineCapRound)
+		case "square":
+			dc.SetLineCap(gg.LineCapSquare)
+		default:
+			dc.SetLineCap(gg.LineCapButt)
+		}
+	}
+	if joinStr, ok := props["join"].(string); ok {
+		switch joinStr {
+		case "round":
+			dc.SetLineJoin(gg.LineJoinRound)
+		case "bevel", "miter":
+			dc.SetLineJoin(gg.LineJoinBevel)
+		}
+	}
+	dc.MoveTo(pts[0], pts[1])
+	for i := 2; i < len(pts); i += 2 {
+		dc.LineTo(pts[i], pts[i+1])
+	}
+	closed := propBool(props, "closed", propBool(props, "filled", false))
+	if closed {
+		dc.ClosePath()
+	}
+	if propBool(props, "filled", false) {
+		dc.Fill()
+		return
+	}
+	dc.SetLineWidth(propNum(props, "width", 3))
+	dc.Stroke()
+}
+
+// drawPolygon fills or strokes a closed polygon from points. Same morph as path.
+func drawPolygon(dc *gg.Context, props map[string]any) {
+	raw, ok := props["points"].([]any)
+	if !ok || len(raw) < 6 || len(raw)%2 != 0 {
 		return
 	}
 	pts := make([]float64, len(raw))
@@ -431,13 +606,55 @@ func drawPath(dc *gg.Context, props map[string]any) {
 	for i := 2; i < len(pts); i += 2 {
 		dc.LineTo(pts[i], pts[i+1])
 	}
-	if propBool(props, "filled", false) {
-		dc.ClosePath()
+	dc.ClosePath()
+	if propBool(props, "filled", true) {
 		dc.Fill()
 		return
 	}
-	dc.SetLineWidth(propNum(props, "width", 3))
+	dc.SetLineWidth(propNum(props, "width", 2))
 	dc.Stroke()
+}
+
+// drawStar draws a star centered at cx,cy with outer radius r, points count, inner ratio.
+func drawStar(dc *gg.Context, props map[string]any, cx, cy float64) {
+	r := propNum(props, "r", 50)
+	if r <= 0 {
+		return
+	}
+	points := int(propNum(props, "points", 5))
+	if points < 2 {
+		points = 5
+	}
+	inner := propNum(props, "inner", 0.45)
+	if inner < 0 {
+		inner = 0
+	}
+	if inner > 1 {
+		inner = 1
+	}
+	outer := r
+	innerR := r * inner
+	for i := 0; i < points*2; i++ {
+		ang := math.Pi*float64(i)/float64(points) - math.Pi/2
+		rad := outer
+		if i%2 == 1 {
+			rad = innerR
+		}
+		x := cx + math.Cos(ang)*rad
+		y := cy + math.Sin(ang)*rad
+		if i == 0 {
+			dc.MoveTo(x, y)
+		} else {
+			dc.LineTo(x, y)
+		}
+	}
+	dc.ClosePath()
+	if propBool(props, "filled", true) {
+		dc.Fill()
+	} else {
+		dc.SetLineWidth(propNum(props, "width", 2))
+		dc.Stroke()
+	}
 }
 
 // propBool reads a boolean prop with a default; anything non-boolean
@@ -449,6 +666,34 @@ func propBool(props map[string]any, key string, def bool) bool {
 		}
 	}
 	return def
+}
+
+// pointsBBox returns bbox of a flat points list.
+func pointsBBox(raw []any) (float64, float64, float64, float64, bool) {
+	if len(raw) < 4 || len(raw)%2 != 0 {
+		return 0, 0, 0, 0, false
+	}
+	minX, maxX, minY, maxY := 0.0, 0.0, 0.0, 0.0
+	for i := 0; i < len(raw); i += 2 {
+		x, ok1 := toFloat(raw[i])
+		y, ok2 := toFloat(raw[i+1])
+		if !ok1 || !ok2 {
+			return 0, 0, 0, 0, false
+		}
+		if i == 0 || x < minX {
+			minX = x
+		}
+		if i == 0 || x > maxX {
+			maxX = x
+		}
+		if i == 0 || y < minY {
+			minY = y
+		}
+		if i == 0 || y > maxY {
+			maxY = y
+		}
+	}
+	return minX, minY, maxX, maxY, true
 }
 
 // pathCenter is the bbox middle of a point list for spin transforms;

@@ -1,48 +1,202 @@
 use "helpers/spike"
 use "helpers/cube"
-
 scene(10, 30)
-
 audio("/home/uthman/Music/1-01. Stereo Madness.mp3")
-
 shape("bg", "rect", table{
-  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
-  "5.50": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
-  "6.50": table{x: 0, y: 0, w: 640, h: 360, color: "#1a0a1a"},
-  "8.50": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
-  "10": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"}
+    "0": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#0a0a18",
+    },
+    "5.50": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#0a0a18",
+    },
+    "6.50": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#1a0a1a",
+    },
+    "8.50": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#0a0a18",
+    },
+    "10": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#0a0a18",
+    },
 })
-
 shape("ground", "line", table{
-  "0": table{x1: 0, y1: 310, x2: 640, y2: 310, width: 3, color: "cyan"},
-  "5.50": table{x1: 0, y1: 310, x2: 640, y2: 310, width: 3, color: "cyan"},
-  "6.50": table{x1: 0, y1: 310, x2: 640, y2: 310, width: 4, color: "gold"},
-  "8.50": table{x1: 0, y1: 310, x2: 640, y2: 310, width: 3, color: "cyan"},
-  "10": table{x1: 0, y1: 310, x2: 640, y2: 310, width: 3, color: "cyan"}
+    "0": table{
+        x1: 0,
+        y1: 310,
+        x2: 640,
+        y2: 310,
+        width: 3,
+        color: "cyan",
+    },
+    "5.50": table{
+        x1: 0,
+        y1: 310,
+        x2: 640,
+        y2: 310,
+        width: 3,
+        color: "cyan",
+    },
+    "6.50": table{
+        x1: 0,
+        y1: 310,
+        x2: 640,
+        y2: 310,
+        width: 4,
+        color: "gold",
+    },
+    "8.50": table{
+        x1: 0,
+        y1: 310,
+        x2: 640,
+        y2: 310,
+        width: 3,
+        color: "cyan",
+    },
+    "10": table{
+        x1: 0,
+        y1: 310,
+        x2: 640,
+        y2: 310,
+        width: 3,
+        color: "cyan",
+    },
 })
-
 shape("wave1", "wave", table{
-  "0": table{x: 0, y: 80, width: 640, amplitude: 12, frequency: 3, phase: 0, thickness: 2, color: "slate"},
-  "5.50": table{x: 0, y: 80, width: 640, amplitude: 12, frequency: 3, phase: 330, thickness: 2, color: "slate"},
-  "6.50": table{x: 0, y: 80, width: 640, amplitude: 26, frequency: 6, phase: 420, thickness: 3, color: "slate"},
-  "8.50": table{x: 0, y: 80, width: 640, amplitude: 12, frequency: 3, phase: 600, thickness: 2, color: "slate"},
-  "10": table{x: 0, y: 80, width: 640, amplitude: 12, frequency: 3, phase: 720, thickness: 2, color: "slate"}
+    "0": table{
+        x: 0,
+        y: 80,
+        width: 640,
+        amplitude: 12,
+        frequency: 3,
+        phase: 0,
+        thickness: 2,
+        color: "slate",
+    },
+    "5.50": table{
+        x: 0,
+        y: 80,
+        width: 640,
+        amplitude: 12,
+        frequency: 3,
+        phase: 330,
+        thickness: 2,
+        color: "slate",
+    },
+    "6.50": table{
+        x: 0,
+        y: 80,
+        width: 640,
+        amplitude: 26,
+        frequency: 6,
+        phase: 420,
+        thickness: 3,
+        color: "slate",
+    },
+    "8.50": table{
+        x: 0,
+        y: 80,
+        width: 640,
+        amplitude: 12,
+        frequency: 3,
+        phase: 600,
+        thickness: 2,
+        color: "slate",
+    },
+    "10": table{
+        x: 0,
+        y: 80,
+        width: 640,
+        amplitude: 12,
+        frequency: 3,
+        phase: 720,
+        thickness: 2,
+        color: "slate",
+    },
 })
-
 camera(table{
-  "0": table{x: 320, y: 180, zoom: 1},
-  "2": table{x: 315, y: 175, zoom: 1.06, ease: "sine"},
-  "4": table{x: 325, y: 185, zoom: 1, ease: "sine"},
-  "5.50": table{x: 320, y: 180, zoom: 1, ease: "sine"},
-  "6.50": table{x: 318, y: 200, zoom: 1.22, ease: "sine"},
-  "7.50": table{x: 322, y: 190, zoom: 1.08, ease: "sine"},
-  "8.50": table{x: 320, y: 180, zoom: 1, ease: "sine"},
-  "10": table{x: 320, y: 180, zoom: 1}
+    "0": table{
+        x: 320,
+        y: 180,
+        zoom: 1,
+    },
+    "2": table{
+        x: 315,
+        y: 175,
+        zoom: 1.06,
+        ease: "sine",
+    },
+    "4": table{
+        x: 325,
+        y: 185,
+        zoom: 1,
+        ease: "sine",
+    },
+    "5.50": table{
+        x: 320,
+        y: 180,
+        zoom: 1,
+        ease: "sine",
+    },
+    "6.50": table{
+        x: 318,
+        y: 200,
+        zoom: 1.22,
+        ease: "sine",
+    },
+    "7.50": table{
+        x: 322,
+        y: 190,
+        zoom: 1.08,
+        ease: "sine",
+    },
+    "8.50": table{
+        x: 320,
+        y: 180,
+        zoom: 1,
+        ease: "sine",
+    },
+    "10": table{
+        x: 320,
+        y: 180,
+        zoom: 1,
+    },
 })
-
 let cubeKeys = table{
-  "0": table{x: 120, y: 270, w: 40, h: 40, color: "mint"},
-  "10": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 1350}
+    "0": table{
+        x: 120,
+        y: 270,
+        w: 40,
+        h: 40,
+        color: "mint",
+    },
+    "10": table{
+        x: 120,
+        y: 270,
+        w: 40,
+        h: 40,
+        color: "mint",
+        rotate: 1350,
+    },
 }
 addJump(cubeKeys, 1.55, 180)
 addJump(cubeKeys, 3.05, 360)
@@ -52,7 +206,6 @@ addJump(cubeKeys, 6.60, 900)
 addJump(cubeKeys, 7.25, 1080)
 addJump(cubeKeys, 7.90, 1260)
 shape("cube", "rect", cubeKeys)
-
 spikeAt("spike1", 1.55, "coral")
 spikeAt("spike2", 3.05, "coral")
 spikeAt("spike3", 4.45, "coral")

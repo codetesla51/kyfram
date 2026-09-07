@@ -1,0 +1,17 @@
+scene(3, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
+  "3": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"}
+})
+
+shape("card", "roundRect", table{
+  "0": table{x: 120, y: 110, w: 400, h: 140, radius: 16, color: "#ffffff"},
+  "1.5": table{x: 100, y: 90, w: 440, h: 180, radius: 32, color: "#e6c040"},
+  "3": table{x: 120, y: 110, w: 400, h: 140, radius: 16, color: "#ffffff"}
+})
+
+text("label", table{
+  "0": table{content: "roundRect", x: 320, y: 180, size: 28, color: "#0a0a18"},
+  "3": table{content: "roundRect", x: 320, y: 180, size: 28, color: "#0a0a18"}
+})

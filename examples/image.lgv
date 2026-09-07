@@ -1,6 +1,13 @@
 scene(2, 30)
-
 shape("logo", "image", table{
-  "0": table{path: "examples/assets/ball.png", x: 120, y: 180},
-  "2": table{path: "examples/assets/ball.png", x: 520, y: 180}
+    "0": table{
+        path: "examples/assets/ball.png",
+        x: 120,
+        y: 180,
+    },
+    "2": table{
+        path: "examples/assets/ball.png",
+        x: 520,
+        y: 180,
+    },
 })

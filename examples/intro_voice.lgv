@@ -7,18 +7,80 @@ let v = tts("hey my name is uthman and this is kyfram", "/tmp/intro_voice.wav", 
 scene(v.duration + 1, 30)
 audio(v.audio)
 shape("bg", "rect", table{
-  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
-  str(v.duration + 1): table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"}
+    "0": table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#0a0a18",
+    },
+    str(v.duration + 1): table{
+        x: 0,
+        y: 0,
+        w: 640,
+        h: 360,
+        color: "#0a0a18",
+    },
 })
 shape("ring", "arc", table{
-  "0": table{x: 320, y: 180, r: 90, start: 0, end: 360, width: 4, color: "slate", alpha: 0.25},
-  str(v.duration + 1): table{x: 320, y: 180, r: 90, start: 0, end: 360, width: 4, color: "slate", alpha: 0.25}
+    "0": table{
+        x: 320,
+        y: 180,
+        r: 90,
+        start: 0,
+        end: 360,
+        width: 4,
+        color: "slate",
+        alpha: 0.25,
+    },
+    str(v.duration + 1): table{
+        x: 320,
+        y: 180,
+        r: 90,
+        start: 0,
+        end: 360,
+        width: 4,
+        color: "slate",
+        alpha: 0.25,
+    },
 })
 for i, w in v.words {
-  text("w" + str(i), table{
-    str(w.start): table{content: w.word, x: 320, y: 180, size: 64, color: "white", alpha: 0, scale: 0.85},
-    str(w.start + 0.08): table{content: w.word, x: 320, y: 180, size: 64, color: "white", alpha: 1, scale: 1},
-    str(w.end): table{content: w.word, x: 320, y: 180, size: 64, color: "white", alpha: 1, scale: 1},
-    str(w.end + 0.12): table{content: w.word, x: 320, y: 180, size: 64, color: "white", alpha: 0, scale: 1.06}
-  })
+    text("w" + str(i), table{
+        str(w.start): table{
+            content: w.word,
+            x: 320,
+            y: 180,
+            size: 64,
+            color: "white",
+            alpha: 0,
+            scale: 0.85,
+        },
+        str(w.start + 0.08): table{
+            content: w.word,
+            x: 320,
+            y: 180,
+            size: 64,
+            color: "white",
+            alpha: 1,
+            scale: 1,
+        },
+        str(w.end): table{
+            content: w.word,
+            x: 320,
+            y: 180,
+            size: 64,
+            color: "white",
+            alpha: 1,
+            scale: 1,
+        },
+        str(w.end + 0.12): table{
+            content: w.word,
+            x: 320,
+            y: 180,
+            size: 64,
+            color: "white",
+            alpha: 0,
+            scale: 1.06,
+        },
+    })
 }

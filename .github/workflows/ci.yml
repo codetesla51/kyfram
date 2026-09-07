@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+    branches: ["master", "main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          cache: true
+      - run: go mod download
+      - run: make build
+      - run: make vet
+      - run: go test ./... -v
+      - name: Check fmt
+        run: |
+          make fmt
+          git diff --exit-code || (echo "run 'make fmt' and commit" && exit 1)
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v2.1

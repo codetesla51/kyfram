@@ -46,8 +46,8 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		return interpreter.NULL
 	})
 	vm.Register("shape", func(args ...interpreter.Object) interpreter.Object {
-		if len(args) != 3 {
-			return &interpreter.Error{Message: fmt.Sprintf("shape() takes 3 arguments, got %d", len(args))}
+		if len(args) < 3 || len(args) > 4 {
+			return &interpreter.Error{Message: fmt.Sprintf("shape() takes 3 arguments plus optional group, got %d", len(args))}
 		}
 		name, err := strArg(args[0], "name")
 		if err != nil {
@@ -61,12 +61,19 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		if err != nil {
 			return &interpreter.Error{Message: err.Error()}
 		}
-		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs})
+		group := ""
+		if len(args) == 4 {
+			group, err = strArg(args[3], "group")
+			if err != nil {
+				return &interpreter.Error{Message: err.Error()}
+			}
+		}
+		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs, Group: group})
 		return interpreter.NULL
 	})
 	vm.Register("text", func(args ...interpreter.Object) interpreter.Object {
-		if len(args) != 2 {
-			return &interpreter.Error{Message: fmt.Sprintf("text() takes 2 arguments, got %d", len(args))}
+		if len(args) < 2 || len(args) > 3 {
+			return &interpreter.Error{Message: fmt.Sprintf("text() takes 2 arguments plus optional group, got %d", len(args))}
 		}
 		name, err := strArg(args[0], "name")
 		if err != nil {
@@ -76,7 +83,29 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		if err != nil {
 			return &interpreter.Error{Message: err.Error()}
 		}
-		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: "text", Keyframes: kfs})
+		group := ""
+		if len(args) == 3 {
+			group, err = strArg(args[2], "group")
+			if err != nil {
+				return &interpreter.Error{Message: err.Error()}
+			}
+		}
+		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: "text", Keyframes: kfs, Group: group})
+		return interpreter.NULL
+	})
+	vm.Register("group", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) != 2 {
+			return &interpreter.Error{Message: fmt.Sprintf("group() takes 2 arguments, got %d", len(args))}
+		}
+		name, err := strArg(args[0], "name")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		kfs, err := keyframesArg(args[1])
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		b.tl.Groups = append(b.tl.Groups, Group{Name: name, Keyframes: kfs})
 		return interpreter.NULL
 	})
 	vm.Register("audio", func(args ...interpreter.Object) interpreter.Object {

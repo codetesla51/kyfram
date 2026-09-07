@@ -47,7 +47,8 @@ text("caption", table{
 - **Declarative keyframes** — `scene()` / `shape()` / `text()` / `audio()` builtins; scripts compute freely, the builder keeps only declarations
 - **Interpolator** — numbers lerp, hex colors lerp per channel, strings snap to the earlier key; out-of-range holds the edge, never extrapolates
 - **Easing** — `linear | easeIn | easeOut | easeInOut | cubicIn | cubicOut | cubicInOut | sine` per segment, declared on the earlier key
-- **Primitives** — circle, rect, line, arc, wave, path, image, font-backed text; every vector kind takes `rotate` (degrees), `scale`, `layer`, `alpha`
+- **Groups** — `group(name, keyframes)` containers with keyframed `x y scale rotate alpha layer`; children keep local `x/y` and animate independently, group transform → child local → world (see `examples/groups.lgv`)
+- **Primitives** — circle, rect, roundRect, polygon, star, ellipse, line, arc, wave, path, image, font-backed text; every vector kind takes `rotate` (degrees), `scale`, `layer`, `alpha`
 - **Zero-disk render path** — raw RGBA bytes piped to ffmpeg's stdin (`-f rawvideo`); PNG sequences exist only as a debug path
 - **Audio mux** — `audio(path, offset?, loop?)` tracks mixed under the video, beeps land on visual beats via `-itsoffset`
 - **Preview server** — scrub slider, play button, hot reload (every request re-reads the script)
@@ -78,6 +79,11 @@ text("caption", table{
 | `examples/vars.lgv` | `--var` templating + `text_file` copy |
 | `examples/wave.lgv` | morphing wave, gradient sun, blend halo, path sail, text on path |
 | `examples/camera.lgv` | keyframed pan and zoom |
+| `examples/groups.lgv` | group orbit/scale/rotate with children (local + world) |
+| `examples/polygon.lgv` | filled morphing polygon |
+| `examples/roundrect.lgv` | animating rounded rect + radius |
+| `examples/star.lgv` | 5-point star, inner ratio + rotate |
+| `examples/ellipse.lgv` | ellipse `rx/ry` vs circle `r` |
 
 ## How it works
 
@@ -112,14 +118,19 @@ Kinds and their props (`x`/`y` in pixels, origin top-left):
 
 - `circle`: `x y r color`
 - `rect`: `x y` (top-left) `w h color`
+- `roundRect`: `x y w h radius color` — `radius` lerps
+- `polygon`: `points` flat `[x1,y1,…]` `color` `filled?` (default true) `width` — closed, same-length morphs
+- `star`: `x y r points inner color` — `r` outer, `points` count, `inner` 0-1 inner ratio, all keyframeable
+- `ellipse`: `x y rx ry color` (`ry` defaults to `rx`, `r` is alias for `rx`)
 - `line`: `x1 y1 x2 y2 width color`
 - `arc`: `x y` (center) `r start end` (degrees) `width color` — `0..360` is a ring
 - `wave`: `x y` (left baseline) `width amplitude frequency` (cycles) `phase` (degrees) `thickness color` — engine owns the sine
-- `path`: `points` flat `[x1,y1,…]` `width color filled?` — same-length lists morph
+- `path`: `points` flat `[x1,y1,…]` `width color filled? closed? cap join` — `cap: "round"|"butt"|"square"`, `join: "round"|"bevel"`, same-length lists morph
 - `image`: `path x y` (centered)
 - `text`: `content x y size color font?` — `points` lays glyphs along the polyline
+- `group`: `group(name, table{"0": table{x,y,scale,rotate,alpha,layer}})` then `shape(..., group)` / `text(..., group)` — child `x/y` is local to group origin; group `scale/rotate/alpha` multiply children; nested groups are future (flat for v1)
 
-Gradients on circle/rect: `gradFrom gradTo` (names or hex) + `gradAngle`.
+Gradients on circle/rect/polygon/roundRect/ellipse: `gradFrom gradTo` (names or hex) + `gradAngle`.
 Blend on any entity: `blend: "multiply" | "screen" | "add"`.
 Camera as a declaration: `camera(table{"0": table{x: 320, y: 180, zoom: 1}, …})`.
 
@@ -149,22 +160,22 @@ refresh — no restart, no watcher.
 ## Project layout
 
 ```
-timeline.go      Timeline / Entity / Keyframe / AudioTrack (pure data)
+timeline.go      Timeline / Entity / Group / Keyframe / AudioTrack (pure data)
 interpolate.go   Interpolate + easing + hex helpers
-render.go        RenderFrame / RenderSequence / Encode (gg + ffmpeg pipe)
-bindings.go      Builder: scene/shape/text/audio builtins
+render.go        RenderFrame / RenderSequence / Encode (gg + ffmpeg pipe, groups + polygon/roundRect/star/ellipse + path caps)
+bindings.go      Builder: scene/shape/text/audio/group + tts/tts_voices builtins
 cmd/kyfram/      render + view commands, sandboxed VM init
 cmd/example/     throwaway manual probe (sequence/mp4 dumping)
-examples/        one .lgv per feature + assets/
-logos_reference.md  pinned Logos v0.4.9 notes (local only, gitignored)
+examples/        one .lgv per feature + assets/ (see table above)
+logos_reference.md  pinned Logos v0.4.10 notes (local only, gitignored)
 third_party/       vendored Logos stdlib (.lgs) the VM resolves `use "std/..."` against
 ```
 
 ## Limitations
 
-- 2D screen space only. No camera, no 3D, no streaming, no GUI editor.
-- Fixed prop vocabulary per kind; no groups (nesting) yet — `layer` covers ordering.
-- Gradient fills on circle/rect only; strokes and images stay flat.
+- 2D screen space only. No 3D, no streaming, no GUI editor.
+- Groups are flat (one level) for v1; nested groups are next.
+- Gradient fills on circle/rect/polygon/roundRect/ellipse; strokes and images stay flat.
 - `ffmpeg` and the default font are system dependencies, not embedded. Fonts must be `.ttf` (TrueType outlines) — `.otf`/CFF fails to load and the text is skipped.
 - Audio loops whole files; no per-section repeat.
 - Scripts are "declarations only" by convention — the sandbox can't block `for`/`if`, the builder just ignores them.

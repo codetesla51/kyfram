@@ -1,0 +1,17 @@
+version: "2"
+run:
+  timeout: 5m
+linters:
+  default: standard
+  enable:
+    - govet
+    - staticcheck
+    - unused
+    - ineffassign
+    - misspell
+  disable:
+    - errcheck # kyfram prefers explicit handling where it matters
+formatters:
+  enable:
+    - gofmt
+    - goimports

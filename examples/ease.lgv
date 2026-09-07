@@ -1,11 +1,30 @@
 scene(2, 30)
-
 shape("steady", "circle", table{
-  "0": table{x: 80, y: 120, r: 30, color: "#ffffff"},
-  "2": table{x: 560, y: 120, r: 30, color: "#ffffff"}
+    "0": table{
+        x: 80,
+        y: 120,
+        r: 30,
+        color: "#ffffff",
+    },
+    "2": table{
+        x: 560,
+        y: 120,
+        r: 30,
+        color: "#ffffff",
+    },
 })
-
 shape("creeper", "circle", table{
-  "0": table{x: 80, y: 240, r: 30, color: "#e6c040", ease: "easeIn"},
-  "2": table{x: 560, y: 240, r: 30, color: "#e6c040"}
+    "0": table{
+        x: 80,
+        y: 240,
+        r: 30,
+        color: "#e6c040",
+        ease: "easeIn",
+    },
+    "2": table{
+        x: 560,
+        y: 240,
+        r: 30,
+        color: "#e6c040",
+    },
 })

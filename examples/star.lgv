@@ -1,0 +1,17 @@
+scene(3, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"},
+  "3": table{x: 0, y: 0, w: 640, h: 360, color: "#0a0a18"}
+})
+
+shape("star", "star", table{
+  "0": table{x: 320, y: 180, r: 50, points: 5, inner: 0.45, color: "#ffd43b", rotate: 0},
+  "1.5": table{x: 320, y: 180, r: 90, points: 5, inner: 0.5, color: "#ffd43b", rotate: 180},
+  "3": table{x: 320, y: 180, r: 50, points: 5, inner: 0.45, color: "#ffd43b", rotate: 360}
+})
+
+shape("star2", "star", table{
+  "0": table{x: 120, y: 100, r: 20, points: 6, inner: 0.6, color: "coral"},
+  "3": table{x: 120, y: 100, r: 30, points: 6, inner: 0.6, color: "coral", rotate: 360}
+})

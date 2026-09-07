@@ -1,6 +1,19 @@
 scene(2, 30)
-
 shape("beam", "line", table{
-  "0": table{x1: 60, y1: 300, x2: 200, y2: 60, width: 4, color: "#ffffff"},
-  "2": table{x1: 440, y1: 300, x2: 580, y2: 60, width: 4, color: "#e6c040"}
+    "0": table{
+        x1: 60,
+        y1: 300,
+        x2: 200,
+        y2: 60,
+        width: 4,
+        color: "#ffffff",
+    },
+    "2": table{
+        x1: 440,
+        y1: 300,
+        x2: 580,
+        y2: 60,
+        width: 4,
+        color: "#e6c040",
+    },
 })
