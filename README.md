@@ -66,6 +66,7 @@ text("caption", table{
 | `examples/ease.lgv` | linear vs `easeIn`, side by side |
 | `examples/audio.lgv` | beep aligned to center crossing |
 | `examples/hello.lgv` | 2-minute greeting + loader + outro (alpha fades) |
+| `examples/bounce.lgv` | gravity bounces (easeIn down, easeOut up) + sloshing lines |
 
 ## How it works
 
