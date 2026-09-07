@@ -1,0 +1,9 @@
+fn spikeAt(name, arrival, color) {
+  let dur = 1.8
+  let start = arrival - 1.37
+  let end = start + dur
+  shape(name, "path", table{
+    str(start): table{points: [700, 310, 740, 310, 720, 270], filled: true, color: color},
+    str(end): table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: color}
+  })
+}

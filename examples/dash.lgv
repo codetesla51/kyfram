@@ -1,3 +1,5 @@
+use "helpers/spike"
+
 scene(10, 30)
 
 audio("/home/uthman/Music/1-01. Stereo Madness.mp3")
@@ -64,38 +66,10 @@ shape("cube", "rect", table{
   "10": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 1350}
 })
 
-shape("spike1", "path", table{
-  "0.18": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "coral"},
-  "1.98": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "coral"}
-})
-
-shape("spike2", "path", table{
-  "1.68": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "coral"},
-  "3.48": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "coral"}
-})
-
-shape("spike3", "path", table{
-  "3.08": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "coral"},
-  "4.88": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "coral"}
-})
-
-shape("spike4", "path", table{
-  "4.48": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "coral"},
-  "6.28": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "coral"}
-})
-
-shape("spike5", "path", table{
-  "5.23": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "red"},
-  "7.03": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "red"}
-})
-
-shape("spike6", "path", table{
-  "5.88": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "red"},
-  "7.68": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "red"}
-})
-
-shape("spike7", "path", table{
-  "6.53": table{points: [700, 310, 740, 310, 720, 270], filled: true, color: "red"},
-  "8.33": table{points: [-60, 310, -20, 310, -40, 270], filled: true, color: "red"}
-})
-
+spikeAt("spike1", 1.55, "coral")
+spikeAt("spike2", 3.05, "coral")
+spikeAt("spike3", 4.45, "coral")
+spikeAt("spike4", 5.85, "coral")
+spikeAt("spike5", 6.60, "red")
+spikeAt("spike6", 7.25, "red")
+spikeAt("spike7", 7.90, "red")
