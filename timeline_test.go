@@ -27,3 +27,13 @@ func TestTimelineLiteral(t *testing.T) {
 		t.Fatalf("x at t=2 = %v, want 100", got)
 	}
 }
+
+// Zero dims fall back to the default canvas; explicit dims win.
+func TestTimelineSize(t *testing.T) {
+	if w, h := (Timeline{}).size(); w != frameW || h != frameH {
+		t.Fatalf("default size = %dx%d", w, h)
+	}
+	if w, h := (Timeline{Width: 320, Height: 180}).size(); w != 320 || h != 180 {
+		t.Fatalf("explicit size = %dx%d", w, h)
+	}
+}

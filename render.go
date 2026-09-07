@@ -26,7 +26,8 @@ const (
 // values through Interpolate, then dispatch on Kind. Unknown kinds are
 // skipped so one experimental entity can't kill the whole frame.
 func RenderFrame(tl Timeline, t float64) *gg.Context {
-	dc := gg.NewContext(frameW, frameH)
+	w, h := tl.size()
+	dc := gg.NewContext(w, h)
 	dc.SetRGB(0.1, 0.1, 0.12)
 	dc.Clear()
 
@@ -36,8 +37,8 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		case "circle":
 			dc.SetHexColor(propStr(props, "color", "#ffffff"))
 			dc.DrawCircle(
-				propNum(props, "x", frameW/2),
-				propNum(props, "y", frameH/2),
+				propNum(props, "x", float64(w)/2),
+				propNum(props, "y", float64(h)/2),
 				propNum(props, "r", 50),
 			)
 			dc.Fill()
@@ -48,16 +49,16 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			dc.SetHexColor(propStr(props, "color", "#ffffff"))
 			dc.DrawStringAnchored(
 				propStr(props, "content", ""),
-				propNum(props, "x", frameW/2),
-				propNum(props, "y", frameH/2),
+				propNum(props, "x", float64(w)/2),
+				propNum(props, "y", float64(h)/2),
 				0.5, 0.5,
 			)
 		case "rect":
 			// x,y is the top-left corner; w,h default to a 100px square.
 			dc.SetHexColor(propStr(props, "color", "#ffffff"))
 			dc.DrawRectangle(
-				propNum(props, "x", frameW/2-50),
-				propNum(props, "y", frameH/2-50),
+				propNum(props, "x", float64(w)/2-50),
+				propNum(props, "y", float64(h)/2-50),
 				propNum(props, "w", 100),
 				propNum(props, "h", 100),
 			)
@@ -67,9 +68,9 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			dc.SetLineWidth(propNum(props, "width", 2))
 			dc.DrawLine(
 				propNum(props, "x1", 0),
-				propNum(props, "y1", frameH/2),
-				propNum(props, "x2", frameW),
-				propNum(props, "y2", frameH/2),
+				propNum(props, "y1", float64(h)/2),
+				propNum(props, "x2", float64(w)),
+				propNum(props, "y2", float64(h)/2),
 			)
 			dc.Stroke()
 		case "image":
@@ -82,7 +83,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			if err != nil {
 				continue
 			}
-			dc.DrawImageAnchored(im, int(propNum(props, "x", frameW/2)), int(propNum(props, "y", frameH/2)), 0.5, 0.5)
+			dc.DrawImageAnchored(im, int(propNum(props, "x", float64(w)/2)), int(propNum(props, "y", float64(h)/2)), 0.5, 0.5)
 		}
 	}
 	return dc
@@ -126,10 +127,11 @@ func Encode(tl Timeline, outPath string) error {
 	if tl.FPS <= 0 {
 		return fmt.Errorf("fps %d: must be positive", tl.FPS)
 	}
+	w, h := tl.size()
 	args := []string{
 		"-y",
 		"-f", "rawvideo", "-pix_fmt", "rgba",
-		"-s", fmt.Sprintf("%dx%d", frameW, frameH),
+		"-s", fmt.Sprintf("%dx%d", w, h),
 		"-r", strconv.Itoa(tl.FPS),
 		"-i", "-",
 		"-c:v", "libx264", "-pix_fmt", "yuv420p",

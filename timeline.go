@@ -1,10 +1,13 @@
 package kyfram
 
 // Timeline is the full scene description: how long the video runs,
-// at what frame rate, and every animated entity in it.
+// at what frame rate, and every animated entity in it. Width/Height
+// of zero mean the default canvas (CLI flags or scene defaults win).
 type Timeline struct {
 	Duration float64
 	FPS      int
+	Width    int
+	Height   int
 	Entities []Entity
 }
 
@@ -25,4 +28,16 @@ type Keyframe struct {
 	Time  float64
 	Props map[string]any
 	Ease  string
+}
+
+// size resolves the render canvas: explicit dims win, zero means default.
+func (tl Timeline) size() (int, int) {
+	w, h := tl.Width, tl.Height
+	if w <= 0 {
+		w = frameW
+	}
+	if h <= 0 {
+		h = frameH
+	}
+	return w, h
 }
