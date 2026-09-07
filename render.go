@@ -98,33 +98,44 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			if gProps == nil {
 				continue
 			}
-			// Group alpha multiplies children
 			gAlpha := propNum(gProps, "alpha", 1)
 			gx := propNum(gProps, "x", float64(w)/2)
 			gy := propNum(gProps, "y", float64(h)/2)
 			gRot := propNum(gProps, "rotate", 0)
 			gScale := propNum(gProps, "scale", 1)
-			// Push group transform
 			dc.Push()
 			dc.Translate(gx, gy)
 			dc.Rotate(gg.Radians(gRot))
 			dc.Scale(gScale, gScale)
-			dc.Translate(-gx, -gy)
-			// Draw children with group alpha applied
 			for _, f := range grouped[it.name] {
 				props := copyProps(f.props)
 				if gAlpha < 1 {
 					props["alpha"] = propNum(props, "alpha", 1) * gAlpha
 				}
+				// For group children, default x/y to 0 local (not canvas center)
+				if f.kind == "circle" || f.kind == "star" || f.kind == "ellipse" || f.kind == "text" {
+					if _, ok := props["x"]; !ok {
+						props["x"] = 0.0
+					}
+					if _, ok := props["y"]; !ok {
+						props["y"] = 0.0
+					}
+				}
+				if f.kind == "rect" || f.kind == "roundRect" {
+					if _, ok := props["x"]; !ok {
+						props["x"] = -propNum(props, "w", 100) / 2
+					}
+					if _, ok := props["y"]; !ok {
+						props["y"] = -propNum(props, "h", 100) / 2
+					}
+				}
 				if mode, ok := props["blend"].(string); ok && blendModes[mode] {
 					layer := gg.NewContext(w, h)
 					frameCamera(layer, tl, w, h, t)
-					// re-apply group transform to offscreen
 					layer.Push()
 					layer.Translate(gx, gy)
 					layer.Rotate(gg.Radians(gRot))
 					layer.Scale(gScale, gScale)
-					layer.Translate(-gx, -gy)
 					drawEntity(layer, w, h, f.kind, props, defaultFace(tl))
 					layer.Pop()
 					composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
