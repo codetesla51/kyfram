@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"math"
 	"os"
@@ -70,8 +71,11 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 	switch kind {
 	case "circle":
 		spin(dc, cx, cy, props, func() {
-			paint(dc, props)
-			dc.DrawCircle(cx, cy, propNum(props, "r", 50))
+			r := propNum(props, "r", 50)
+			if !gradientFill(dc, cx-r, cy-r, cx+r, cy+r, props) {
+				paint(dc, props)
+			}
+			dc.DrawCircle(cx, cy, r)
 			dc.Fill()
 		})
 	case "text":
@@ -87,7 +91,9 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		rx, ry := propNum(props, "x", float64(w)/2-50), propNum(props, "y", float64(h)/2-50)
 		rw, rh := propNum(props, "w", 100), propNum(props, "h", 100)
 		spin(dc, rx+rw/2, ry+rh/2, props, func() {
-			paint(dc, props)
+			if !gradientFill(dc, rx, ry, rx+rw, ry+rh, props) {
+				paint(dc, props)
+			}
 			dc.DrawRectangle(rx, ry, rw, rh)
 			dc.Fill()
 		})
@@ -455,4 +461,46 @@ func pathCenter(props map[string]any) (float64, float64, bool) {
 		}
 	}
 	return (minX + maxX) / 2, (minY + maxY) / 2, true
+}
+
+// gradientFill paints bbox with a linear gradFrom→gradTo gradient at
+// gradAngle degrees, honoring alpha. It reports whether a gradient was
+// declared so callers fall back to flat paint otherwise. Fill kinds
+// only (circle, rect) — strokes keep their flat color.
+func gradientFill(dc *gg.Context, x0, y0, x1, y1 float64, props map[string]any) bool {
+	from, ok := props["gradFrom"].(string)
+	if !ok {
+		return false
+	}
+	to, ok := props["gradTo"].(string)
+	if !ok {
+		return false
+	}
+	fc, err := parseColor(from)
+	if err != nil {
+		return false
+	}
+	tc, err := parseColor(to)
+	if err != nil {
+		return false
+	}
+	a := propNum(props, "alpha", 1)
+	if a > 1 {
+		a = 1
+	}
+	if a < 0 {
+		a = 0
+	}
+	ang := gg.Radians(propNum(props, "gradAngle", 0))
+	cx, cy := (x0+x1)/2, (y0+y1)/2
+	dx, dy := math.Cos(ang), math.Sin(ang)
+	r := math.Hypot(x1-x0, y1-y0) / 2
+	g := gg.NewLinearGradient(cx-dx*r, cy-dy*r, cx+dx*r, cy+dy*r)
+	stop := func(c [3]float64) color.NRGBA {
+		return color.NRGBA{uint8(c[0]), uint8(c[1]), uint8(c[2]), uint8(a*255 + 0.5)}
+	}
+	g.AddColorStop(0, stop(fc))
+	g.AddColorStop(1, stop(tc))
+	dc.SetFillStyle(g)
+	return true
 }

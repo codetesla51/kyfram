@@ -437,3 +437,24 @@ func TestRenderPath(t *testing.T) {
 		t.Fatalf("bad path painted #%02x%02x%02x", r>>8, g>>8, b>>8)
 	}
 }
+
+// A horizontal black→white gradient is dark left, bright right.
+func TestRenderGradient(t *testing.T) {
+	tl := Timeline{Entities: []Entity{
+		{Name: "g", Kind: "rect", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{
+				"x": 270.0, "y": 130.0, "w": 100.0, "h": 100.0,
+				"gradFrom": "#000000", "gradTo": "#ffffff", "gradAngle": 0.0,
+			}},
+		}},
+	}}
+	img := RenderFrame(tl, 0).Image()
+	lr, _, _, _ := img.At(275, 180).RGBA()
+	rr, _, _, _ := img.At(365, 180).RGBA()
+	if lr>>8 > 100 {
+		t.Fatalf("gradient left = %d, want dark", lr>>8)
+	}
+	if rr>>8 < 150 {
+		t.Fatalf("gradient right = %d, want bright", rr>>8)
+	}
+}
