@@ -373,7 +373,7 @@ func TestRenderFontOverride(t *testing.T) {
 	if n := mk("/nope-missing.ttf"); n != 0 {
 		t.Fatalf("bogus font painted %d pixels", n)
 	}
-	if n := mk("/usr/share/fonts/TTF/FiraCodeNerdFont-Bold.ttf"); n < 100 {
+	if n := mk("examples/assets/fonts/ArchivoBlack-Regular.ttf"); n < 100 {
 		t.Fatalf("override font painted %d pixels, want a real word", n)
 	}
 }
