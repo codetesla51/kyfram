@@ -5,7 +5,7 @@
 [![Release](https://img.shields.io/github/v/release/codetesla51/kyfram)](https://github.com/codetesla51/kyfram/releases)
 
 <p align="center">
-  <img src="logo.png" width="320" alt="kyfram logo — two states connected by an eased trail with frame ticks">
+  <img src="logo.png" width="120" alt="kyfram logo — two states connected by an eased trail with frame ticks">
 </p>
 <p align="center"><sub>Logo made with kyfram</sub></p>
 
