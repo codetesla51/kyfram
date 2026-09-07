@@ -1,4 +1,5 @@
 use "helpers/spike"
+use "helpers/cube"
 
 scene(10, 30)
 
@@ -39,32 +40,18 @@ camera(table{
   "10": table{x: 320, y: 180, zoom: 1}
 })
 
-shape("cube", "rect", table{
+let cubeKeys = table{
   "0": table{x: 120, y: 270, w: 40, h: 40, color: "mint"},
-  "1.20": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 90, ease: "easeOut"},
-  "1.55": table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: 180, ease: "easeIn"},
-  "1.90": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 270},
-  "2.70": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 270, ease: "easeOut"},
-  "3.05": table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: 360, ease: "easeIn"},
-  "3.40": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 450},
-  "4.10": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 450, ease: "easeOut"},
-  "4.45": table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: 540, ease: "easeIn"},
-  "4.80": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 630},
-  "5.50": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 630},
-  "5.85": table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: 720, ease: "easeIn"},
-  "6.20": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 810},
-  "6.35": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 810, ease: "easeOut"},
-  "6.60": table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: 900, ease: "easeIn"},
-  "6.85": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 990},
-  "7.00": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 990, ease: "easeOut"},
-  "7.25": table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: 1080, ease: "easeIn"},
-  "7.50": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 1170},
-  "7.65": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 1170, ease: "easeOut"},
-  "7.90": table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: 1260, ease: "easeIn"},
-  "8.15": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 1350},
-  "8.80": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 1350},
   "10": table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: 1350}
-})
+}
+addJump(cubeKeys, 1.55, 180)
+addJump(cubeKeys, 3.05, 360)
+addJump(cubeKeys, 4.45, 540)
+addJump(cubeKeys, 5.85, 720)
+addJump(cubeKeys, 6.60, 900)
+addJump(cubeKeys, 7.25, 1080)
+addJump(cubeKeys, 7.90, 1260)
+shape("cube", "rect", cubeKeys)
 
 spikeAt("spike1", 1.55, "coral")
 spikeAt("spike2", 3.05, "coral")

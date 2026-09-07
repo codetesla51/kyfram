@@ -1,0 +1,5 @@
+fn addJump(keys, t, rot) {
+  keys[str(t - 0.35)] = table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: rot - 90, ease: "easeOut"}
+  keys[str(t)] = table{x: 120, y: 170, w: 40, h: 40, color: "gold", rotate: rot, ease: "easeIn"}
+  keys[str(t + 0.35)] = table{x: 120, y: 270, w: 40, h: 40, color: "mint", rotate: rot + 90}
+}
