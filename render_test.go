@@ -411,3 +411,29 @@ func TestRenderWave(t *testing.T) {
 		t.Fatal("flat wave painted off-line")
 	}
 }
+
+// A triangle path fills its interior; a bad list draws nothing.
+func TestRenderPath(t *testing.T) {
+	tl := Timeline{Entities: []Entity{
+		{Name: "tri", Kind: "path", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{
+				"points": []any{270.0, 230.0, 370.0, 230.0, 320.0, 130.0},
+				"filled": true, "color": "#ffffff",
+			}},
+		}},
+	}}
+	img := RenderFrame(tl, 0).Image()
+	if r, _, _, _ := img.At(320, 190).RGBA(); r>>8 != 0xff {
+		t.Fatal("triangle interior not filled")
+	}
+
+	bad := Timeline{Entities: []Entity{
+		{Name: "x", Kind: "path", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"points": []any{1.0}}},
+		}},
+	}}
+	r, g, b, _ := RenderFrame(bad, 0).Image().At(320, 180).RGBA()
+	if r>>8 != 0x19 || g>>8 != 0x19 {
+		t.Fatalf("bad path painted #%02x%02x%02x", r>>8, g>>8, b>>8)
+	}
+}

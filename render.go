@@ -134,6 +134,18 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 			drawWave(dc, props, float64(w))
 			dc.Stroke()
 		})
+	case "path":
+		// Flat point list [x1,y1,x2,y2...]: stroke it, or fill it
+		// closed when filled is set. Same-length lists morph (see
+		// blend); mismatched ones snap like strings.
+		pcx, pcy, ok := pathCenter(props)
+		if !ok {
+			pcx, pcy = cx, cy
+		}
+		spin(dc, pcx, pcy, props, func() {
+			paint(dc, props)
+			drawPath(dc, props)
+		})
 	}
 }
 
@@ -370,4 +382,77 @@ func propStr(props map[string]any, key, def string) string {
 		}
 	}
 	return def
+}
+
+// drawPath strokes (or closed-fills) a flat [x1,y1,...] point list.
+// Short or non-numeric lists draw nothing instead of half a shape.
+func drawPath(dc *gg.Context, props map[string]any) {
+	raw, ok := props["points"].([]any)
+	if !ok || len(raw) < 4 || len(raw)%2 != 0 {
+		return
+	}
+	pts := make([]float64, len(raw))
+	for i, v := range raw {
+		f, ok := toFloat(v)
+		if !ok {
+			return
+		}
+		pts[i] = f
+	}
+	dc.MoveTo(pts[0], pts[1])
+	for i := 2; i < len(pts); i += 2 {
+		dc.LineTo(pts[i], pts[i+1])
+	}
+	if propBool(props, "filled", false) {
+		dc.ClosePath()
+		dc.Fill()
+		return
+	}
+	dc.SetLineWidth(propNum(props, "width", 3))
+	dc.Stroke()
+}
+
+// propBool reads a boolean prop with a default; anything non-boolean
+// falls back so a typo can't arm a flag by accident.
+func propBool(props map[string]any, key string, def bool) bool {
+	if v, ok := props[key]; ok {
+		if b, ok := v.(bool); ok {
+			return b
+		}
+	}
+	return def
+}
+
+// pathCenter is the bbox middle of a point list for spin transforms;
+// invalid lists report false and callers fall back to canvas center.
+func pathCenter(props map[string]any) (float64, float64, bool) {
+	raw, ok := props["points"].([]any)
+	if !ok || len(raw) < 4 || len(raw)%2 != 0 {
+		return 0, 0, false
+	}
+	minX, maxX := 0.0, 0.0
+	minY, maxY := 0.0, 0.0
+	for i := 0; i < len(raw); i += 2 {
+		x, ok := toFloat(raw[i])
+		if !ok {
+			return 0, 0, false
+		}
+		y, ok := toFloat(raw[i+1])
+		if !ok {
+			return 0, 0, false
+		}
+		if i == 0 || x < minX {
+			minX = x
+		}
+		if i == 0 || x > maxX {
+			maxX = x
+		}
+		if i == 0 || y < minY {
+			minY = y
+		}
+		if i == 0 || y > maxY {
+			maxY = y
+		}
+	}
+	return (minX + maxX) / 2, (minY + maxY) / 2, true
 }

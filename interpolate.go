@@ -123,6 +123,22 @@ func blend(a, b any, f float64) any {
 			}
 		}
 	}
+	// Same-length numeric arrays morph elementwise, so point lists
+	// tween instead of jumping; anything else snaps to the earlier.
+	if as, ok := a.([]any); ok {
+		if bs, ok := b.([]any); ok && len(as) == len(bs) {
+			out := make([]any, len(as))
+			for i := range as {
+				af, aok := toFloat(as[i])
+				bf, bok := toFloat(bs[i])
+				if !aok || !bok {
+					return a
+				}
+				out[i] = af + (bf-af)*f
+			}
+			return out
+		}
+	}
 	return a
 }
 

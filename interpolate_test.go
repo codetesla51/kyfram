@@ -102,3 +102,23 @@ func TestInterpolateColorNames(t *testing.T) {
 		t.Fatalf("words at t=1 = %v, want hello", got)
 	}
 }
+
+// Same-length numeric arrays morph elementwise; mismatched snap.
+func TestInterpolateArrays(t *testing.T) {
+	kfs := []Keyframe{
+		{Time: 0, Props: map[string]any{"pts": []any{0.0, 0.0, 100.0, 0.0}}},
+		{Time: 2, Props: map[string]any{"pts": []any{0.0, 100.0, 100.0, 100.0}}},
+	}
+	got, ok := Interpolate(kfs, 1)["pts"].([]any)
+	if !ok || len(got) != 4 || got[1] != 50.0 || got[3] != 50.0 {
+		t.Fatalf("pts at t=1 = %v", Interpolate(kfs, 1)["pts"])
+	}
+
+	odd := []Keyframe{
+		{Time: 0, Props: map[string]any{"pts": []any{0.0}}},
+		{Time: 2, Props: map[string]any{"pts": []any{0.0, 1.0}}},
+	}
+	if got := Interpolate(odd, 1)["pts"]; len(got.([]any)) != 1 {
+		t.Fatalf("mismatched arrays should snap, got %v", got)
+	}
+}
