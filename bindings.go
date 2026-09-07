@@ -98,7 +98,22 @@ func keyframesArg(obj interpreter.Object) ([]Keyframe, error) {
 		if !ok {
 			return nil, fmt.Errorf("keyframe %q: value must be a table", ks)
 		}
-		kfs = append(kfs, Keyframe{Time: t, Props: props})
+		// ease is segment metadata, not a drawable value: lift it out so
+		// the renderer never sees it and blending never touches it.
+		ease := ""
+		if e, ok := props["ease"]; ok {
+			delete(props, "ease")
+			ease, ok = e.(string)
+			if !ok {
+				return nil, fmt.Errorf("keyframe %q: ease must be a string", ks)
+			}
+			switch ease {
+			case "linear", "easeIn", "easeOut", "easeInOut":
+			default:
+				return nil, fmt.Errorf("keyframe %q: unknown ease %q", ks, ease)
+			}
+		}
+		kfs = append(kfs, Keyframe{Time: t, Props: props, Ease: ease})
 	}
 	sort.Slice(kfs, func(i, j int) bool { return kfs[i].Time < kfs[j].Time })
 	return kfs, nil

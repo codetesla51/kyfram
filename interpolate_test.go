@@ -38,3 +38,29 @@ func TestInterpolate(t *testing.T) {
 		})
 	}
 }
+
+// Same span, different curves: easeIn lags at the midpoint while easeOut
+// leads, linear splits it. Two renders of these visibly differ.
+func TestInterpolateEase(t *testing.T) {
+	mk := func(ease string) []Keyframe {
+		return []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 0.0}, Ease: ease},
+			{Time: 2, Props: map[string]any{"x": 100.0}},
+		}
+	}
+	for _, c := range []struct {
+		ease string
+		want float64
+	}{
+		{"", 50.0},
+		{"linear", 50.0},
+		{"easeIn", 25.0},
+		{"easeOut", 75.0},
+		{"easeInOut", 50.0},
+		{"bogus", 50.0},
+	} {
+		if got := Interpolate(mk(c.ease), 1)["x"]; got != c.want {
+			t.Fatalf("ease %q at t=1 = %v, want %v", c.ease, got, c.want)
+		}
+	}
+}

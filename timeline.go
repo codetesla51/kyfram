@@ -19,7 +19,10 @@ type Entity struct {
 // Keyframe fixes an entity's properties at one moment in seconds.
 // Props holds numbers (float64), colors (hex string), or discrete
 // values (string) — interpretation lives in the interpolator.
+// Ease names the curve of the segment starting here
+// (linear, easeIn, easeOut, easeInOut); empty means linear.
 type Keyframe struct {
 	Time  float64
 	Props map[string]any
+	Ease  string
 }

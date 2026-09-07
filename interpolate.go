@@ -26,10 +26,9 @@ func Interpolate(kfs []Keyframe, t float64) map[string]any {
 		i++
 	}
 	a, b := kfs[i], kfs[i+1]
-	f := 0.0
-	if b.Time > a.Time {
-		f = (t - a.Time) / (b.Time - a.Time)
-	}
+	// The earlier key owns the segment's curve, so easing reads like
+	// intent: "leave here gently" rather than "arrive here gently".
+	f := applyEase(a.Ease, spanFrac(a.Time, b.Time, t))
 
 	out := make(map[string]any, len(a.Props))
 	for k, av := range a.Props {
@@ -46,6 +45,36 @@ func Interpolate(kfs []Keyframe, t float64) map[string]any {
 		}
 	}
 	return out
+}
+
+// spanFrac is how far t sits between two keyframe times: 0 at the
+// earlier key, 1 at the later. Duplicate times hold the earlier value
+// instead of dividing by zero.
+func spanFrac(t0, t1, t float64) float64 {
+	if t1 > t0 {
+		return (t - t0) / (t1 - t0)
+	}
+	return 0
+}
+
+// applyEase reshapes the linear fraction into a named curve. Unknown
+// names fall back to linear; bindings reject them earlier so this is
+// only a backstop for hand-built timelines.
+func applyEase(name string, f float64) float64 {
+	switch name {
+	case "", "linear":
+		return f
+	case "easeIn":
+		return f * f
+	case "easeOut":
+		return 1 - (1-f)*(1-f)
+	case "easeInOut":
+		if f < 0.5 {
+			return 2 * f * f
+		}
+		return 1 - 2*(1-f)*(1-f)
+	}
+	return f
 }
 
 // blend picks per-type combination: numbers and colors lerp, the rest
