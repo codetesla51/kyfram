@@ -47,24 +47,28 @@ else
     echo "install go or check https://github.com/$REPO/releases" >&2
     exit 1
   fi
-  echo "no prebuilt binary, building from source (go install $VERSION)..."
-  # go install tag: latest or vX.Y.Z (fallback to direct if proxy not yet indexed)
-  TAG="$VERSION"
-  [ "$TAG" = "latest" ] && TAG="latest"
-  if ! go install "github.com/${REPO}/cmd/kyfram@$TAG" 2>/dev/null; then
-    echo "retry with GOPROXY=direct..."
-    GOPROXY=direct GOSUMDB=off go install "github.com/${REPO}/cmd/kyfram@$TAG"
+  if ! command -v git >/dev/null 2>&1; then
+    echo "no prebuilt binary and git not found — install git to build from source" >&2
+    exit 1
   fi
-  GOBIN=$(go env GOBIN 2>/dev/null); [ -z "$GOBIN" ] && GOBIN=$(go env GOPATH 2>/dev/null)/bin
-  if [ -x "$GOBIN/$BIN" ]; then
-    if [ "$GOBIN" != "$INSTALL_DIR" ] && [ -w "$INSTALL_DIR" ]; then
-      cp "$GOBIN/$BIN" "$INSTALL_DIR/$BIN" 2>/dev/null || true
-      echo "built $GOBIN/$BIN → $INSTALL_DIR/$BIN"
-    else
-      echo "built $GOBIN/$BIN — ensure $GOBIN is on PATH"
-      INSTALL_DIR="$GOBIN"
+  TAG="$VERSION"
+  if [ "$TAG" = "latest" ]; then
+    TAG="master"
+    echo "no prebuilt binary, cloning and building from source (master)..."
+  else
+    case "$TAG" in v*) ;; *) TAG="v$TAG" ;; esac
+    echo "no prebuilt binary, cloning and building from source ($TAG)..."
+  fi
+  TMPDIR=$(mktemp -d)
+  if ! git clone --depth 1 --branch "$TAG" "https://github.com/${REPO}.git" "$TMPDIR" 2>/dev/null; then
+    git clone "https://github.com/${REPO}.git" "$TMPDIR" 2>/dev/null
+    if [ "$TAG" != "master" ]; then
+      (cd "$TMPDIR" && git checkout "$TAG" 2>/dev/null || true)
     fi
   fi
+  (cd "$TMPDIR" && go build -o "$INSTALL_DIR/$BIN" ./cmd/kyfram)
+  rm -rf "$TMPDIR"
+  echo "built $INSTALL_DIR/$BIN from source ($TAG)"
 fi
 if "$INSTALL_DIR/$BIN" --help >/dev/null 2>&1; then
   echo "kyfram ready: $INSTALL_DIR/$BIN --help"
