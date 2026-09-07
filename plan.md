@@ -13,8 +13,7 @@ Motion Canvas, and Manim are all imperative (sequence commands). Nothing
 mainstream lets you declare states-at-times and have the engine own 100%
 of the sequencing and tweening.
 
-Status: scaffold only. `main.go` inits a sandboxed VM and runs one script
-file. No Timeline, no renderer, no bindings yet.
+Status: all 13 steps built — silent linear video, easing, CLI flags, view preview, audio mux, docs. Iterating from here.
 
 ## Decisions already made (and why)
 
