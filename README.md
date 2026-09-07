@@ -1,8 +1,8 @@
 # kyfram
 
-> A declarative, keyframe-driven video engine where **the video is written in Logos** and Go is only the runtime underneath.
+> Keyframe-driven rendering engine (video + still frames) — the video is written in Logos and Go is only the runtime underneath.
 
-`kyfram` is a small, opinionated engine for building motion-graphics clips. You declare what shapes look like at specific times in a `.lgv` script — Go interpolates between keyframes, rasterizes each frame in memory with `gg` (pure Go, no GPU/window), and pipes raw pixels to `ffmpeg` for encoding. Same lineage as `logos2d` (sibling repo, live 2D games); this one is batch video instead of a live window.
+`kyfram` is a small, opinionated engine for building motion-graphics clips and stills. You declare what shapes look like at specific times in a `.lgv` script — Go interpolates between keyframes, rasterizes each frame in memory with `gg` (pure Go, no GPU/window), and pipes raw pixels to `ffmpeg` for video or writes a single `png` for stills. Same lineage as `logos2d` (sibling repo, live 2D games); this one is batch rendering instead of a live window.
 
 The mental model is CSS `@keyframes` applied to video files. Remotion, Motion Canvas, and Manim are imperative (sequences of commands). Here you declare states-at-times and the engine owns 100% of the sequencing and tweening — retiming is editing a number, not re-directing.
 
