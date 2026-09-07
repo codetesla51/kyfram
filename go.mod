@@ -1,6 +1,6 @@
 module github.com/codetesla51/kyfram
 
-go 1.27.0
+go 1.25.0
 
 require (
 	github.com/codetesla51/logos v0.4.10
