@@ -6,6 +6,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
@@ -233,20 +234,58 @@ type ttsSpan struct {
 	start, end float64
 }
 
-// synthTTS is a fully-local placeholder voice: it synthesizes a wav
-// with one beep per word and returns word-level timings. No network,
-// no model download, just ffmpeg-already-required style wav + true
-// timings because we *are* the synthesizer. Swap the wav generator for
-// Piper/Edge later; the API (file + timings) stays identical.
+// synthTTS is fully-local voice: it tries espeak-ng for real speech,
+// falls back to beeps if missing. Either way it returns word-level
+// timings because we control the synthesis. No network, no model.
 func synthTTS(text, out string) (interpreter.Object, error) {
 	words := strings.Fields(text)
 	if len(words) == 0 {
 		return nil, fmt.Errorf("no words")
 	}
+	// Try real voice first: espeak-ng is now installed (Arch) and
+	// writes a wav we can probe for total duration.
+	if err := exec.Command("espeak-ng", "-v", "en", "-s", "150", "-w", out, text).Run(); err == nil {
+		if fi, err := os.Stat(out); err == nil && fi.Size() > 44 {
+			// Estimate word timings proportional to rune length, scaled
+			// to the real wav duration so sync is exact.
+			raw := make([]float64, len(words))
+			sum := 0.0
+			for i, w := range words {
+				d := 0.22 + 0.06*float64(len([]rune(w)))
+				if d < 0.28 {
+					d = 0.28
+				}
+				if d > 0.9 {
+					d = 0.9
+				}
+				raw[i] = d
+				sum += d
+			}
+			// Real duration from wav header or ffprobe; fall back to sum
+			total := sum - 0.06
+			if d, err := wavDuration(out); err == nil && d > 0.3 {
+				total = d
+			}
+			spans := make([]ttsSpan, len(words))
+			t := 0.0
+			for i, w := range words {
+				d := raw[i] / sum * total
+				if i == len(words)-1 {
+					d = total - t
+				}
+				spans[i] = ttsSpan{w, t, t + d - 0.04}
+				if spans[i].end < spans[i].start+0.15 {
+					spans[i].end = spans[i].start + 0.15
+				}
+				t += d
+			}
+			return ttsTable(out, total, spans)
+		}
+	}
+	// Fallback: beeps
 	spans := make([]ttsSpan, len(words))
 	t := 0.0
 	for i, w := range words {
-		// 0.06s per rune + 0.22s base, so "hey" < "uthman", still natural
 		dur := 0.22 + 0.06*float64(len([]rune(w)))
 		if dur < 0.28 {
 			dur = 0.28
@@ -261,7 +300,11 @@ func synthTTS(text, out string) (interpreter.Object, error) {
 	if err := writeBeepWav(out, spans, total); err != nil {
 		return nil, err
 	}
-	// Build Logos return: table{audio: path, duration: total, words: [table{word, start, end}]}
+	return ttsTable(out, total, spans)
+}
+
+// ttsTable builds the Logos return value shared by both paths.
+func ttsTable(out string, total float64, spans []ttsSpan) (interpreter.Object, error) {
 	wArr := make([]interpreter.Object, len(spans))
 	for i, s := range spans {
 		wArr[i] = &interpreter.Table{Pairs: map[string]interpreter.Object{
@@ -275,6 +318,26 @@ func synthTTS(text, out string) (interpreter.Object, error) {
 		"STRING:duration": &interpreter.Float{Value: total},
 		"STRING:words":    &interpreter.Array{Elements: wArr},
 	}}, nil
+}
+
+// wavDuration reads a wav header to get duration without ffprobe.
+func wavDuration(path string) (float64, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	var hdr [44]byte
+	if _, err := io.ReadFull(f, hdr[:]); err != nil {
+		return 0, err
+	}
+	rate := binary.LittleEndian.Uint32(hdr[24:28])
+	blockAlign := binary.LittleEndian.Uint16(hdr[32:34])
+	dataSize := binary.LittleEndian.Uint32(hdr[40:44])
+	if rate == 0 || blockAlign == 0 {
+		return 0, fmt.Errorf("bad wav header")
+	}
+	return float64(dataSize) / float64(uint32(blockAlign)*rate/2*2) * 1.0, nil
 }
 
 // writeBeepWav writes a mono 16-bit 44.1kHz wav: one sine beep per word
