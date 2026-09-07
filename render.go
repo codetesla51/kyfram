@@ -35,6 +35,10 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 	dc.SetRGB(0.1, 0.1, 0.12)
 	dc.Clear()
 
+	// Camera reframes the world (see frameCamera); the background clear
+	// stays put while entities travel.
+	frameCamera(dc, tl, w, h, t)
+
 	// Layers are paint order: lower draws first. Stable sort keeps
 	// declaration order within a layer, so old scripts behave the same.
 	type framed struct {
@@ -53,12 +57,14 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		// everything else paints straight onto the canvas.
 		if mode, ok := f.props["blend"].(string); ok && blendModes[mode] {
 			layer := gg.NewContext(w, h)
+			frameCamera(layer, tl, w, h, t)
 			drawEntity(layer, w, h, f.kind, f.props, defaultFace(tl))
 			composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
 			continue
 		}
 		drawEntity(dc, w, h, f.kind, f.props, defaultFace(tl))
 	}
+	dc.Pop()
 	return dc
 }
 
@@ -551,4 +557,20 @@ func composite(dst, src *image.RGBA, mode string) {
 		dst.Pix[i+2] = uint8((mix(sb, db)*sa + db*da*(1-sa)) / oa * 255)
 		dst.Pix[i+3] = uint8(oa*255 + 0.5)
 	}
+}
+
+// frameCamera pushes the world-to-screen transform: the x/y world point
+// lands on the screen center, scaled by zoom. Empty keys interpolate to
+// nothing, so the transform is identity and costs one matrix. The caller
+// pops after drawing (or discards the context for offscreen layers).
+func frameCamera(dc *gg.Context, tl Timeline, w, h int, t float64) {
+	dc.Push()
+	cam := Interpolate(tl.Camera, t)
+	zoom := propNum(cam, "zoom", 1)
+	if zoom <= 0 {
+		zoom = 1
+	}
+	dc.Translate(float64(w)/2, float64(h)/2)
+	dc.Scale(zoom, zoom)
+	dc.Translate(-propNum(cam, "x", float64(w)/2), -propNum(cam, "y", float64(h)/2))
 }

@@ -12,6 +12,8 @@ type Timeline struct {
 	Font     string
 	Entities []Entity
 	Audio    []AudioTrack
+	// Camera holds x/y/zoom keyframes; empty means a locked frame.
+	Camera []Keyframe
 }
 
 // AudioTrack lays one sound file under the video at Offset seconds.

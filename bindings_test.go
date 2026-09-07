@@ -123,3 +123,27 @@ func TestBindingsTextFile(t *testing.T) {
 		t.Fatal("missing file should error")
 	}
 }
+
+// camera() stores keyframes on the Timeline like an invisible entity.
+func TestBindingsCamera(t *testing.T) {
+	vm := interpreter.NewInterpreter(interpreter.SandboxConfig{})
+	var b Builder
+	b.Bind(vm)
+	src := `
+scene(2, 30)
+camera(table{
+  "0": table{x: 320, y: 180, zoom: 1},
+  "2": table{x: 500, y: 180, zoom: 2}
+})
+`
+	if err := vm.Run(src); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	tl, err := b.Build()
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+	if len(tl.Camera) != 2 || tl.Camera[1].Props["zoom"] != int64(2) {
+		t.Fatalf("camera = %+v", tl.Camera)
+	}
+}

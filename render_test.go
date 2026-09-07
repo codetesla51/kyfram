@@ -488,3 +488,30 @@ func TestRenderBlend(t *testing.T) {
 		}
 	}
 }
+
+// Panning the camera right moves the world left on screen.
+func TestRenderCamera(t *testing.T) {
+	mk := func(cam []Keyframe) image.Image {
+		return RenderFrame(Timeline{
+			Entities: []Entity{{Name: "b", Kind: "circle", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"x": 320.0, "y": 180.0, "r": 40.0, "color": "#ffffff"}},
+			}}},
+			Camera: cam,
+		}, 0).Image()
+	}
+	img := mk(nil)
+	if r, _, _, _ := img.At(320, 180).RGBA(); r>>8 != 0xff {
+		t.Fatal("locked camera: center not painted")
+	}
+	panned := mk([]Keyframe{{Time: 0, Props: map[string]any{"x": 420.0, "y": 180.0, "zoom": 1.0}}})
+	if r, _, _, _ := panned.At(220, 180).RGBA(); r>>8 != 0xff {
+		t.Fatal("panned camera: ball should sit 100px left")
+	}
+	if r, g, b, _ := panned.At(320, 180).RGBA(); r>>8 == 0xff && g>>8 == 0xff && b>>8 == 0xff {
+		t.Fatal("panned camera: center should be background")
+	}
+	zoomed := mk([]Keyframe{{Time: 0, Props: map[string]any{"zoom": 2.0}}})
+	if r, _, _, _ := zoomed.At(320, 110).RGBA(); r>>8 != 0xff {
+		t.Fatal("zoom 2: ball edge should reach 80px out")
+	}
+}

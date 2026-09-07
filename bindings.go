@@ -99,6 +99,17 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		b.tl.Audio = append(b.tl.Audio, track)
 		return interpreter.NULL
 	})
+	vm.Register("camera", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) != 1 {
+			return &interpreter.Error{Message: fmt.Sprintf("camera() takes 1 keyframe table, got %d", len(args))}
+		}
+		kfs, err := keyframesArg(args[0])
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		b.tl.Camera = kfs
+		return interpreter.NULL
+	})
 	vm.Register("text_file", func(args ...interpreter.Object) interpreter.Object {
 		if len(args) != 1 {
 			return &interpreter.Error{Message: fmt.Sprintf("text_file() takes 1 argument, got %d", len(args))}
