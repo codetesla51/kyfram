@@ -1,6 +1,10 @@
 package kyfram
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/fogleman/gg"
 )
 
@@ -46,6 +50,29 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		}
 	}
 	return dc
+}
+
+// RenderSequence renders every frame of tl into dir as frame_%04d.png:
+// frame count is Duration*FPS, frame i sits at t=i/FPS. Zero-padded
+// names keep alphabetical order equal to time order. Failures name the
+// frame index so a bad keyframe is findable without re-running blind.
+func RenderSequence(tl Timeline, dir string) error {
+	if tl.FPS <= 0 {
+		return fmt.Errorf("fps %d: must be positive", tl.FPS)
+	}
+	n := int(tl.Duration*float64(tl.FPS) + 0.5)
+	if n < 1 {
+		n = 1
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("mkdir %s: %w", dir, err)
+	}
+	for i := range n {
+		if err := RenderFrame(tl, float64(i)/float64(tl.FPS)).SavePNG(filepath.Join(dir, fmt.Sprintf("frame_%04d.png", i))); err != nil {
+			return fmt.Errorf("frame %d: %w", i, err)
+		}
+	}
+	return nil
 }
 
 // propNum reads a numeric prop with a default, so entities missing a

@@ -4,6 +4,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	kyfram "github.com/codetesla51/kyfram"
 )
@@ -32,6 +33,14 @@ func main() {
 		},
 	}
 
+	// With a directory argument, dump the whole PNG sequence there
+	// (flip through to check motion); otherwise one frame to out.png.
+	if len(os.Args) > 1 {
+		if err := kyfram.RenderSequence(tl, os.Args[1]); err != nil {
+			log.Fatalf("sequence: %v", err)
+		}
+		return
+	}
 	if err := kyfram.RenderFrame(tl, 2).SavePNG("out.png"); err != nil {
 		log.Fatalf("save: %v", err)
 	}
