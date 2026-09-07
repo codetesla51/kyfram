@@ -8,7 +8,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/fogleman/gg"
 )
@@ -31,75 +33,107 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 	dc.SetRGB(0.1, 0.1, 0.12)
 	dc.Clear()
 
+	// Layers are paint order: lower draws first. Stable sort keeps
+	// declaration order within a layer, so old scripts behave the same.
+	type framed struct {
+		kind  string
+		props map[string]any
+		layer float64
+	}
+	framed_ := make([]framed, 0, len(tl.Entities))
 	for _, e := range tl.Entities {
 		props := Interpolate(e.Keyframes, t)
-		switch e.Kind {
-		case "circle":
-			paint(dc, props)
-			dc.DrawCircle(
-				propNum(props, "x", float64(w)/2),
-				propNum(props, "y", float64(h)/2),
-				propNum(props, "r", 50),
-			)
-			dc.Fill()
-		case "text":
-			if err := dc.LoadFontFace(propStr(props, "font", frameFont), propNum(props, "size", 28)); err != nil {
-				continue
-			}
-			paint(dc, props)
-			dc.DrawStringAnchored(
-				propStr(props, "content", ""),
-				propNum(props, "x", float64(w)/2),
-				propNum(props, "y", float64(h)/2),
-				0.5, 0.5,
-			)
-		case "rect":
-			// x,y is the top-left corner; w,h default to a 100px square.
-			paint(dc, props)
-			dc.DrawRectangle(
-				propNum(props, "x", float64(w)/2-50),
-				propNum(props, "y", float64(h)/2-50),
-				propNum(props, "w", 100),
-				propNum(props, "h", 100),
-			)
-			dc.Fill()
-		case "line":
-			paint(dc, props)
-			dc.SetLineWidth(propNum(props, "width", 2))
-			dc.DrawLine(
-				propNum(props, "x1", 0),
-				propNum(props, "y1", float64(h)/2),
-				propNum(props, "x2", float64(w)),
-				propNum(props, "y2", float64(h)/2),
-			)
-			dc.Stroke()
-		case "arc":
-			// Angles are degrees in scripts (gg wants radians); a full
-			// 0..360 sweep is a ring, partial sweeps are loader hands.
-			paint(dc, props)
-			dc.SetLineWidth(propNum(props, "width", 4))
-			dc.DrawArc(
-				propNum(props, "x", float64(w)/2),
-				propNum(props, "y", float64(h)/2),
-				propNum(props, "r", 50),
-				gg.Radians(propNum(props, "start", 0)),
-				gg.Radians(propNum(props, "end", 360)),
-			)
-			dc.Stroke()
-		case "image":
-			// ponytail: decoded from disk every frame; cache by path if slow.
-			path := propStr(props, "path", "")
-			if path == "" {
-				continue
-			}
-			im, err := gg.LoadImage(path)
-			if err != nil {
-				continue
-			}
-			dc.DrawImageAnchored(im, int(propNum(props, "x", float64(w)/2)), int(propNum(props, "y", float64(h)/2)), 0.5, 0.5)
-		}
+		framed_ = append(framed_, framed{e.Kind, props, propNum(props, "layer", 0)})
+	}
+	sort.SliceStable(framed_, func(i, j int) bool { return framed_[i].layer < framed_[j].layer })
+	for _, f := range framed_ {
+		drawEntity(dc, w, h, f.kind, f.props)
 	}
 	return dc
+}
+
+// drawEntity paints one entity. Unknown kinds and unloadable assets
+// return silently so one experimental entity can't kill the frame.
+func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any) {
+	cx := propNum(props, "x", float64(w)/2)
+	cy := propNum(props, "y", float64(h)/2)
+	switch kind {
+	case "circle":
+		spin(dc, cx, cy, props, func() {
+			paint(dc, props)
+			dc.DrawCircle(cx, cy, propNum(props, "r", 50))
+			dc.Fill()
+		})
+	case "text":
+		if err := dc.LoadFontFace(propStr(props, "font", frameFont), propNum(props, "size", 28)); err != nil {
+			return
+		}
+		spin(dc, cx, cy, props, func() {
+			paint(dc, props)
+			dc.DrawStringAnchored(propStr(props, "content", ""), cx, cy, 0.5, 0.5)
+		})
+	case "rect":
+		// x,y is the top-left corner; w,h default to a 100px square.
+		rx, ry := propNum(props, "x", float64(w)/2-50), propNum(props, "y", float64(h)/2-50)
+		rw, rh := propNum(props, "w", 100), propNum(props, "h", 100)
+		spin(dc, rx+rw/2, ry+rh/2, props, func() {
+			paint(dc, props)
+			dc.DrawRectangle(rx, ry, rw, rh)
+			dc.Fill()
+		})
+	case "line":
+		x1, y1 := propNum(props, "x1", 0), propNum(props, "y1", float64(h)/2)
+		x2, y2 := propNum(props, "x2", float64(w)), propNum(props, "y2", float64(h)/2)
+		spin(dc, (x1+x2)/2, (y1+y2)/2, props, func() {
+			paint(dc, props)
+			dc.SetLineWidth(propNum(props, "width", 2))
+			dc.DrawLine(x1, y1, x2, y2)
+			dc.Stroke()
+		})
+	case "arc":
+		// Angles are degrees in scripts (gg wants radians); a full
+		// 0..360 sweep is a ring, partial sweeps are loader hands.
+		spin(dc, cx, cy, props, func() {
+			paint(dc, props)
+			dc.SetLineWidth(propNum(props, "width", 4))
+			dc.DrawArc(cx, cy, propNum(props, "r", 50),
+				gg.Radians(propNum(props, "start", 0)),
+				gg.Radians(propNum(props, "end", 360)))
+			dc.Stroke()
+		})
+	case "image":
+		path := propStr(props, "path", "")
+		if path == "" {
+			return
+		}
+		im, err := loadImage(path)
+		if err != nil {
+			return
+		}
+		spin(dc, cx, cy, props, func() {
+			dc.DrawImageAnchored(im, int(cx), int(cy), 0.5, 0.5)
+		})
+	}
+}
+
+// spin wraps drawing with centered rotation (degrees) and scale when
+// requested, passing straight through otherwise so the common path
+// costs nothing. Rotation needs no per-kind math: the canvas moves,
+// the shape code stays naive.
+func spin(dc *gg.Context, cx, cy float64, props map[string]any, draw func()) {
+	rot := propNum(props, "rotate", 0)
+	sc := propNum(props, "scale", 1)
+	if rot == 0 && sc == 1 {
+		draw()
+		return
+	}
+	dc.Push()
+	dc.Translate(cx, cy)
+	dc.Rotate(gg.Radians(rot))
+	dc.Scale(sc, sc)
+	dc.Translate(-cx, -cy)
+	draw()
+	dc.Pop()
 }
 
 // RenderSequence renders every frame of tl into dir as frame_%04d.png:
@@ -192,6 +226,33 @@ func Encode(tl Timeline, outPath string) error {
 		return fmt.Errorf("ffmpeg (%s): %w\n%s", cmd.String(), err, stderr.String())
 	}
 	return nil
+}
+
+// imgCache keeps decoded assets across frames: one PNG decoded once,
+// not once per frame for the whole video. Process-lifetime; a render
+// never mutates source files mid-run.
+var imgCache = struct {
+	sync.RWMutex
+	m map[string]image.Image
+}{m: make(map[string]image.Image)}
+
+// loadImage reads an asset through the cache. Failures stay errors so
+// the caller can skip the entity — a missing file is not fatal.
+func loadImage(path string) (image.Image, error) {
+	imgCache.RLock()
+	im, ok := imgCache.m[path]
+	imgCache.RUnlock()
+	if ok {
+		return im, nil
+	}
+	im, err := gg.LoadImage(path)
+	if err != nil {
+		return nil, err
+	}
+	imgCache.Lock()
+	imgCache.m[path] = im
+	imgCache.Unlock()
+	return im, nil
 }
 
 // rgbaBytes exposes the canvas pixels for the ffmpeg pipe. gg canvases

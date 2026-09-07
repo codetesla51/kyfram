@@ -254,3 +254,52 @@ func TestRenderArc(t *testing.T) {
 		t.Fatal("arc 225deg painted, want background")
 	}
 }
+
+// Higher layer paints on top; equal layers keep declaration order.
+func TestRenderLayers(t *testing.T) {
+	paint := func(top string) string {
+		layers := map[string]float64{"red": 0, "blue": 0}
+		layers[top] = 1
+		tl := Timeline{Entities: []Entity{
+			{Name: "a", Kind: "rect", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"x": 270.0, "y": 130.0, "w": 100.0, "h": 100.0, "color": "#ff0000", "layer": layers["red"]}},
+			}},
+			{Name: "b", Kind: "rect", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"x": 270.0, "y": 130.0, "w": 100.0, "h": 100.0, "color": "#0000ff", "layer": layers["blue"]}},
+			}},
+		}}
+		r, g, b, _ := RenderFrame(tl, 0).Image().At(320, 180).RGBA()
+		return fmt.Sprintf("#%02x%02x%02x", r>>8, g>>8, b>>8)
+	}
+	if got := paint("blue"); got != "#0000ff" {
+		t.Fatalf("blue on top = %s, want #0000ff", got)
+	}
+	if got := paint("red"); got != "#ff0000" {
+		t.Fatalf("red on top = %s, want #ff0000", got)
+	}
+}
+
+// Rotate 90 turns a horizontal bar vertical; scale 3 triples a radius.
+func TestRenderSpin(t *testing.T) {
+	bar := Timeline{Entities: []Entity{
+		{Name: "b", Kind: "rect", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 270.0, "y": 170.0, "w": 100.0, "h": 20.0, "color": "#ffffff", "rotate": 90.0}},
+		}},
+	}}
+	img := RenderFrame(bar, 0).Image()
+	if r, _, _, _ := img.At(320, 140).RGBA(); r>>8 != 0xff {
+		t.Fatal("rotated bar: pixel above center not painted")
+	}
+	if r, g, b, _ := img.At(360, 180).RGBA(); r>>8 == 0xff && g>>8 == 0xff && b>>8 == 0xff {
+		t.Fatal("rotated bar: pixel right of center painted, want background")
+	}
+
+	dot := Timeline{Entities: []Entity{
+		{Name: "d", Kind: "circle", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 320.0, "y": 180.0, "r": 10.0, "color": "#ffffff", "scale": 3.0}},
+		}},
+	}}
+	if r, _, _, _ := RenderFrame(dot, 0).Image().At(345, 180).RGBA(); r>>8 != 0xff {
+		t.Fatal("scaled circle: radius-25 pixel not painted")
+	}
+}
