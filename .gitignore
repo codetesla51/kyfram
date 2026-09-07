@@ -1,0 +1,20 @@
+# binaries
+kyfram
+/dist/
+
+# render output
+/out/
+*.mp4
+frames/
+frame_*.png
+out.png
+
+# Go
+*.test
+*.out
+
+# editor
+.idea/
+.vscode/
+*.swp
+.DS_Store

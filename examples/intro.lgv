@@ -1,0 +1,5 @@
+let title = "hello kyfram"
+
+fn on_load() {
+    print("loaded: " + title)
+}
