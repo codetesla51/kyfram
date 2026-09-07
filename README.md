@@ -15,7 +15,7 @@
 
 ## What is kyfram?
 
-`kyfram` is a small, opinionated engine for motion graphics. You write a `.lgv` script in [Logos](https://github.com/codetesla51/logos) declaring states-at-times — `scene()`, `shape()`, `text()`, `group()`, `camera()`, `audio()` — and Go owns the tweening: `Timeline → Interpolate(t) → gg canvas → ffmpeg`. Same lineage as `logos2d`, but for batch video/stills instead of a live window.
+`kyfram` is a small, opinionated engine for motion graphics. You write a `.lgv` script in [Logos](https://github.com/codetesla51/logos) declaring states-at-times — `scene()`, `shape()`, `text()`, `group()`, `camera()`, `audio()` — and Go owns the tweening: `Timeline → Interpolate(t) → gg canvas → ffmpeg`.
 
 Think CSS `@keyframes` for video: retiming is editing a number, not re-directing callbacks.
 
@@ -35,6 +35,22 @@ Think CSS `@keyframes` for video: retiming is editing a number, not re-directing
 - **Preview + templates** — `kyfram view` hot-reload, `render --var k=v` and `text_file()` for batch renders.
 
 See docs for the full scripting reference.
+
+## Install
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/main/install.sh | sh
+```
+
+Specific version or update:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/main/install.sh | sh -s -- v0.1.1
+# or
+VERSION=v0.1.1 sh install.sh
+# or via Go
+# go install github.com/codetesla51/kyfram/cmd/kyfram@latest
+```
 
 ## Quick start
 
