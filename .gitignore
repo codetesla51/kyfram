@@ -4,7 +4,7 @@
 
 # render output
 /out/
-*.mp4
+/*.mp4
 frames/
 frame_*.png
 out.png
