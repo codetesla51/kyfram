@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kyfram docs — scripts, CLI, reference</title>
+<meta name="description" content="kyfram documentation: install, quickstart, scripting in Logos, kinds and props, CLI reference, examples.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="index.html" aria-label="kyfram home">
+      <img src="logo.png" width="44" height="24" alt="kyfram logo">
+      <span>kyfram</span>
+    </a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="index.html#showcase">Showcase</a>
+      <a href="index.html#install">Install</a>
+      <a href="docs.html" aria-current="page">Docs</a>
+    </nav>
+    <a class="btn-star" href="https://gitlab.com/codetesla51/kyfram">
+      <i class="ph-fill ph-star" aria-hidden="true"></i>
+      <span>Star</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <h1>Docs.</h1>
+    <p class="lede">Everything kyfram understands: scripts, kinds, props, flags. The mental model is CSS <code>@keyframes</code> applied to video files.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Install</h2>
+    <div class="cmd">
+      <code id="docs-install">curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh</code>
+      <button class="copy" data-copy="docs-install" aria-label="Copy install command">
+        <i class="ph ph-copy" aria-hidden="true"></i>
+      </button>
+    </div>
+    <p class="caption">Needs Go 1.25+, <code>ffmpeg</code> + <code>ffprobe</code> on <code>PATH</code>. Optional: <code>edge-tts</code> + <code>python3</code> for neural voice, <code>espeak-ng</code> for local fallback. Neither is required, beeps work offline.</p>
+    <p class="caption">Or build by hand: <code>git clone https://gitlab.com/codetesla51/kyfram</code>, <code>go mod download</code>, <code>go build ./...</code>.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Scripting in Logos</h2>
+    <p class="caption">Times are <strong>quoted-string seconds</strong>. Logos has no duration literals, so <code>"0"</code> and <code>"1.5"</code> are keys, never <code>0s</code>. Keyframes sort by time, declare in any order.</p>
+<pre><code class="language-lua">scene(3, 30)                              -- duration, fps
+shape("b", "circle", table{               -- name, kind, keyframes, optional group
+    "0": table{x: 80, y: 240, r: 40, color: "#e64c40", ease: "easeInOut"},
+    "3": table{x: 560, y: 240, r: 40, color: "#40e680"},
+})
+text("t", table{                          -- kind implied
+    "0": table{content: "go", x: 320, y: 60, size: 48, color: "#ffffff", font: "/path/to.ttf"},
+})
+group("g", table{"0": table{x: 320, y: 180, scale: 1, rotate: 0}})
+shape("c", "circle", table{"0": table{x: 0, y: 0, r: 20, color: "red"}}, "g")
+audio("/path/to.mp3", 1.0)                -- path, offset, optional loop bool
+camera(table{"0": table{x: 320, y: 180, zoom: 1}, "2": table{x: 400, y: 180, zoom: 1.2}})
+
+let v = tts("hello world", "/tmp/out.mp3")                          -- default voice en-US-AriaNeural
+let v = tts("hello world", "/tmp/out.mp3", "en-US-JennyNeural")     -- string shorthand
+let v = tts("hello world", "/tmp/out.mp3", table{voice: "en-NG-EzinneNeural", rate: "+10%"})
+let voices = tts_voices()                 -- list Edge voices
+let copy = text_file("assets/copy.txt")   -- 1 MB cap, frozen at build time
+
+use "helpers/spike"                       -- inlines helpers/spike.lgv beside the script</code></pre>
+    <p class="caption">Numbers lerp, hex and named colors lerp per channel, point arrays lerp elementwise, strings snap to the earlier key. Out of range holds the edge, never extrapolates. Easing per segment: <code>linear easeIn easeOut easeInOut cubicIn cubicOut cubicInOut sine</code>, declared on the earlier key as <code>ease: "easeIn"</code>.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Kinds and props</h2>
+    <p class="caption"><code>x</code>/<code>y</code> in pixels, origin top-left. Unknown kinds and unloadable assets skip silently. Every vector kind takes <code>alpha</code> 0-1, <code>rotate</code> degrees, <code>scale</code>, <code>layer</code>, <code>ease</code>.</p>
+    <div class="cli-table">
+      <div class="cli-row cli-head"><span>Kind</span><span>Props</span></div>
+      <div class="cli-row"><code>circle</code><span>x y r color</span></div>
+      <div class="cli-row"><code>rect</code><span>x y (top-left) w h color</span></div>
+      <div class="cli-row"><code>roundRect</code><span>x y w h radius color</span></div>
+      <div class="cli-row"><code>polygon</code><span>points [x1,y1,…] color filled? width</span></div>
+      <div class="cli-row"><code>star</code><span>x y r points inner color</span></div>
+      <div class="cli-row"><code>ellipse</code><span>x y rx ry color (ry defaults to rx)</span></div>
+      <div class="cli-row"><code>line</code><span>x1 y1 x2 y2 width color</span></div>
+      <div class="cli-row"><code>arc</code><span>x y r start end (degrees) width color</span></div>
+      <div class="cli-row"><code>wave</code><span>x y width amplitude frequency phase thickness color</span></div>
+      <div class="cli-row"><code>path</code><span>points width color filled? closed? cap join</span></div>
+      <div class="cli-row"><code>image</code><span>path x y (centered, ignores alpha)</span></div>
+      <div class="cli-row"><code>text</code><span>content x y size color font? (points rides a path)</span></div>
+      <div class="cli-row"><code>group</code><span>children keep local x/y; scale/rotate/alpha multiply</span></div>
+    </div>
+    <p class="caption">Gradients on filled kinds: <code>gradFrom gradTo</code> + <code>gradAngle</code>. Blend on any entity: <code>blend: "multiply" | "screen" | "add"</code>. 24 named colors resolve to hex and lerp like hex.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">CLI reference</h2>
+<pre><code class="language-plaintext">kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f]
+              [--crf n] [--preset s] [--format mp4|png] [--var k=v ...] &lt;script.lgv&gt;
+kyfram view [--port n] &lt;script.lgv&gt;</code></pre>
+    <div class="cli-table">
+      <div class="cli-row cli-head"><span>Flag</span><span>Meaning</span></div>
+      <div class="cli-row"><code>--out</code><span>output path (default out.mp4)</span></div>
+      <div class="cli-row"><code>--fps --width --height</code><span>override scene rate and canvas (default 640x360)</span></div>
+      <div class="cli-row"><code>--font</code><span>fallback typeface, must be .ttf</span></div>
+      <div class="cli-row"><code>--crf</code><span>x264 quality 0-51, lower is better (18 high, 23 default, 28 small)</span></div>
+      <div class="cli-row"><code>--preset</code><span>ultrafast..veryslow (medium default)</span></div>
+      <div class="cli-row"><code>--format</code><span>mp4 via ffmpeg, or png single frame at t=0 with no ffmpeg</span></div>
+      <div class="cli-row"><code>--var k=v</code><span>repeatable template vars, one script renders many videos</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">How it works</h2>
+<pre><code class="language-plaintext">.lgv script → LoadScript (inline use) → vm.Run → Builder (Timeline)
+          → Interpolate(t) → gg canvas → ffmpeg stdin → out.mp4</code></pre>
+    <p class="caption">Load inlines <code>use</code>. Declare keeps only scene/shape/text/group/audio/camera/tts calls, everything else runs and is ignored. Interpolate blends the two surrounding keyframes per entity per frame. Rasterize paints one RGBA canvas per frame. Encode streams raw pixels to ffmpeg; short audio is padded, looped tracks repeat to the last frame.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Examples</h2>
+    <div class="cli-table">
+      <div class="cli-row cli-head"><span>Script</span><span>Shows</span></div>
+      <div class="cli-row"><code>intro.lgv</code><span>ball glide + caption (start here)</span></div>
+      <div class="cli-row"><code>wave.lgv</code><span>morphing wave, gradient sun, text on path</span></div>
+      <div class="cli-row"><code>groups.lgv</code><span>group orbit, scale, rotate with children</span></div>
+      <div class="cli-row"><code>dash.lgv</code><span>10s product cut, helpers, music, camera pans</span></div>
+      <div class="cli-row"><code>voice.lgv</code><span>minimal TTS + word loop</span></div>
+      <div class="cli-row"><code>intro_voice.lgv</code><span>neural voice + word-synced crossfade</span></div>
+      <div class="cli-row"><code>camera.lgv</code><span>keyframed pan and zoom</span></div>
+      <div class="cli-row"><code>bounce.lgv</code><span>gravity bounces + sloshing lines</span></div>
+      <div class="cli-row"><code>vars.lgv</code><span>--var templating + text_file</span></div>
+    </div>
+    <p class="caption">Run any: <code>kyfram render examples/&lt;name&gt;.lgv --out /tmp/&lt;name&gt;.mp4</code>. Scripts are declarations only by convention. Sandbox blocks file IO, network, shell, exit.</p>
+  </section>
+
+  <section class="section final">
+    <h2 class="section-title">Limits, honestly</h2>
+    <p class="caption">2D screen space only. Groups are flat, one level. Gradient fills on filled kinds, strokes and images stay flat. Audio loops whole files. TTS needs network for neural, otherwise local voice, otherwise beeps.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="index.html#install"><i class="ph ph-download-simple" aria-hidden="true"></i>Install kyfram</a>
+      <a class="btn-ghost" href="https://gitlab.com/codetesla51/kyfram"><i class="ph ph-git-branch" aria-hidden="true"></i>Read the source</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <img src="logo.png" width="60" alt="kyfram logo">
+    <p>kyfram. Logo made with kyfram.<br><a href="https://gitlab.com/codetesla51/kyfram">Source</a> · <a href="index.html">Home</a></p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
