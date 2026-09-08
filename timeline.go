@@ -5,15 +5,15 @@ package kyfram
 // of zero mean the default canvas (CLI flags or scene defaults win).
 // Empty Font means the built-in default typeface.
 type Timeline struct {
-	Duration float64
-	FPS      int
-	Width    int
-	Height   int
-	Font     string
+	Duration    float64
+	FPS         int
+	Width       int
+	Height      int
+	Font        string
 	Transparent bool
-	Entities []Entity
-	Groups   []Group
-	Audio    []AudioTrack
+	Entities    []Entity
+	Groups      []Group
+	Audio       []AudioTrack
 	// Camera holds x/y/zoom keyframes; empty means a locked frame.
 	Camera []Keyframe
 }

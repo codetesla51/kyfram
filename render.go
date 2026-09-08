@@ -86,7 +86,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		isGroup bool
 		layer   float64
 		name    string // group name if isGroup
-		framed  framed  // if !isGroup
+		framed  framed // if !isGroup
 	}
 	var order []drawItem
 	for _, f := range root {

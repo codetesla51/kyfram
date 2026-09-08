@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	kyfram "gitlab.com/codetesla51/kyfram"
 	"github.com/codetesla51/logos/interpreter"
+	kyfram "gitlab.com/codetesla51/kyfram"
 )
 
 // newVM creates the sandboxed Logos VM used by kyfram.
@@ -124,8 +124,6 @@ func printHelpView() {
 	fmt.Println()
 	fmt.Println("then open http://localhost:8080")
 }
-
-func usage() { printHelp(); os.Exit(1) }
 
 // varFlags collects repeatable --var key=value flags.
 type varFlags []string
