@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	kyfram "github.com/codetesla51/kyfram"
+	kyfram "gitlab.com/codetesla51/kyfram"
 )
 
 // runView serves a live preview: scrub slider, play button, and hot

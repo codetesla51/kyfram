@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kyfram — video you declare, not direct</title>
+<meta name="description" content="kyfram (KAI-fram) is a keyframe-driven rendering engine. Declare what shapes look like at specific times, Go renders to mp4/png.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="kyfram home">
+      <img src="logo.png" width="40" height="22" alt="kyfram logo">
+      <span>kyfram</span>
+    </a>
+    <nav class="links" aria-label="Sections">
+      <a href="#demo">Demo</a>
+      <a href="#install">Install</a>
+      <a href="#quickstart">Quickstart</a>
+      <a href="#features">Features</a>
+      <a href="#cli">CLI</a>
+    </nav>
+    <a class="star" href="https://github.com/codetesla51/kyfram">
+      <i class="ph-fill ph-star" aria-hidden="true"></i>
+      <span>Star</span>
+    </a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <p class="kicker">KAI-fram. Like keyframe without the e.</p>
+    <h1>Video you declare,<br>not <span class="u">direct.</span></h1>
+    <p class="lede">kyfram is a keyframe-driven rendering engine. You write down what shapes look like at specific times. Go owns the tweening and renders it to video.</p>
+    <div class="cta-row">
+      <a class="cta" href="#install"><i class="ph ph-download-simple" aria-hidden="true"></i>Install kyfram</a>
+      <a class="cta ghost" href="#quickstart"><i class="ph ph-play" aria-hidden="true"></i>See it render</a>
+    </div>
+    <div class="badges">
+      <span><i class="ph ph-file-code" aria-hidden="true"></i>.lgv scripts</span>
+      <span><i class="ph ph-film-strip" aria-hidden="true"></i>mp4 + png</span>
+      <span><i class="ph ph-speaker-high" aria-hidden="true"></i>audio + TTS</span>
+    </div>
+  </section>
+
+  <section id="demo" class="block reveal">
+    <div class="stage">
+      <canvas id="demo-canvas" width="640" height="360" aria-label="Live demo: a coral ball gliding across the frame on a loop"></canvas>
+      <div class="stage-bar">
+        <button id="demo-toggle" class="icon-btn" aria-label="Pause demo">
+          <i class="ph-fill ph-pause" aria-hidden="true"></i>
+        </button>
+        <span class="stage-time" id="demo-time">0.00 / 2.00</span>
+        <span class="stage-tag">live keyframes, in your browser</span>
+      </div>
+    </div>
+    <p class="note">That ball is two keyframes and an easing curve. The script is twelve lines. Scroll down.</p>
+  </section>
+
+  <section id="install" class="block reveal">
+    <h2><i class="ph ph-terminal-window" aria-hidden="true"></i>Install</h2>
+    <div class="cmd">
+      <code id="install-cmd">curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh</code>
+      <button class="copy" data-copy="install-cmd" aria-label="Copy install command">
+        <i class="ph ph-copy" aria-hidden="true"></i>
+      </button>
+    </div>
+    <p class="note">Needs Go 1.25+ and <code>ffmpeg</code>. No prebuilt binaries to track. The script clones and builds for your machine. Specific version: <code>sh -s -- v0.2.0</code>.</p>
+  </section>
+
+  <section id="quickstart" class="block reveal">
+    <h2><i class="ph ph-play-circle" aria-hidden="true"></i>Quickstart</h2>
+    <div class="tabs" role="tablist" aria-label="Quickstart steps">
+      <button class="tab active" data-tab="script" role="tab" aria-selected="true">1 · Script</button>
+      <button class="tab" data-tab="render" role="tab" aria-selected="false">2 · Render</button>
+      <button class="tab" data-tab="preview" role="tab" aria-selected="false">3 · Preview</button>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active" data-panel="script">
+        <div class="cmd file">
+          <span class="fname">examples/intro.lgv</span>
+          <button class="copy" data-copy="lgv-code" aria-label="Copy example script">
+            <i class="ph ph-copy" aria-hidden="true"></i>
+          </button>
+        </div>
+<pre><code id="lgv-code">scene(2, 30)
+
+shape("ball", "circle", table{
+    "0": table{x: 100, y: 180, r: 40, color: "#e64c40"},
+    "2": table{x: 540, y: 180, r: 40, color: "#e64c40"},
+})</code></pre>
+      </div>
+      <div class="tab-panel" data-panel="render">
+        <div class="cmd">
+          <code id="render-cmd">kyfram render examples/intro.lgv --out out.mp4</code>
+          <button class="copy" data-copy="render-cmd" aria-label="Copy render command">
+            <i class="ph ph-copy" aria-hidden="true"></i>
+          </button>
+        </div>
+        <p class="note">Quality flags ride along: <code>--crf 18 --preset slow</code> for near-lossless, <code>--format png</code> for a single frame with no ffmpeg.</p>
+      </div>
+      <div class="tab-panel" data-panel="preview">
+        <div class="cmd">
+          <code id="view-cmd">kyfram view examples/intro.lgv</code>
+          <button class="copy" data-copy="view-cmd" aria-label="Copy preview command">
+            <i class="ph ph-copy" aria-hidden="true"></i>
+          </button>
+        </div>
+        <p class="note">Opens localhost:8080 with a scrub slider and hot reload. Save the file, the preview follows.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="block reveal">
+    <h2><i class="ph ph-shapes" aria-hidden="true"></i>What it does</h2>
+    <div class="grid">
+      <article>
+        <i class="ph ph-keyframes" aria-hidden="true"></i>
+        <h3>Declarative keyframes</h3>
+        <p>States at times, quoted in seconds. Numbers and colors lerp, text snaps. Retiming is editing a number.</p>
+      </article>
+      <article>
+        <i class="ph ph-wave-sine" aria-hidden="true"></i>
+        <h3>Easing per segment</h3>
+        <p>Linear, ease in and out, cubic, sine. Declared on the earlier key, owned by the engine.</p>
+      </article>
+      <article>
+        <i class="ph ph-circle-dashed" aria-hidden="true"></i>
+        <h3>Rich primitives</h3>
+        <p>Circle, rect, polygon, star, wave, path, text on a path, images. Gradients and blend modes included.</p>
+      </article>
+      <article>
+        <i class="ph ph-users-three" aria-hidden="true"></i>
+        <h3>Groups and camera</h3>
+        <p>Group children around a local origin. Pan and zoom the whole scene with keyframed cameras.</p>
+      </article>
+      <article>
+        <i class="ph ph-voicemail" aria-hidden="true"></i>
+        <h3>Audio and voice</h3>
+        <p>Mux tracks under the video. Neural text to speech returns word timings for synced captions.</p>
+      </article>
+      <article>
+        <i class="ph ph-stack" aria-hidden="true"></i>
+        <h3>Built for batch</h3>
+        <p>Template vars and text files turn one script into many videos. Preview hot, render cold.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="cli" class="block reveal">
+    <h2><i class="ph ph-command" aria-hidden="true"></i>CLI</h2>
+    <div class="cli-table">
+      <div class="cli-row cli-head"><span>Command</span><span>Does what</span></div>
+      <div class="cli-row"><code>kyfram render [flags] &lt;script.lgv&gt;</code><span>Render to mp4 or a single png</span></div>
+      <div class="cli-row"><code>kyfram view [--port n] &lt;script.lgv&gt;</code><span>Live preview with scrub and reload</span></div>
+      <div class="cli-row"><code>kyfram help [command]</code><span>Structured help, no man page needed</span></div>
+      <div class="cli-row"><code>kyfram --version</code><span>Print the version</span></div>
+    </div>
+    <p class="note">Render flags: <code>--out</code> <code>--fps</code> <code>--width</code> <code>--height</code> <code>--font</code> <code>--crf</code> <code>--preset</code> <code>--format</code> <code>--var k=v</code>.</p>
+  </section>
+
+  <section class="block reveal final">
+    <h2>Two keyframes. Twelve lines. One video.</h2>
+    <div class="cta-row left">
+      <a class="cta" href="#install"><i class="ph ph-download-simple" aria-hidden="true"></i>Install kyfram</a>
+      <a class="cta ghost" href="https://github.com/codetesla51/kyfram"><i class="ph ph-github-logo" aria-hidden="true"></i>Read the source</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <img src="logo.png" width="60" alt="kyfram logo">
+    <p>kyfram. Logo made with kyfram.<br><a href="https://github.com/codetesla51/kyfram">GitHub</a></p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

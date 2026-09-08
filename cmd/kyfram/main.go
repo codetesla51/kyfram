@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	kyfram "github.com/codetesla51/kyfram"
+	kyfram "gitlab.com/codetesla51/kyfram"
 	"github.com/codetesla51/logos/interpreter"
 )
 

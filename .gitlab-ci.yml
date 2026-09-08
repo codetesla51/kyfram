@@ -1,0 +1,56 @@
+image: golang:1.25
+
+variables:
+  GOPATH: $CI_PROJECT_DIR/.go
+  GOCACHE: $CI_PROJECT_DIR/.cache/go-build
+  PATH: $CI_PROJECT_DIR/.go/bin:$PATH
+
+cache:
+  key: go-mod-$CI_COMMIT_REF_SLUG
+  paths:
+    - .go/pkg/mod/
+  policy: pull-push
+
+stages:
+  - build
+  - test
+  - lint
+  - deploy
+
+before_script:
+  - go mod download
+
+build:
+  stage: build
+  script:
+    - go build ./...
+
+vet:
+  stage: test
+  script:
+    - go vet ./...
+
+test:
+  stage: test
+  script:
+    - go test ./... -v
+
+lint:
+  stage: lint
+  script:
+    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
+    - golangci-lint run
+  allow_failure: false
+
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - cp site/index.html site/style.css site/script.js public/
+    - cp logo.png install.sh public/
+    - ls -l public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"

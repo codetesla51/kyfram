@@ -2,8 +2,8 @@
 set -e
 # kyfram installer — clones source and builds for the host (no prebuilt binaries to track)
 # usage:
-#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh
-#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh -s -- v0.2.0
+#   curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh
+#   curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh -s -- v0.2.0
 #   VERSION=v0.2.0 sh install.sh
 REPO="codetesla51/kyfram"
 BIN="kyfram"
@@ -17,9 +17,9 @@ echo "installing kyfram ($TAG) → $INSTALL_DIR/$BIN"
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT INT TERM
 if [ "$TAG" = "master" ]; then
-  git clone --depth 1 "https://github.com/${REPO}.git" "$TMPDIR"
+  git clone --depth 1 "https://gitlab.com/${REPO}.git" "$TMPDIR"
 else
-  git clone --depth 1 --branch "$TAG" "https://github.com/${REPO}.git" "$TMPDIR"
+  git clone --depth 1 --branch "$TAG" "https://gitlab.com/${REPO}.git" "$TMPDIR"
 fi
 (cd "$TMPDIR" && go build -o "$INSTALL_DIR/$BIN" ./cmd/kyfram)
 echo "kyfram ready: $INSTALL_DIR/$BIN --help"
