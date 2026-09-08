@@ -1,6 +1,5 @@
 # kyfram
 
-[![CI](https://github.com/codetesla51/kyfram/actions/workflows/ci.yml/badge.svg)](https://github.com/codetesla51/kyfram/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/github/go-mod/go-version/codetesla51/kyfram)](https://go.mod)
 [![Release](https://img.shields.io/github/v/release/codetesla51/kyfram)](https://github.com/codetesla51/kyfram/releases)
 
