@@ -221,6 +221,34 @@ a { color: var(--text); }
 
 .caption code { color: var(--text); }
 
+/* Docs sub-nav: scrolling mono rail, active goes solid. */
+.docs-nav {
+  display: flex;
+  gap: var(--sp-2x);
+  overflow-x: auto;
+  padding-bottom: var(--sp-2x);
+  margin-bottom: var(--sp-4x);
+}
+
+.docs-nav a {
+  flex: none;
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+  box-shadow: var(--edge);
+  border-radius: 9999px;
+  padding: 8px var(--sp-4x);
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.docs-nav a:hover { color: var(--text); box-shadow: var(--edge-strong); }
+
+.docs-nav a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); font-weight: 500; box-shadow: none; }
+
 /* Demo stage: elevated card, bar divided by shadow. */
 .stage {
   background: var(--surface);

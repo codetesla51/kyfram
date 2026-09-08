@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kyfram docs — scripting</title>
+<meta name="description" content="kyfram scripting reference: scene, shape, text, group, audio, camera, tts, keyframe rules, easing, templates.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="../index.html" aria-label="kyfram home">
+      <img src="../logo.png" width="44" height="24" alt="kyfram logo">
+      <span>kyfram</span>
+    </a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="../index.html#showcase">Showcase</a>
+      <a href="../index.html#install">Install</a>
+      <a href="index.html" aria-current="page">Docs</a>
+    </nav>
+    <a class="btn-star" href="https://gitlab.com/codetesla51/kyfram">
+      <i class="ph-fill ph-star" aria-hidden="true"></i>
+      <span>Star</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <h1>Scripting.</h1>
+    <p class="lede">Scripts are Logos with seven declaration calls. Everything else, loops and helpers included, runs and is ignored.</p>
+  </section>
+
+  <section class="section">
+    <nav class="docs-nav" aria-label="Documentation pages">
+      <a href="index.html">Overview</a>
+      <a href="install.html">Install</a>
+      <a href="quickstart.html">Quickstart</a>
+      <a href="scripting.html" aria-current="page">Scripting</a>
+      <a href="kinds.html">Kinds</a>
+      <a href="cli.html">CLI</a>
+      <a href="examples.html">Examples</a>
+      <a href="concepts.html">Concepts</a>
+    </nav>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Keyframe rules</h2>
+    <p class="caption">Times are <strong>quoted-string seconds</strong>. Logos has no duration literals, so <code>"0"</code> and <code>"1.5"</code> are keys, never <code>0s</code>. Keyframes sort by time, declare in any order. Numbers lerp, hex and named colors lerp per channel, point arrays lerp elementwise, strings snap to the earlier key. Out of range holds the edge, never extrapolates.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Builtins</h2>
+<pre><code class="language-lua">scene(3, 30)                              -- duration, fps
+shape("b", "circle", table{               -- name, kind, keyframes, optional group
+    "0": table{x: 80, y: 240, r: 40, color: "#e64c40", ease: "easeInOut"},
+    "3": table{x: 560, y: 240, r: 40, color: "#40e680"},
+})
+text("t", table{                          -- kind implied
+    "0": table{content: "go", x: 320, y: 60, size: 48, color: "#ffffff"},
+})
+group("g", table{"0": table{x: 320, y: 180, scale: 1, rotate: 0}})
+shape("c", "circle", table{"0": table{x: 0, y: 0, r: 20, color: "red"}}, "g")
+audio("/path/to.mp3", 1.0)                -- path, offset, optional loop bool
+camera(table{"0": table{x: 320, y: 180, zoom: 1}})</code></pre>
+    <div class="cli-table">
+      <div class="cli-row cli-head"><span>Call</span><span>Does what</span></div>
+      <div class="cli-row"><code>scene(dur, fps)</code><span>canvas length and frame rate, once per script</span></div>
+      <div class="cli-row"><code>shape(name, kind, keys[, group])</code><span>one animated entity of a kind from the kinds page</span></div>
+      <div class="cli-row"><code>text(name, keys[, group])</code><span>shape with kind implied</span></div>
+      <div class="cli-row"><code>group(name, keys)</code><span>container with keyframed x y scale rotate alpha layer; children use local x/y</span></div>
+      <div class="cli-row"><code>audio(path[, offset][, loop])</code><span>mux a track under the video; loop repeats to the last frame</span></div>
+      <div class="cli-row"><code>camera(keys)</code><span>pan and zoom the whole scene with x y zoom keys</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Voice</h2>
+<pre><code class="language-lua">let v = tts("hello world", "/tmp/out.mp3")                       -- default voice
+let v = tts("hello world", "/tmp/out.mp3", "en-US-JennyNeural")  -- string shorthand
+let v = tts("hello world", "/tmp/out.mp3",
+    table{voice: "en-NG-EzinneNeural", rate: "+10%", pitch: "+0Hz", volume: "+0%"})
+audio(v.audio)                             -- lay the narration under the video
+for i, w in v.words {                      -- word timings for synced captions
+    text("w" + str(i), table{
+        str(w.start): table{content: w.word, alpha: 0},
+        str(w.start + 0.08): table{content: w.word, alpha: 1},
+        str(w.end + 0.12): table{content: w.word, alpha: 0},
+    })
+}
+let voices = tts_voices()                  -- list Edge voices</code></pre>
+    <p class="caption">Tries Edge neural first with exact word timings, falls back to espeak-ng, then beeps. Returns <code>table{audio, duration, words}</code>.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Easing</h2>
+    <p class="caption">Per segment, declared on the earlier key: <code>linear easeIn easeOut easeInOut cubicIn cubicOut cubicInOut sine</code>. Example: <code>"0": table{x: 0, ease: "easeInOut"}</code>.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Templates and files</h2>
+    <p class="caption">One script renders many videos. Leave names and copy as bare variables, feed per render with <code>render --var title="Batch Alice"</code>. Long copy comes from disk: <code>text_file("assets/copy.txt")</code>, 1 MB cap, frozen at build time. Shared code inlines with <code>use "helpers/spike"</code>, resolved beside the script.</p>
+  </section>
+
+  <section class="section final">
+    <div class="cta-row">
+      <a class="btn-primary" href="kinds.html">Next: kinds</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <img src="../logo.png" width="60" alt="kyfram logo">
+    <p>kyfram. Logo made with kyfram.<br><a href="https://gitlab.com/codetesla51/kyfram">Source</a> · <a href="../index.html">Home</a></p>
+  </div>
+</footer>
+
+<script src="../script.js"></script>
+</body>
+</html>

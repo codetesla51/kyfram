@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kyfram docs — examples</title>
+<meta name="description" content="kyfram examples: one script per feature and how to run each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="../index.html" aria-label="kyfram home">
+      <img src="../logo.png" width="44" height="24" alt="kyfram logo">
+      <span>kyfram</span>
+    </a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="../index.html#showcase">Showcase</a>
+      <a href="../index.html#install">Install</a>
+      <a href="index.html" aria-current="page">Docs</a>
+    </nav>
+    <a class="btn-star" href="https://gitlab.com/codetesla51/kyfram">
+      <i class="ph-fill ph-star" aria-hidden="true"></i>
+      <span>Star</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <h1>Examples.</h1>
+    <p class="lede">One script per feature. Start with intro, steal from the rest.</p>
+  </section>
+
+  <section class="section">
+    <nav class="docs-nav" aria-label="Documentation pages">
+      <a href="index.html">Overview</a>
+      <a href="install.html">Install</a>
+      <a href="quickstart.html">Quickstart</a>
+      <a href="scripting.html">Scripting</a>
+      <a href="kinds.html">Kinds</a>
+      <a href="cli.html">CLI</a>
+      <a href="examples.html" aria-current="page">Examples</a>
+      <a href="concepts.html">Concepts</a>
+    </nav>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Run any</h2>
+<pre><code class="language-bash">kyfram render examples/&lt;name&gt;.lgv --out /tmp/&lt;name&gt;.mp4
+kyfram render --format png --out /tmp/&lt;name&gt;.png examples/&lt;name&gt;.lgv</code></pre>
+    <div class="cli-table">
+      <div class="cli-row cli-head"><span>Script</span><span>Shows</span></div>
+      <div class="cli-row"><code>intro.lgv</code><span>ball glide + caption (start here)</span></div>
+      <div class="cli-row"><code>wave.lgv</code><span>morphing wave, gradient sun, blend halo, path sail, text on path</span></div>
+      <div class="cli-row"><code>groups.lgv</code><span>group orbit, scale, rotate with children</span></div>
+      <div class="cli-row"><code>dash.lgv</code><span>10s product cut, helpers, music, camera pans</span></div>
+      <div class="cli-row"><code>voice.lgv</code><span>minimal TTS + word loop</span></div>
+      <div class="cli-row"><code>intro_voice.lgv</code><span>neural voice + word-synced crossfade</span></div>
+      <div class="cli-row"><code>showcase.lgv</code><span>3-key arc, color washes, fading beam</span></div>
+      <div class="cli-row"><code>camera.lgv</code><span>keyframed pan and zoom</span></div>
+      <div class="cli-row"><code>ease.lgv</code><span>linear vs easeIn side by side</span></div>
+      <div class="cli-row"><code>bounce.lgv</code><span>gravity bounces + sloshing lines</span></div>
+      <div class="cli-row"><code>audio.lgv</code><span>beep aligned to center crossing</span></div>
+      <div class="cli-row"><code>vars.lgv</code><span>--var templating + text_file</span></div>
+      <div class="cli-row"><code>rect.lgv</code><span>sliding, recoloring rect</span></div>
+      <div class="cli-row"><code>line.lgv</code><span>sweeping line</span></div>
+      <div class="cli-row"><code>polygon.lgv</code><span>filled morphing polygon</span></div>
+      <div class="cli-row"><code>roundrect.lgv</code><span>animating rounded rect + radius</span></div>
+      <div class="cli-row"><code>star.lgv</code><span>5-point star, inner ratio + rotate</span></div>
+      <div class="cli-row"><code>ellipse.lgv</code><span>ellipse rx/ry vs circle r</span></div>
+      <div class="cli-row"><code>spinner.lgv</code><span>ring + rotating arc hand</span></div>
+      <div class="cli-row"><code>image.lgv</code><span>image asset gliding</span></div>
+      <div class="cli-row"><code>text.lgv</code><span>growing text + snapping content</span></div>
+      <div class="cli-row"><code>hello.lgv</code><span>2-minute greeting + loader + outro</span></div>
+    </div>
+    <p class="caption">Shared helpers live in <code>examples/helpers/</code>: <code>spike.lgv</code> and <code>cube.lgv</code>, inlined with <code>use</code>.</p>
+  </section>
+
+  <section class="section final">
+    <div class="cta-row">
+      <a class="btn-primary" href="concepts.html">Next: concepts</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <img src="../logo.png" width="60" alt="kyfram logo">
+    <p>kyfram. Logo made with kyfram.<br><a href="https://gitlab.com/codetesla51/kyfram">Source</a> · <a href="../index.html">Home</a></p>
+  </div>
+</footer>
+
+<script src="../script.js"></script>
+</body>
+</html>

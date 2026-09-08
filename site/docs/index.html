@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kyfram docs — overview</title>
+<meta name="description" content="kyfram documentation overview. Keyframe-driven rendering engine for video.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="../index.html" aria-label="kyfram home">
+      <img src="../logo.png" width="44" height="24" alt="kyfram logo">
+      <span>kyfram</span>
+    </a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="../index.html#showcase">Showcase</a>
+      <a href="../index.html#install">Install</a>
+      <a href="index.html" aria-current="page">Docs</a>
+    </nav>
+    <a class="btn-star" href="https://gitlab.com/codetesla51/kyfram">
+      <i class="ph-fill ph-star" aria-hidden="true"></i>
+      <span>Star</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <h1>Docs.</h1>
+    <p class="lede">Everything kyfram understands. Start with install and quickstart, then read scripting and kinds when you need a prop.</p>
+  </section>
+
+  <section class="section">
+    <nav class="docs-nav" aria-label="Documentation pages">
+      <a href="index.html" aria-current="page">Overview</a>
+      <a href="install.html">Install</a>
+      <a href="quickstart.html">Quickstart</a>
+      <a href="scripting.html">Scripting</a>
+      <a href="kinds.html">Kinds</a>
+      <a href="cli.html">CLI</a>
+      <a href="examples.html">Examples</a>
+      <a href="concepts.html">Concepts</a>
+    </nav>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">What kyfram is</h2>
+    <p class="caption">kyfram is a small, opinionated engine for motion graphics and stills. You declare what shapes look like at specific times in a <code>.lgv</code> script. Go interpolates between keyframes, rasterizes each frame in memory, and pipes raw pixels to <code>ffmpeg</code> for video or writes a single <code>png</code>.</p>
+    <p class="caption">The mental model is CSS <code>@keyframes</code> applied to video files. Imperative tools make you sequence commands. Here you declare states at times and the engine owns all sequencing and tweening.</p>
+<pre><code class="language-plaintext">.lgv script → LoadScript (inline use) → vm.Run → Builder (Timeline)
+          → Interpolate(t) → gg canvas → ffmpeg stdin → out.mp4</code></pre>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Read in order</h2>
+    <div class="cli-table">
+      <div class="cli-row"><code><a href="install.html">Install</a></code><span>requirements, installer, build from source</span></div>
+      <div class="cli-row"><code><a href="quickstart.html">Quickstart</a></code><span>first script, first render, first preview</span></div>
+      <div class="cli-row"><code><a href="scripting.html">Scripting</a></code><span>builtins, keyframe rules, easing, templates</span></div>
+      <div class="cli-row"><code><a href="kinds.html">Kinds</a></code><span>every shape and prop it takes</span></div>
+      <div class="cli-row"><code><a href="cli.html">CLI</a></code><span>every flag on render and view</span></div>
+      <div class="cli-row"><code><a href="examples.html">Examples</a></code><span>one script per feature, how to run each</span></div>
+      <div class="cli-row"><code><a href="concepts.html">Concepts</a></code><span>interpolation, pipeline, sandbox, limits</span></div>
+    </div>
+  </section>
+
+  <section class="section final">
+    <div class="cta-row">
+      <a class="btn-primary" href="install.html">Start with install</a>
+      <a class="btn-ghost" href="../index.html#showcase">Watch the clips</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <img src="../logo.png" width="60" alt="kyfram logo">
+    <p>kyfram. Logo made with kyfram.<br><a href="https://gitlab.com/codetesla51/kyfram">Source</a> · <a href="../index.html">Home</a></p>
+  </div>
+</footer>
+
+<script src="../script.js"></script>
+</body>
+</html>

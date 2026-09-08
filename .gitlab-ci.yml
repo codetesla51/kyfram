@@ -58,7 +58,8 @@ pages:
   stage: deploy
   script:
     - mkdir -p public/videos
-    - cp site/index.html site/style.css site/script.js site/docs.html public/
+    - cp site/index.html site/style.css site/script.js public/
+    - cp -r site/docs public/
     - cp site/videos/* public/videos/
     - cp logo.png install.sh public/
     - ls -l public/

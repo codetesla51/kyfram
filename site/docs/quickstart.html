@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kyfram docs — quickstart</title>
+<meta name="description" content="kyfram quickstart: first script, first render, first preview.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="../index.html" aria-label="kyfram home">
+      <img src="../logo.png" width="44" height="24" alt="kyfram logo">
+      <span>kyfram</span>
+    </a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="../index.html#showcase">Showcase</a>
+      <a href="../index.html#install">Install</a>
+      <a href="index.html" aria-current="page">Docs</a>
+    </nav>
+    <a class="btn-star" href="https://gitlab.com/codetesla51/kyfram">
+      <i class="ph-fill ph-star" aria-hidden="true"></i>
+      <span>Star</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <h1>Quickstart.</h1>
+    <p class="lede">One script, one render, one preview. Two minutes.</p>
+  </section>
+
+  <section class="section">
+    <nav class="docs-nav" aria-label="Documentation pages">
+      <a href="index.html">Overview</a>
+      <a href="install.html">Install</a>
+      <a href="quickstart.html" aria-current="page">Quickstart</a>
+      <a href="scripting.html">Scripting</a>
+      <a href="kinds.html">Kinds</a>
+      <a href="cli.html">CLI</a>
+      <a href="examples.html">Examples</a>
+      <a href="concepts.html">Concepts</a>
+    </nav>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">1 · Write a script</h2>
+    <p class="caption">Save as <code>intro.lgv</code>. A ball glides left to right over two seconds at thirty frames.</p>
+    <div class="code-head">
+      <span>intro.lgv</span>
+      <button class="copy" data-copy="qs-code" aria-label="Copy quickstart script">
+        <i class="ph ph-copy" aria-hidden="true"></i>
+      </button>
+    </div>
+<pre><code id="qs-code" class="language-lua">scene(2, 30)
+
+shape("ball", "circle", table{
+    "0": table{x: 100, y: 180, r: 40, color: "#e64c40"},
+    "2": table{x: 540, y: 180, r: 40, color: "#e64c40"},
+})</code></pre>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">2 · Render it</h2>
+    <div class="cmd">
+      <code id="qs-render">kyfram render intro.lgv --out out.mp4</code>
+      <button class="copy" data-copy="qs-render" aria-label="Copy render command">
+        <i class="ph ph-copy" aria-hidden="true"></i>
+      </button>
+    </div>
+    <p class="caption">Higher quality: <code>--crf 18 --preset slow</code>. One still frame, no ffmpeg: <code>--format png --out frame.png</code>.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">3 · Preview it live</h2>
+    <div class="cmd">
+      <code id="qs-view">kyfram view intro.lgv</code>
+      <button class="copy" data-copy="qs-view" aria-label="Copy preview command">
+        <i class="ph ph-copy" aria-hidden="true"></i>
+      </button>
+    </div>
+    <p class="caption">Opens localhost:8080. Scrub slider, play button, hot reload. Save the file and the preview follows, no re-encode.</p>
+  </section>
+
+  <section class="section final">
+    <div class="cta-row">
+      <a class="btn-primary" href="scripting.html">Next: scripting</a>
+      <a class="btn-ghost" href="examples.html">Browse examples</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <img src="../logo.png" width="60" alt="kyfram logo">
+    <p>kyfram. Logo made with kyfram.<br><a href="https://gitlab.com/codetesla51/kyfram">Source</a> · <a href="../index.html">Home</a></p>
+  </div>
+</footer>
+
+<script src="../script.js"></script>
+</body>
+</html>
