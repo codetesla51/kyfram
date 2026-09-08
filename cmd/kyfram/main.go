@@ -39,7 +39,7 @@ func main() {
 			printHelp()
 		}
 	case "version", "--version", "-v":
-		fmt.Println("kyfram v0.1.6")
+		fmt.Println("kyfram v0.2.0")
 	case "render":
 		if hasHelp(os.Args[2:]) {
 			printHelpRender()

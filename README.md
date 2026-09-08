@@ -38,15 +38,15 @@ See docs for the full scripting reference.
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh
 ```
 
 Specific version or update:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/main/install.sh | sh -s -- v0.1.1
+curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh -s -- v0.2.0
 # or
-VERSION=v0.1.1 sh install.sh
+VERSION=v0.2.0 sh install.sh
 # or via Go
 # go install github.com/codetesla51/kyfram/cmd/kyfram@latest
 ```

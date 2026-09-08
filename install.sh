@@ -2,9 +2,9 @@
 set -e
 # kyfram installer — clones source and builds for the host (no prebuilt binaries to track)
 # usage:
-#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/main/install.sh | sh
-#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/main/install.sh | sh -s -- v0.5.0
-#   VERSION=v0.5.0 sh install.sh
+#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh -s -- v0.2.0
+#   VERSION=v0.2.0 sh install.sh
 REPO="codetesla51/kyfram"
 BIN="kyfram"
 VERSION="${VERSION:-${1:-latest}}"
