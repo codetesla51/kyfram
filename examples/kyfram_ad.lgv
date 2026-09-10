@@ -1,403 +1,666 @@
-// kyfram_ad.lgv — a 26s ad for kyfram: "video you declare, not direct."
-//
-// A single edge-tts narration drives everything: word boundaries are measured
-// first, scene cuts are placed in the ~0.86s gaps between sentences, and each
-// spoken word pops a caption exactly when it is heard. Six beats:
-//   1. brand slam        "Kyfram."
-//   2. tagline           "Video you declare, not direct."   (dot grid + flowing words)
-//   3. the pitch         "Motion graphics from a plain text file." (file -> animation)
-//   4. capability reel   "Scenes. Shapes. Transitions. Camera moves." (4 fast mini-scenes)
-//   5. the workflow      "Retime it. Recolor it. Re-render in seconds." (one showcased ball)
-//   6. bookend           "Kyfram. Video you declare, not direct." (lockup, fade to black)
-//
-// Render (1080p): kyfram render --width 1920 --height 1080 --crf 17
-//                       --out /tmp/kyfram_ad.mp4 examples/kyfram_ad.lgv
-// Preview:      kyfram view examples/kyfram_ad.lgv
-//
-// Retune: edit the narration text; every caption is tied to the returned
-// word timings, so timing follows the voice automatically. scene() durations
-// are the measured sentence boundaries — re-measure with tts() before editing.
-
-let s2_start   = 1.6       // "Kyfram." ends 0.75; 0.85s of air before "Video"
-let s3_start   = 4.5875    // after "direct" (3.725)
-let s4a_start  = 7.85      // after "file" (6.9875)
-let s4b_start  = 9.525     // after "Scenes" (8.675)
-let s4c_start  = 11.0875   // after "Shapes" (10.2375)
-let s4d_start  = 12.8875   // after "Transitions" (12.0375)
-let s5_start   = 14.775    // after "moves" (13.9125)
-let s6_start   = 20.375    // after "seconds" (19.5125)
-let s6_end     = 26.3      // audio ends 24.86 + a 1.4s tail to land the lockup
-
-let ink   = "#f2f2f5"   // headline paper-white
-let gold  = "#e6c040"   // brand gold
-let slate = "#8a8a9a"   // secondary
-let bg    = "#0a0a12"   // deep space
-
-// Word-synced caption entity: pops in on the word, holds while spoken
-// (hold=1) or fades out after (hold=0). t0/t1 are scene-LOCAL times.
-let capword = fn(idx, word, x, y, size, color, t0, t1, hold) {
-  if hold == 1 {
-    shape("cap" + str(idx), "text", table{
-      str(t0): table{content: word, x: x, y: y, size: size, color: color, alpha: 0, scale: 0.84, ease: "cubicOut"},
-      str(t0 + 0.09): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0},
-      str(t1 + 0.2): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0},
-    })
-  } else {
-    shape("cap" + str(idx), "text", table{
-      str(t0): table{content: word, x: x, y: y, size: size, color: color, alpha: 0, scale: 0.84, ease: "cubicOut"},
-      str(t0 + 0.09): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0},
-      str(t1): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0, ease: "easeIn"},
-      str(t1 + 0.12): table{content: word, x: x, y: y, size: size, color: color, alpha: 0, scale: 1.05},
-    })
-  }
-}
-
-// The narration — the source of all timing.
-let v = tts("Kyfram. Video you declare, not direct. Motion graphics from a plain text file. Scenes. Shapes. Transitions. Camera moves. Retime it. Recolor it. Re-render in seconds. Kyfram. Video you declare, not direct.", "/tmp/kyfram_ad.wav", table{
-    voice: "en-US-ChristopherNeural",
-    rate: "+0%",
-})
-
-audio(v.audio)
-
-// ======================================================================
-// BEAT 1 — brand slam (0 .. 1.6)        voice: "Kyfram."     (0.10-0.75)
-// ======================================================================
+let ink = "#ffffff"
+let slate = "#6a6a78"
+let bg = "#000000"
 scene(1.6, 30)
 shape("bg1", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: "#000000"},
-  "0.4": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.6": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.60": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
 })
-// the wordmark, one letter at a time — stagger sells the lockup
-let letters = ["K", "Y", "F", "R", "A", "M"]
-let lx = [590, 738, 886, 1034, 1182, 1330]
-for i, ch in letters {
-  text("let" + str(i), table{
-    str(0.10 + 0.07 * i): table{content: ch, x: lx[i], y: 480, size: 150, color: ink, alpha: 0, scale: 1.35, ease: "cubicOut"},
-    str(0.10 + 0.07 * i + 0.16): table{content: ch, x: lx[i], y: 480, size: 150, color: ink, alpha: 1, scale: 1.0},
-    "1.6": table{content: ch, x: lx[i], y: 480, size: 150, color: ink, alpha: 1, scale: 1.0},
-  })
-}
-// gold rule — lands on the beat after the voice finishes
+shape("let0", "text", table{
+  "0.10": table{content: "K", x: 590, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
+  "0.26": table{content: "K", x: 590, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.60": table{content: "K", x: 590, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("let1", "text", table{
+  "0.17": table{content: "Y", x: 738, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
+  "0.33": table{content: "Y", x: 738, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.60": table{content: "Y", x: 738, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("let2", "text", table{
+  "0.24": table{content: "F", x: 886, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
+  "0.40": table{content: "F", x: 886, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.60": table{content: "F", x: 886, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("let3", "text", table{
+  "0.31": table{content: "R", x: 1034, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
+  "0.47": table{content: "R", x: 1034, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.60": table{content: "R", x: 1034, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("let4", "text", table{
+  "0.38": table{content: "A", x: 1182, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
+  "0.54": table{content: "A", x: 1182, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.60": table{content: "A", x: 1182, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("let5", "text", table{
+  "0.45": table{content: "M", x: 1330, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
+  "0.61": table{content: "M", x: 1330, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.60": table{content: "M", x: 1330, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
 shape("rule1", "rect", table{
-  "0.75": table{x: 960, y: 640, w: 0, h: 8, color: gold, alpha: 0, ease: "cubicOut"},
-  "1.15": table{x: 400, y: 640, w: 1120, h: 8, color: gold, alpha: 1},
-  "1.6": table{x: 400, y: 640, w: 1120, h: 8, color: gold, alpha: 1},
+  "0.75": table{x: 960, y: 640, w: 0, h: 8, color: ink, alpha: 0, ease: "cubicOut"},
+  "1.15": table{x: 400, y: 640, w: 1120, h: 8, color: ink, alpha: 1},
+  "1.60": table{x: 400, y: 640, w: 1120, h: 8, color: ink, alpha: 1}
 })
-text("sub1", table{
-  "0.95": table{content: "MOTION GRAPHICS · DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, alpha: 0, ease: "cubicOut"},
-  "1.35": table{content: "MOTION GRAPHICS · DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, alpha: 0.9},
-  "1.6": table{content: "MOTION GRAPHICS · DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, alpha: 0.9},
+shape("sub1", "text", table{
+  "0.95": table{content: "MOTION GRAPHICS - DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
+  "1.35": table{content: "MOTION GRAPHICS - DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.9},
+  "1.60": table{content: "MOTION GRAPHICS - DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.9}
 })
-text("ver1", table{
-  "1.0": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, alpha: 0.35},
-  "1.6": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, alpha: 0.35},
+shape("ver1", "text", table{
+  "1.00": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35},
+  "1.60": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35}
 })
 
-// ======================================================================
-// BEAT 2 — the tagline (1.6 .. 4.5875)  "Video you declare, not direct."
-// ======================================================================
-scene(2.9875, 30, "fade", 0.4)
+scene(3.0, 30, "fade", 0.4)
 shape("bg2", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "2.9875": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "3.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
 })
-// faint dot grid
-let gy = [120, 260, 400, 540, 680, 820, 960]
-for i, yy in gy {
-  shape("dotr" + str(i), "rect", table{
-    "0": table{x: 0, y: yy, w: 1920, h: 1, color: "#14141f", alpha: 1},
-    "2.9875": table{x: 0, y: yy, w: 1920, h: 1, color: "#14141f", alpha: 1},
-  })
-}
-text("prompt", table{
-  "0.1": table{content: "KYFRAM  ·  kai-fram", x: 960, y: 170, size: 30, color: slate, alpha: 0, ease: "cubicOut"},
-  "0.5": table{content: "KYFRAM  ·  kai-fram", x: 960, y: 170, size: 30, color: slate, alpha: 0.75},
-  "2.9875": table{content: "KYFRAM  ·  kai-fram", x: 960, y: 170, size: 30, color: slate, alpha: 0.75},
+shape("dotr0", "rect", table{
+  "0.00": table{x: 0, y: 120, w: 1920, h: 1, color: "#131318"},
+  "3.00": table{x: 0, y: 120, w: 1920, h: 1, color: "#131318"}
 })
-// the phrase builds left to right; each word lands on its own beat
-for i, w in v.words {
-  if i >= 1 {
-    if i <= 5 {
-      let t0 = w.start - s2_start
-      let t1 = w.end - s2_start
-      if i == 1 { capword(i, w.word, 374.8, 560, 88, gold, 0, t1, 1) }     // Video
-      if i == 2 { capword(i, w.word, 626.5, 560, 88, gold, t0, t1, 1) } // you
-      if i == 3 { capword(i, w.word, 932.7, 560, 88, gold, t0, t1, 1) } // declare
-      if i == 4 { capword(i, w.word, 1239.0, 560, 88, gold, t0, t1, 1) } // not
-      if i == 5 { capword(i, w.word, 1517.9, 560, 88, gold, t0, t1, 1) } // direct
-    }
-  }
-}
+shape("dotr1", "rect", table{
+  "0.00": table{x: 0, y: 260, w: 1920, h: 1, color: "#131318"},
+  "3.00": table{x: 0, y: 260, w: 1920, h: 1, color: "#131318"}
+})
+shape("dotr2", "rect", table{
+  "0.00": table{x: 0, y: 400, w: 1920, h: 1, color: "#131318"},
+  "3.00": table{x: 0, y: 400, w: 1920, h: 1, color: "#131318"}
+})
+shape("dotr3", "rect", table{
+  "0.00": table{x: 0, y: 540, w: 1920, h: 1, color: "#131318"},
+  "3.00": table{x: 0, y: 540, w: 1920, h: 1, color: "#131318"}
+})
+shape("dotr4", "rect", table{
+  "0.00": table{x: 0, y: 680, w: 1920, h: 1, color: "#131318"},
+  "3.00": table{x: 0, y: 680, w: 1920, h: 1, color: "#131318"}
+})
+shape("dotr5", "rect", table{
+  "0.00": table{x: 0, y: 820, w: 1920, h: 1, color: "#131318"},
+  "3.00": table{x: 0, y: 820, w: 1920, h: 1, color: "#131318"}
+})
+shape("dotr6", "rect", table{
+  "0.00": table{x: 0, y: 960, w: 1920, h: 1, color: "#131318"},
+  "3.00": table{x: 0, y: 960, w: 1920, h: 1, color: "#131318"}
+})
+shape("prompt", "text", table{
+  "0.15": table{content: "KYFRAM  /  kai-fram", x: 960, y: 170, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
+  "0.55": table{content: "KYFRAM  /  kai-fram", x: 960, y: 170, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.75},
+  "3.00": table{content: "KYFRAM  /  kai-fram", x: 960, y: 170, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.75}
+})
+shape("cap20", "text", table{
+  "0.35": table{content: "video", x: 375, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "0.44": table{content: "video", x: 375, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "0.97": table{content: "video", x: 375, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap21", "text", table{
+  "0.85": table{content: "you", x: 626, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "0.94": table{content: "you", x: 626, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.47": table{content: "you", x: 626, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap22", "text", table{
+  "1.35": table{content: "declare", x: 933, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.44": table{content: "declare", x: 933, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.97": table{content: "declare", x: 933, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap23", "text", table{
+  "1.85": table{content: "not", x: 1239, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.94": table{content: "not", x: 1239, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.47": table{content: "not", x: 1239, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap24", "text", table{
+  "2.35": table{content: "direct", x: 1518, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "2.44": table{content: "direct", x: 1518, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.97": table{content: "direct", x: 1518, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
 
-// ======================================================================
-// BEAT 3 — the pitch (4.5875 .. 7.85)   "Motion graphics from a plain text file."
-// ======================================================================
-scene(3.2625, 30, "fade", 0.4)
+scene(3.4, 30, "fade", 0.4)
 shape("bg3", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "3.2625": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "3.40": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
 })
-// captions: "Motion graphics" (row 1) / "from a plain text file" (row 2)
-for i, w in v.words {
-  if i >= 6 {
-    if i <= 12 {
-      let t0 = w.start - s3_start
-      let t1 = w.end - s3_start
-      if i == 6 { capword(i, w.word, 767.8, 200, 72, ink, t0, t1, 1) }
-      if i == 7 { capword(i, w.word, 1107.6, 200, 72, gold, t0, t1, 1) }
-      if i == 8 { capword(i, w.word, 664.2, 290, 58, ink, t0, t1, 1) }
-      if i == 9 { capword(i, w.word, 776.1, 290, 58, ink, t0, t1, 1) }
-      if i == 10 { capword(i, w.word, 906.1, 290, 58, ink, t0, t1, 1) }
-      if i == 11 { capword(i, w.word, 1089.9, 290, 58, gold, t0, t1, 1) }
-      if i == 12 { capword(i, w.word, 1255.8, 290, 58, ink, t0, t1, 1) }
-    }
-  }
-}
-// the file -> animation story: a document card types itself on the left,
-// the rendered ball glides on the right
+shape("cap30", "text", table{
+  "0.20": table{content: "motion", x: 768, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "0.29": table{content: "motion", x: 768, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "0.80": table{content: "motion", x: 768, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap31", "text", table{
+  "0.50": table{content: "graphics", x: 1108, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "0.59": table{content: "graphics", x: 1108, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.10": table{content: "graphics", x: 1108, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap32", "text", table{
+  "1.00": table{content: "from", x: 664, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.09": table{content: "from", x: 664, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.50": table{content: "from", x: 664, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap33", "text", table{
+  "1.33": table{content: "a", x: 776, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.42": table{content: "a", x: 776, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.83": table{content: "a", x: 776, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap34", "text", table{
+  "1.66": table{content: "plain", x: 906, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.75": table{content: "plain", x: 906, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.16": table{content: "plain", x: 906, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap35", "text", table{
+  "1.99": table{content: "text", x: 1090, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "2.08": table{content: "text", x: 1090, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.49": table{content: "text", x: 1090, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap36", "text", table{
+  "2.32": table{content: "file", x: 1256, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "2.41": table{content: "file", x: 1256, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.82": table{content: "file", x: 1256, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
 shape("card", "roundRect", table{
-  "0.15": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#0f1019", alpha: 0, scale: 0.94, ease: "cubicOut"},
-  "0.55": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#0f1019", alpha: 1, scale: 1.0},
-  "2.0": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#12141f", alpha: 1, scale: 1.0},
-  "3.2625": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#12141f", alpha: 1, scale: 1.0},
+  "0.15": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#101015", alpha: 0, scale: 0.94, ease: "cubicOut"},
+  "0.55": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#101015", alpha: 1, scale: 1.0},
+  "3.40": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#101015", alpha: 1, scale: 1.0}
 })
 shape("frame3", "roundRect", table{
-  "0.2": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#0e0f18", alpha: 0, scale: 0.94, ease: "cubicOut"},
-  "0.6": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#0e0f18", alpha: 1, scale: 1.0},
-  "3.2625": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#0e0f18", alpha: 1, scale: 1.0},
+  "0.20": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#1c1c24", alpha: 0, scale: 0.94, ease: "cubicOut"},
+  "0.60": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#1c1c24", alpha: 1, scale: 1.0},
+  "3.40": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#1c1c24", alpha: 1, scale: 1.0}
 })
-// the ball that "renders" on the right
 shape("ball3", "circle", table{
-  "0.5": table{x: 1390, y: 620, r: 70, color: gold, alpha: 0, scale: 0.8, ease: "cubicOut"},
-  "0.9": table{x: 1390, y: 620, r: 70, color: gold, alpha: 1, scale: 1.0},
-  "1.5": table{x: 1420, y: 560, r: 70, color: gold, alpha: 1, scale: 1.0},
-  "2.2": table{x: 1480, y: 620, r: 70, color: gold, alpha: 1, scale: 1.05, ease: "cubicInOut"},
-  "3.2625": table{x: 1510, y: 660, r: 70, color: gold, alpha: 1, scale: 1.0},
+  "0.50": table{x: 1390, y: 620, r: 70, color: "#ffffff", alpha: 0, scale: 0.8, ease: "cubicOut"},
+  "0.90": table{x: 1390, y: 620, r: 70, color: "#ffffff", alpha: 1, scale: 1.0},
+  "1.50": table{x: 1420, y: 560, r: 70, color: "#ffffff", alpha: 1, scale: 1.0},
+  "2.20": table{x: 1480, y: 620, r: 70, color: "#ffffff", alpha: 1, scale: 1.05, ease: "cubicInOut"},
+  "3.40": table{x: 1510, y: 660, r: 70, color: "#ffffff", alpha: 1, scale: 1.0}
 })
-// file lines that type themselves in, staggered
-let bars = [440, 320, 480, 360, 450, 300, 420, 380]
-for i, bw in bars {
-  shape("bar" + str(i), "rect", table{
-    str(0.6 + 0.11 * i): table{x: 380, y: 470 + 50 * i, w: bw, h: 18, color: "#23263a", alpha: 0, ease: "cubicOut"},
-    str(0.72 + 0.11 * i): table{x: 380, y: 470 + 50 * i, w: bw, h: 18, color: "#2b2e44", alpha: 1},
-    "2.2": table{x: 380, y: 470 + 50 * i, w: bw, h: 18, color: "#2b2e44", alpha: 1},
-  })
-}
-// the "reading" caret sweeps the file
+shape("bar0", "rect", table{
+  "0.60": table{x: 380, y: 470, w: 440, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "0.72": table{x: 380, y: 470, w: 440, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 470, w: 440, h: 18, color: "#2a2a33", alpha: 1}
+})
+shape("bar1", "rect", table{
+  "0.71": table{x: 380, y: 520, w: 320, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "0.83": table{x: 380, y: 520, w: 320, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 520, w: 320, h: 18, color: "#2a2a33", alpha: 1}
+})
+shape("bar2", "rect", table{
+  "0.82": table{x: 380, y: 570, w: 480, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "0.94": table{x: 380, y: 570, w: 480, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 570, w: 480, h: 18, color: "#2a2a33", alpha: 1}
+})
+shape("bar3", "rect", table{
+  "0.93": table{x: 380, y: 620, w: 360, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "1.05": table{x: 380, y: 620, w: 360, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 620, w: 360, h: 18, color: "#2a2a33", alpha: 1}
+})
+shape("bar4", "rect", table{
+  "1.04": table{x: 380, y: 670, w: 450, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "1.16": table{x: 380, y: 670, w: 450, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 670, w: 450, h: 18, color: "#2a2a33", alpha: 1}
+})
+shape("bar5", "rect", table{
+  "1.15": table{x: 380, y: 720, w: 300, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "1.27": table{x: 380, y: 720, w: 300, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 720, w: 300, h: 18, color: "#2a2a33", alpha: 1}
+})
+shape("bar6", "rect", table{
+  "1.26": table{x: 380, y: 770, w: 420, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "1.38": table{x: 380, y: 770, w: 420, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 770, w: 420, h: 18, color: "#2a2a33", alpha: 1}
+})
+shape("bar7", "rect", table{
+  "1.37": table{x: 380, y: 820, w: 380, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
+  "1.49": table{x: 380, y: 820, w: 380, h: 18, color: "#2a2a33", alpha: 1},
+  "2.20": table{x: 380, y: 820, w: 380, h: 18, color: "#2a2a33", alpha: 1}
+})
 shape("caret", "rect", table{
-  "0.6": table{x: 356, y: 450, w: 8, h: 60, color: gold, alpha: 0, ease: "cubicOut"},
-  "0.75": table{x: 356, y: 450, w: 8, h: 60, color: gold, alpha: 0.9},
-  "2.1": table{x: 356, y: 880, w: 8, h: 60, color: gold, alpha: 0.9, ease: "sine"},
-  "2.4": table{x: 356, y: 880, w: 8, h: 60, color: gold, alpha: 0},
+  "0.60": table{x: 356, y: 450, w: 8, h: 60, color: "#ffffff", alpha: 0, ease: "cubicOut"},
+  "0.75": table{x: 356, y: 450, w: 8, h: 60, color: "#ffffff", alpha: 0.9},
+  "2.10": table{x: 356, y: 880, w: 8, h: 60, color: "#ffffff", alpha: 0.9, ease: "sine"},
+  "2.40": table{x: 356, y: 880, w: 8, h: 60, color: "#ffffff", alpha: 0}
 })
 
-// ======================================================================
-// BEAT 4 — capability reel (7.85 .. 14.775)  hard cut in, fades between
-// ======================================================================
-// --- 4a: Scenes. ---
-scene(1.675, 30, "cut")
+scene(1.15, 30, "cut")
 shape("bg4a", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.675": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.15": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+})
+shape("cap40", "text", table{
+  "0.10": table{content: "Scenes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
+  "0.45": table{content: "Scenes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.15": table{content: "Scenes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
 })
 shape("splitA", "rect", table{
-  "0": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69"},
-  "0.5": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69", ease: "easeInOut"},
-  "1.05": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69", alpha: 0.2},
-  "1.675": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69", alpha: 0.2},
+  "0.00": table{x: 500, y: 480, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.05": table{x: 500, y: 487, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.10": table{x: 500, y: 494, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.15": table{x: 500, y: 499, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.20": table{x: 500, y: 503, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.25": table{x: 500, y: 505, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.30": table{x: 500, y: 506, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.35": table{x: 500, y: 504, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.40": table{x: 500, y: 501, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.45": table{x: 500, y: 496, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.50": table{x: 500, y: 490, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.55": table{x: 500, y: 484, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.60": table{x: 500, y: 476, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.65": table{x: 500, y: 470, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.70": table{x: 500, y: 464, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.75": table{x: 500, y: 459, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.80": table{x: 500, y: 456, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.85": table{x: 500, y: 454, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.90": table{x: 500, y: 455, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "0.95": table{x: 500, y: 457, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "1.00": table{x: 500, y: 461, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "1.05": table{x: 500, y: 466, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
+  "1.10": table{x: 500, y: 473, color: "#ffffff", w: 920, h: 150, alpha: 0.15}
 })
 shape("splitB", "rect", table{
-  "0": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 0.2},
-  "0.5": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 0.2, ease: "easeInOut"},
-  "1.05": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 1},
-  "1.675": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 1},
+  "0.00": table{x: 500, y: 650, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.05": table{x: 500, y: 643, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.10": table{x: 500, y: 636, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.15": table{x: 500, y: 631, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.20": table{x: 500, y: 627, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.25": table{x: 500, y: 625, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.30": table{x: 500, y: 624, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.35": table{x: 500, y: 626, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.40": table{x: 500, y: 629, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.45": table{x: 500, y: 634, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.50": table{x: 500, y: 640, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.55": table{x: 500, y: 646, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.60": table{x: 500, y: 654, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.65": table{x: 500, y: 660, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.70": table{x: 500, y: 666, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.75": table{x: 500, y: 671, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.80": table{x: 500, y: 674, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.85": table{x: 500, y: 676, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.90": table{x: 500, y: 675, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "0.95": table{x: 500, y: 673, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "1.00": table{x: 500, y: 669, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "1.05": table{x: 500, y: 664, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
+  "1.10": table{x: 500, y: 657, color: "#ffffff", w: 920, h: 150, alpha: 0.9}
 })
-for i, w in v.words {
-  if i == 13 { capword(i, w.word, 960, 230, 100, gold, 0, w.end - s4a_start, 1) }
-}
-// --- 4b: Shapes. ---
-scene(1.5625, 30, "fade", 0.25)
+
+scene(1.2, 30, "fade", 0.2)
 shape("bg4b", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.5625": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.20": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
 })
-shape("circ4", "circle", table{
-  "0": table{x: 960, y: 600, r: 100, color: gold, alpha: 1, ease: "easeInOut"},
-  "0.4": table{x: 960, y: 600, r: 100, color: gold, alpha: 1},
-  "0.85": table{x: 960, y: 600, r: 100, color: gold, alpha: 0, scale: 1.15},
-  "1.5625": table{x: 960, y: 600, r: 100, color: gold, alpha: 0, scale: 1.15},
+shape("cap41", "text", table{
+  "0.10": table{content: "Shapes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
+  "0.45": table{content: "Shapes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.20": table{content: "Shapes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
 })
-shape("star4", "star", table{
-  "0.5": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 0, scale: 0.7, ease: "cubicOut"},
-  "0.95": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 1, scale: 1.0},
-  "1.3": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 1, scale: 1.0, rotate: 14, ease: "cubicInOut"},
-  "1.5625": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 1, scale: 1.0, rotate: 14},
+shape("wA", "circle", table{
+  "0.00": table{x: 700, y: 620, color: "#ffffff", r: 64},
+  "0.05": table{x: 700, y: 654, color: "#ffffff", r: 64},
+  "0.10": table{x: 700, y: 685, color: "#ffffff", r: 64},
+  "0.15": table{x: 700, y: 712, color: "#ffffff", r: 64},
+  "0.20": table{x: 700, y: 733, color: "#ffffff", r: 64},
+  "0.25": table{x: 700, y: 746, color: "#ffffff", r: 64},
+  "0.30": table{x: 700, y: 750, color: "#ffffff", r: 64},
+  "0.35": table{x: 700, y: 746, color: "#ffffff", r: 64},
+  "0.40": table{x: 700, y: 733, color: "#ffffff", r: 64},
+  "0.45": table{x: 700, y: 712, color: "#ffffff", r: 64},
+  "0.50": table{x: 700, y: 685, color: "#ffffff", r: 64},
+  "0.55": table{x: 700, y: 654, color: "#ffffff", r: 64},
+  "0.60": table{x: 700, y: 620, color: "#ffffff", r: 64},
+  "0.65": table{x: 700, y: 586, color: "#ffffff", r: 64},
+  "0.70": table{x: 700, y: 555, color: "#ffffff", r: 64},
+  "0.75": table{x: 700, y: 528, color: "#ffffff", r: 64},
+  "0.80": table{x: 700, y: 507, color: "#ffffff", r: 64},
+  "0.85": table{x: 700, y: 494, color: "#ffffff", r: 64},
+  "0.90": table{x: 700, y: 490, color: "#ffffff", r: 64},
+  "0.95": table{x: 700, y: 494, color: "#ffffff", r: 64},
+  "1.00": table{x: 700, y: 507, color: "#ffffff", r: 64},
+  "1.05": table{x: 700, y: 528, color: "#ffffff", r: 64},
+  "1.10": table{x: 700, y: 555, color: "#ffffff", r: 64},
+  "1.15": table{x: 700, y: 586, color: "#ffffff", r: 64}
 })
-for i, w in v.words {
-  if i == 14 { capword(i, w.word, 960, 230, 100, gold, 0, w.end - s4b_start, 1) }
-}
-// --- 4c: Transitions. ---
-scene(1.8, 30, "fade", 0.25)
+shape("wB", "circle", table{
+  "0.00": table{x: 960, y: 771, color: "#6a6a78", r: 44},
+  "0.05": table{x: 960, y: 745, color: "#6a6a78", r: 44},
+  "0.10": table{x: 960, y: 703, color: "#6a6a78", r: 44},
+  "0.15": table{x: 960, y: 651, color: "#6a6a78", r: 44},
+  "0.20": table{x: 960, y: 595, color: "#6a6a78", r: 44},
+  "0.25": table{x: 960, y: 543, color: "#6a6a78", r: 44},
+  "0.30": table{x: 960, y: 499, color: "#6a6a78", r: 44},
+  "0.35": table{x: 960, y: 471, color: "#6a6a78", r: 44},
+  "0.40": table{x: 960, y: 460, color: "#6a6a78", r: 44},
+  "0.45": table{x: 960, y: 469, color: "#6a6a78", r: 44},
+  "0.50": table{x: 960, y: 495, color: "#6a6a78", r: 44},
+  "0.55": table{x: 960, y: 537, color: "#6a6a78", r: 44},
+  "0.60": table{x: 960, y: 589, color: "#6a6a78", r: 44},
+  "0.65": table{x: 960, y: 645, color: "#6a6a78", r: 44},
+  "0.70": table{x: 960, y: 697, color: "#6a6a78", r: 44},
+  "0.75": table{x: 960, y: 741, color: "#6a6a78", r: 44},
+  "0.80": table{x: 960, y: 769, color: "#6a6a78", r: 44},
+  "0.85": table{x: 960, y: 780, color: "#6a6a78", r: 44},
+  "0.90": table{x: 960, y: 771, color: "#6a6a78", r: 44},
+  "0.95": table{x: 960, y: 745, color: "#6a6a78", r: 44},
+  "1.00": table{x: 960, y: 703, color: "#6a6a78", r: 44},
+  "1.05": table{x: 960, y: 651, color: "#6a6a78", r: 44},
+  "1.10": table{x: 960, y: 595, color: "#6a6a78", r: 44},
+  "1.15": table{x: 960, y: 543, color: "#6a6a78", r: 44}
+})
+shape("wC", "star", table{
+  "0.00": table{x: 1220, y: 682, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.05": table{x: 1220, y: 710, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.10": table{x: 1220, y: 731, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.15": table{x: 1220, y: 745, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.20": table{x: 1220, y: 750, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.25": table{x: 1220, y: 746, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.30": table{x: 1220, y: 734, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.35": table{x: 1220, y: 714, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.40": table{x: 1220, y: 688, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.45": table{x: 1220, y: 657, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.50": table{x: 1220, y: 623, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.55": table{x: 1220, y: 589, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.60": table{x: 1220, y: 558, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.65": table{x: 1220, y: 530, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.70": table{x: 1220, y: 509, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.75": table{x: 1220, y: 495, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.80": table{x: 1220, y: 490, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.85": table{x: 1220, y: 494, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.90": table{x: 1220, y: 506, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "0.95": table{x: 1220, y: 526, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "1.00": table{x: 1220, y: 552, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "1.05": table{x: 1220, y: 583, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "1.10": table{x: 1220, y: 617, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
+  "1.15": table{x: 1220, y: 651, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12}
+})
+shape("wD", "arc", table{
+  "0.00": table{x: 960, y: 592, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.05": table{x: 960, y: 563, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.10": table{x: 960, y: 539, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.15": table{x: 960, y: 521, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.20": table{x: 960, y: 512, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.25": table{x: 960, y: 511, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.30": table{x: 960, y: 519, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.35": table{x: 960, y: 535, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.40": table{x: 960, y: 558, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.45": table{x: 960, y: 586, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.50": table{x: 960, y: 617, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.55": table{x: 960, y: 648, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.60": table{x: 960, y: 677, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.65": table{x: 960, y: 701, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.70": table{x: 960, y: 719, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.75": table{x: 960, y: 728, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.80": table{x: 960, y: 729, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.85": table{x: 960, y: 721, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.90": table{x: 960, y: 705, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "0.95": table{x: 960, y: 682, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "1.00": table{x: 960, y: 654, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "1.05": table{x: 960, y: 623, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "1.10": table{x: 960, y: 592, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
+  "1.15": table{x: 960, y: 563, color: "#ffffff", r: 60, start: 0, end: 360, width: 8}
+})
+
+scene(1.25, 30, "fade", 0.2)
 shape("bg4c", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.8": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.25": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+})
+shape("cap42", "text", table{
+  "0.10": table{content: "Transitions", x: 960, y: 240, size: 74, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
+  "0.45": table{content: "Transitions", x: 960, y: 240, size: 74, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.25": table{content: "Transitions", x: 960, y: 240, size: 74, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("tbar0", "rect", table{
+  "0.15": table{x: 480, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 0, scale: 0.82, ease: "cubicOut"},
+  "0.40": table{x: 480, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0},
+  "1.25": table{x: 480, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0}
 })
 shape("tbar1", "rect", table{
-  "0.15": table{x: 480, y: 520, w: 300, h: 120, color: gold, alpha: 0, scale: 0.82, ease: "cubicOut"},
-  "0.4": table{x: 480, y: 520, w: 300, h: 120, color: gold, alpha: 1, scale: 1.0},
-  "1.8": table{x: 480, y: 520, w: 300, h: 120, color: gold, alpha: 1, scale: 1.0},
+  "0.32": table{x: 810, y: 520, w: 300, h: 120, color: "#6a6a78", alpha: 0, scale: 0.82, ease: "cubicOut"},
+  "0.57": table{x: 810, y: 520, w: 300, h: 120, color: "#6a6a78", alpha: 1, scale: 1.0},
+  "1.25": table{x: 810, y: 520, w: 300, h: 120, color: "#6a6a78", alpha: 1, scale: 1.0}
 })
 shape("tbar2", "rect", table{
-  "0.32": table{x: 810, y: 520, w: 300, h: 120, color: "#3a3f69", alpha: 0, scale: 0.82, ease: "cubicOut"},
-  "0.57": table{x: 810, y: 520, w: 300, h: 120, color: "#3a3f69", alpha: 1, scale: 1.0},
-  "1.8": table{x: 810, y: 520, w: 300, h: 120, color: "#3a3f69", alpha: 1, scale: 1.0},
+  "0.49": table{x: 1140, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 0, scale: 0.82, ease: "cubicOut"},
+  "0.74": table{x: 1140, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0},
+  "1.25": table{x: 1140, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0}
 })
-shape("tbar3", "rect", table{
-  "0.49": table{x: 1140, y: 520, w: 300, h: 120, color: "coral", alpha: 0, scale: 0.82, ease: "cubicOut"},
-  "0.74": table{x: 1140, y: 520, w: 300, h: 120, color: "coral", alpha: 1, scale: 1.0},
-  "1.8": table{x: 1140, y: 520, w: 300, h: 120, color: "coral", alpha: 1, scale: 1.0},
-})
-for i, w in v.words {
-  if i == 15 { capword(i, w.word, 960, 230, 74, gold, 0, w.end - s4c_start, 1) }
-}
-// --- 4d: Camera moves. ---
-scene(1.8875, 30, "fade", 0.25)
+
+scene(2.4, 30, "fade", 0.2)
 shape("bg4d", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.8875": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "2.40": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+})
+shape("cap43", "text", table{
+  "0.10": table{content: "Camera", x: 960, y: 130, size: 90, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
+  "0.45": table{content: "Camera", x: 960, y: 130, size: 90, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.40": table{content: "Camera", x: 960, y: 130, size: 90, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap44", "text", table{
+  "0.55": table{content: "moves", x: 960, y: 185, size: 44, color: slate, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
+  "0.85": table{content: "moves", x: 960, y: 185, size: 44, color: slate, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.40": table{content: "moves", x: 960, y: 185, size: 44, color: slate, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
 })
 shape("viewport", "roundRect", table{
-  "0.1": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#0e1019", alpha: 0, scale: 0.96, ease: "cubicOut"},
-  "0.5": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#0e1019", alpha: 1, scale: 1.0},
-  "1.8875": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#0e1019", alpha: 1, scale: 1.0},
+  "0.10": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#101015", alpha: 0, scale: 0.96, ease: "cubicOut"},
+  "0.50": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#101015", alpha: 1, scale: 1.0},
+  "2.40": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#101015", alpha: 1, scale: 1.0}
 })
-for i, w in v.words {
-  if i == 16 { capword(i, w.word, 960, 130, 90, gold, 0, w.end - s4d_start, 1) }
-  if i == 17 { capword(i, w.word, 960, 185, 44, ink, w.start - s4d_start, w.end - s4d_start, 1) }
-}
-// the world that pans under the viewport
-group("world", table{
-  "0": table{x: 0, y: 0},
-  "0.45": table{x: 0, y: 0, ease: "linear"},
-  "2.1": table{x: -640, y: 0},
-  "1.8875": table{x: -640, y: 0},
-})
+camera(table{"0.25": table{x: 960, y: 540, zoom: 1.0}, "0.7": table{x: 1140, y: 530, zoom: 1.06, ease: "easeInOut"}, "1.6": table{x: 1450, y: 515, zoom: 1.22, ease: "easeInOut"}, "2.4": table{x: 1450, y: 515, zoom: 1.22}})
 shape("sun4", "circle", table{
-  "0.1": table{x: 1000, y: 380, r: 62, color: gold, alpha: 0, ease: "cubicOut"},
-  "0.6": table{x: 1000, y: 380, r: 62, color: gold, alpha: 1},
-  "1.8875": table{x: 1000, y: 380, r: 62, color: gold, alpha: 1}
-}, "world")
-shape("hillfar3", "rect", table{
-  "0.1": table{x: 0, y: 560, w: 2600, h: 200, color: "#232642", alpha: 0, ease: "cubicOut"},
-  "0.6": table{x: 0, y: 560, w: 2600, h: 200, color: "#232642", alpha: 1},
-  "1.8875": table{x: 0, y: 560, w: 2600, h: 200, color: "#232642", alpha: 1}
-}, "world")
-shape("hillnear3", "rect", table{
-  "0.1": table{x: 300, y: 660, w: 2500, h: 120, color: "#1a1d34", alpha: 0, ease: "cubicOut"},
-  "0.6": table{x: 300, y: 660, w: 2500, h: 120, color: "#1a1d34", alpha: 1},
-  "1.8875": table{x: 300, y: 660, w: 2500, h: 120, color: "#1a1d34", alpha: 1}
-}, "world")
-shape("ridge3", "rect", table{
-  "0.1": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2b2f52", alpha: 0, ease: "cubicOut"},
-  "0.6": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2b2f52", alpha: 1},
-  "1.8875": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2b2f52", alpha: 1}
-}, "world")
+  "0.10": table{x: 1500, y: 380, r: 62, color: "#ffffff", alpha: 0, ease: "cubicOut"},
+  "0.60": table{x: 1500, y: 380, r: 62, color: "#ffffff", alpha: 1},
+  "2.40": table{x: 1500, y: 380, r: 62, color: "#ffffff", alpha: 1}
+})
+shape("hillfar4", "rect", table{
+  "0.10": table{x: 0, y: 560, w: 2600, h: 200, color: "#1c1c24", alpha: 0, ease: "cubicOut"},
+  "0.60": table{x: 0, y: 560, w: 2600, h: 200, color: "#1c1c24", alpha: 1},
+  "2.40": table{x: 0, y: 560, w: 2600, h: 200, color: "#1c1c24", alpha: 1}
+})
+shape("hillnear4", "rect", table{
+  "0.10": table{x: 300, y: 660, w: 2500, h: 120, color: "#101015", alpha: 0, ease: "cubicOut"},
+  "0.60": table{x: 300, y: 660, w: 2500, h: 120, color: "#101015", alpha: 1},
+  "2.40": table{x: 300, y: 660, w: 2500, h: 120, color: "#101015", alpha: 1}
+})
+shape("ridge4", "rect", table{
+  "0.10": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2e2e3a", alpha: 0, ease: "cubicOut"},
+  "0.60": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2e2e3a", alpha: 1},
+  "2.40": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2e2e3a", alpha: 1}
+})
 shape("ground4", "rect", table{
-  "0.1": table{x: 0, y: 760, w: 2600, h: 12, color: "#31375f", alpha: 0, ease: "cubicOut"},
-  "0.6": table{x: 0, y: 760, w: 2600, h: 12, color: "#31375f", alpha: 1},
-  "1.8875": table{x: 0, y: 760, w: 2600, h: 12, color: "#31375f", alpha: 1}
-}, "world")
+  "0.10": table{x: 0, y: 760, w: 2600, h: 12, color: "#3a3a48", alpha: 0, ease: "cubicOut"},
+  "0.60": table{x: 0, y: 760, w: 2600, h: 12, color: "#3a3a48", alpha: 1},
+  "2.40": table{x: 0, y: 760, w: 2600, h: 12, color: "#3a3a48", alpha: 1}
+})
 
-// ======================================================================
-// BEAT 5 — the workflow (14.775 .. 20.375)
-//          "Retime it. Recolor it. Re-render in seconds."
-// ======================================================================
-scene(5.6, 30, "fade", 0.4)
+scene(5.4, 30, "fade", 0.4)
 shape("bg5", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "5.6": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "5.40": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
 })
-for i, w in v.words {
-  if i >= 18 {
-    if i <= 24 {
-      let t0 = w.start - s5_start
-      let t1 = w.end - s5_start
-      if i == 18 { capword(i, w.word, 593.8, 200, 92, ink, t0, t1, 0) }
-      if i == 19 { capword(i, w.word, 857.0, 200, 92, ink, t0, t1, 0) }
-      if i == 20 { capword(i, w.word, 1148.6, 200, 92, gold, t0, t1, 0) }
-      if i == 21 { capword(i, w.word, 1440.2, 200, 92, ink, t0, t1, 0) }
-      if i == 22 { capword(i, w.word, 681.0, 300, 88, gold, t0, t1, 0) }
-      if i == 23 { capword(i, w.word, 1014.6, 300, 88, ink, t0, t1, 0) }
-      if i == 24 { capword(i, w.word, 1293.5, 300, 88, ink, t0, t1, 0) }
-    }
-  }
-}
-// ghosts mark the tween path; the lead ball does all three verbs
-shape("ghost1", "circle", table{
-  "0": table{x: 520, y: 620, r: 66, color: gold, alpha: 0.13},
-  "5.6": table{x: 520, y: 620, r: 66, color: gold, alpha: 0.13},
+shape("wf_title", "text", table{
+  "0.10": table{content: "WORKFLOW", x: 150, y: 80, size: 26, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.7},
+  "5.40": table{content: "WORKFLOW", x: 150, y: 80, size: 26, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.7}
 })
-shape("ghost2", "circle", table{
-  "0": table{x: 970, y: 620, r: 66, color: gold, alpha: 0.13},
-  "5.6": table{x: 970, y: 620, r: 66, color: gold, alpha: 0.13},
+shape("cap50", "text", table{
+  "0.15": table{content: "Retime", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "0.24": table{content: "Retime", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "0.55": table{content: "Retime", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0, ease: "easeIn"},
+  "0.67": table{content: "Retime", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.05}
 })
-shape("ghost3", "circle", table{
-  "0": table{x: 1420, y: 620, r: 66, color: gold, alpha: 0.13},
-  "5.6": table{x: 1420, y: 620, r: 66, color: gold, alpha: 0.13},
+shape("cap51", "text", table{
+  "0.55": table{content: "it.", x: 1132, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "0.64": table{content: "it.", x: 1132, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "0.95": table{content: "it.", x: 1132, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0, ease: "easeIn"},
+  "1.07": table{content: "it.", x: 1132, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.05}
+})
+shape("cap52", "text", table{
+  "1.90": table{content: "Recolor", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.99": table{content: "Recolor", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.30": table{content: "Recolor", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0, ease: "easeIn"},
+  "2.42": table{content: "Recolor", x: 866, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.05}
+})
+shape("cap53", "text", table{
+  "2.30": table{content: "it.", x: 1158, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "2.39": table{content: "it.", x: 1158, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.70": table{content: "it.", x: 1158, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0, ease: "easeIn"},
+  "2.82": table{content: "it.", x: 1158, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.05}
+})
+shape("cap54", "text", table{
+  "3.70": table{content: "Re-render", x: 668, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "3.79": table{content: "Re-render", x: 668, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "4.10": table{content: "Re-render", x: 668, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0, ease: "easeIn"},
+  "4.22": table{content: "Re-render", x: 668, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.05}
+})
+shape("cap55", "text", table{
+  "4.02": table{content: "in", x: 986, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "4.11": table{content: "in", x: 986, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "4.42": table{content: "in", x: 986, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0, ease: "easeIn"},
+  "4.54": table{content: "in", x: 986, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.05}
+})
+shape("cap56", "text", table{
+  "4.34": table{content: "seconds.", x: 1278, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "4.43": table{content: "seconds.", x: 1278, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "4.74": table{content: "seconds.", x: 1278, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0, ease: "easeIn"},
+  "4.86": table{content: "seconds.", x: 1278, y: 190, size: 84, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.05}
+})
+shape("track", "rect", table{
+  "0.10": table{x: 340, y: 620, w: 1240, h: 5, color: "#2a2a33"},
+  "5.40": table{x: 340, y: 620, w: 1240, h: 5, color: "#2a2a33"}
+})
+shape("dia0", "rect", table{
+  "0.15": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 0, ease: "cubicOut"},
+  "0.30": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 1},
+  "1.50": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 1}
+})
+shape("dia1", "rect", table{
+  "0.30": table{x: 820, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 0, ease: "cubicOut"},
+  "0.45": table{x: 820, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "1.50": table{x: 820, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1}
+})
+shape("dia2", "rect", table{
+  "0.45": table{x: 1140, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 0, ease: "cubicOut"},
+  "0.60": table{x: 1140, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "1.50": table{x: 1140, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1}
+})
+shape("dia3", "rect", table{
+  "0.60": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 0, ease: "cubicOut"},
+  "0.75": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 1},
+  "1.50": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 1}
+})
+shape("dia1", "rect", table{
+  "0.30": table{x: 820, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "0.75": table{x: 700, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1, ease: "cubicInOut"},
+  "1.50": table{x: 700, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1}
+})
+shape("dia2", "rect", table{
+  "0.45": table{x: 1140, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "0.75": table{x: 980, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1, ease: "cubicInOut"},
+  "1.50": table{x: 980, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1}
+})
+shape("diaf0", "rect", table{
+  "1.55": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "1.95": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "2.35": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#ff9d7a", alpha: 1},
+  "2.75": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "5.40": table{x: 500, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1}
+})
+shape("diaf1", "rect", table{
+  "1.55": table{x: 700, y: 620, w: 18, h: 18, rotate: 45, color: "#7fd1a9", alpha: 1},
+  "1.95": table{x: 700, y: 620, w: 18, h: 18, rotate: 45, color: "#7fd1a9", alpha: 1},
+  "2.35": table{x: 700, y: 620, w: 18, h: 18, rotate: 45, color: "#7fd1a9", alpha: 1},
+  "2.75": table{x: 700, y: 620, w: 18, h: 18, rotate: 45, color: "#7fd1a9", alpha: 1},
+  "5.40": table{x: 700, y: 620, w: 18, h: 18, rotate: 45, color: "#7fd1a9", alpha: 1}
+})
+shape("diaf2", "rect", table{
+  "1.55": table{x: 980, y: 620, w: 18, h: 18, rotate: 45, color: "#ff9d7a", alpha: 1},
+  "1.95": table{x: 980, y: 620, w: 18, h: 18, rotate: 45, color: "#ff9d7a", alpha: 1},
+  "2.35": table{x: 980, y: 620, w: 18, h: 18, rotate: 45, color: "#777782", alpha: 1},
+  "2.75": table{x: 980, y: 620, w: 18, h: 18, rotate: 45, color: "#ff9d7a", alpha: 1},
+  "5.40": table{x: 980, y: 620, w: 18, h: 18, rotate: 45, color: "#ff9d7a", alpha: 1}
+})
+shape("diaf3", "rect", table{
+  "1.55": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 1},
+  "1.95": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#777782", alpha: 1},
+  "2.35": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#ffffff", alpha: 1},
+  "2.75": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 1},
+  "5.40": table{x: 1460, y: 620, w: 18, h: 18, rotate: 45, color: "#6a6a78", alpha: 1}
+})
+shape("sw0", "rect", table{
+  "1.95": table{x: 650, y: 700, w: 22, h: 22, rotate: 45, color: "#ffffff", alpha: 0, ease: "cubicOut"},
+  "2.07": table{x: 650, y: 700, w: 22, h: 22, rotate: 45, color: "#ffffff", alpha: 0.9},
+  "3.40": table{x: 650, y: 700, w: 22, h: 22, rotate: 45, color: "#ffffff", alpha: 0.9}
+})
+shape("sw1", "rect", table{
+  "2.20": table{x: 690, y: 700, w: 22, h: 22, rotate: 45, color: "#7fd1a9", alpha: 0, ease: "cubicOut"},
+  "2.32": table{x: 690, y: 700, w: 22, h: 22, rotate: 45, color: "#7fd1a9", alpha: 0.9},
+  "3.40": table{x: 690, y: 700, w: 22, h: 22, rotate: 45, color: "#7fd1a9", alpha: 0.9}
+})
+shape("sw2", "rect", table{
+  "2.45": table{x: 730, y: 700, w: 22, h: 22, rotate: 45, color: "#ff9d7a", alpha: 0, ease: "cubicOut"},
+  "2.57": table{x: 730, y: 700, w: 22, h: 22, rotate: 45, color: "#ff9d7a", alpha: 0.9},
+  "3.40": table{x: 730, y: 700, w: 22, h: 22, rotate: 45, color: "#ff9d7a", alpha: 0.9}
+})
+shape("sw3", "rect", table{
+  "2.70": table{x: 770, y: 700, w: 22, h: 22, rotate: 45, color: "#777782", alpha: 0, ease: "cubicOut"},
+  "2.82": table{x: 770, y: 700, w: 22, h: 22, rotate: 45, color: "#777782", alpha: 0.9},
+  "3.40": table{x: 770, y: 700, w: 22, h: 22, rotate: 45, color: "#777782", alpha: 0.9}
+})
+shape("progress", "rect", table{
+  "3.70": table{x: 340, y: 620, w: 0, h: 5, color: "#ffffff"},
+  "4.15": table{x: 340, y: 620, w: 1240, h: 5, color: "#ffffff", ease: "cubicOut"},
+  "5.40": table{x: 340, y: 620, w: 1240, h: 5, color: "#ffffff"}
+})
+shape("rr_ok", "text", table{
+  "4.15": table{content: "RENDERED 0.42s", x: 1710, y: 700, size: 30, color: "#7fd1a9", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
+  "4.45": table{content: "RENDERED 0.42s", x: 1710, y: 700, size: 30, color: "#7fd1a9", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1},
+  "5.40": table{content: "RENDERED 0.42s", x: 1710, y: 700, size: 30, color: "#7fd1a9", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}
 })
 shape("ball5", "circle", table{
-  "0": table{x: 400, y: 620, r: 76, color: gold, ease: "cubicInOut"},
-  "0.55": table{x: 950, y: 620, r: 76, color: gold, ease: "cubicInOut"},
-  "1.0": table{x: 1520, y: 620, r: 76, color: gold},
-  "1.65": table{x: 1520, y: 620, r: 76, color: gold, ease: "linear"},
-  "2.2": table{x: 1520, y: 620, r: 76, color: "coral"},
-  "2.7": table{x: 1520, y: 620, r: 76, color: "mint"},
-  "3.3125": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0, ease: "cubicOut"},
-  "3.62": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.26},
-  "3.85": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0},
-  "4.05": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0, ease: "cubicOut"},
-  "4.35": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.16},
-  "4.6": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0},
-  "5.6": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0},
+  "4.30": table{x: 960, y: 520, r: 52, color: "#ffffff", alpha: 0, scale: 0.5, ease: "cubicOut"},
+  "4.65": table{x: 960, y: 520, r: 52, color: "#ffffff", alpha: 1, scale: 1.0},
+  "5.40": table{x: 960, y: 520, r: 52, color: "#ffffff", alpha: 1, scale: 1.0}
 })
 shape("ring5", "arc", table{
-  "3.4": table{x: 1520, y: 620, r: 80, start: 0, end: 360, width: 6, color: gold, alpha: 0, ease: "cubicOut"},
-  "3.62": table{x: 1520, y: 620, r: 80, start: 0, end: 360, width: 6, color: gold, alpha: 0.6},
-  "3.95": table{x: 1520, y: 620, r: 175, start: 0, end: 360, width: 5, color: gold, alpha: 0},
-  "5.6": table{x: 1520, y: 620, r: 175, start: 0, end: 360, width: 5, color: gold, alpha: 0},
-})
-shape("wire5", "rect", table{
-  "0": table{x: 340, y: 780, w: 1240, h: 5, color: "#22263c"},
-  "5.6": table{x: 340, y: 780, w: 1240, h: 5, color: "#22263c"},
+  "4.50": table{x: 960, y: 520, r: 64, start: 0, end: 360, width: 6, color: "#ffffff", alpha: 0, ease: "cubicOut"},
+  "4.72": table{x: 960, y: 520, r: 64, start: 0, end: 360, width: 6, color: "#ffffff", alpha: 0.5},
+  "5.05": table{x: 960, y: 520, r: 150, start: 0, end: 360, width: 5, color: "#ffffff", alpha: 0},
+  "5.40": table{x: 960, y: 520, r: 150, start: 0, end: 360, width: 5, color: "#ffffff", alpha: 0}
 })
 
-// ======================================================================
-// BEAT 6 — bookend (20.375 .. 26.3)     "Kyfram. Video you declare, not direct."
-// ======================================================================
-scene(5.925, 30, "fade", 0.5)
+scene(5.0, 30, "fade", 0.5)
 shape("bg6", "rect", table{
-  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "4.9": table{x: 0, y: 0, w: 1920, h: 1080, color: bg, ease: "easeIn"},
-  "5.925": table{x: 0, y: 0, w: 1920, h: 1080, color: "#000000"},
+  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "4.30": table{x: 0, y: 0, w: 1920, h: 1080, color: bg, ease: "easeIn"},
+  "5.00": table{x: 0, y: 0, w: 1920, h: 1080, color: "#000000"}
 })
-for i, w in v.words {
-  if i >= 25 {
-    if i <= 30 {
-      let t0 = w.start - s6_start
-      let t1 = w.end - s6_start
-      if i == 25 { capword(i, w.word, 960, 400, 150, ink, 0, t1, 1) }       // Kyfram.
-      if i == 26 { capword(i, w.word, 654.1, 640, 46, ink, t0, t1, 1) }    // Video
-      if i == 27 { capword(i, w.word, 785.7, 640, 46, ink, t0, t1, 1) }    // you
-      if i == 28 { capword(i, w.word, 945.7, 640, 46, gold, t0, t1, 1) }   // declare
-      if i == 29 { capword(i, w.word, 1105.8, 640, 46, ink, t0, t1, 1) }   // not
-      if i == 30 { capword(i, w.word, 1251.6, 640, 46, ink, t0, t1, 1) }   // direct
-    }
-  }
-}
+shape("lock6", "text", table{
+  "0.15": table{content: "Kyfram.", x: 960, y: 400, size: 150, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.92, ease: "cubicOut"},
+  "0.55": table{content: "Kyfram.", x: 960, y: 400, size: 150, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "5.00": table{content: "Kyfram.", x: 960, y: 400, size: 150, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
 shape("rule6", "rect", table{
-  "0.35": table{x: 960, y: 540, w: 0, h: 8, color: gold, alpha: 0, ease: "cubicOut"},
-  "0.75": table{x: 700, y: 540, w: 520, h: 8, color: gold, alpha: 1},
-  "5.925": table{x: 700, y: 540, w: 520, h: 8, color: gold, alpha: 1},
+  "0.50": table{x: 960, y: 540, w: 0, h: 8, color: "#ffffff", alpha: 0, ease: "cubicOut"},
+  "0.90": table{x: 700, y: 540, w: 520, h: 8, color: "#ffffff", alpha: 1},
+  "5.00": table{x: 700, y: 540, w: 520, h: 8, color: "#ffffff", alpha: 1}
+})
+shape("cap60", "text", table{
+  "1.20": table{content: "video", x: 654, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.29": table{content: "video", x: 654, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "1.80": table{content: "video", x: 654, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap61", "text", table{
+  "1.65": table{content: "you", x: 786, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "1.74": table{content: "you", x: 786, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.25": table{content: "you", x: 786, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap62", "text", table{
+  "2.10": table{content: "declare", x: 946, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "2.19": table{content: "declare", x: 946, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "2.70": table{content: "declare", x: 946, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap63", "text", table{
+  "2.55": table{content: "not", x: 1106, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "2.64": table{content: "not", x: 1106, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "3.15": table{content: "not", x: 1106, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+})
+shape("cap64", "text", table{
+  "3.00": table{content: "direct", x: 1252, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
+  "3.09": table{content: "direct", x: 1252, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
+  "3.60": table{content: "direct", x: 1252, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
 })
