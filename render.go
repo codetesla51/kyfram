@@ -994,9 +994,9 @@ func compositeFade(dst, src *image.RGBA, f float64) {
 		if oa == 0 {
 			continue
 		}
-		dst.Pix[i] = uint8((float64(src.Pix[i])*w + float64(dst.Pix[i])*da*(1-w)) / oa * 255)
-		dst.Pix[i+1] = uint8((float64(src.Pix[i+1])*w + float64(dst.Pix[i+1])*da*(1-w)) / oa * 255)
-		dst.Pix[i+2] = uint8((float64(src.Pix[i+2])*w + float64(dst.Pix[i+2])*da*(1-w)) / oa * 255)
+		dst.Pix[i] = uint8((float64(src.Pix[i])*w + float64(dst.Pix[i])*da*(1-w)) / oa)
+		dst.Pix[i+1] = uint8((float64(src.Pix[i+1])*w + float64(dst.Pix[i+1])*da*(1-w)) / oa)
+		dst.Pix[i+2] = uint8((float64(src.Pix[i+2])*w + float64(dst.Pix[i+2])*da*(1-w)) / oa)
 		dst.Pix[i+3] = uint8(oa*255 + 0.5)
 	}
 }

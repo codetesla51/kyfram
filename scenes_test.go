@@ -107,6 +107,16 @@ shape("bg", "rect", table{
 	if r>>8 > 200 || b>>8 > 200 {
 		t.Fatalf("fade middle = r%d b%d, want mix", r>>8, b>>8)
 	}
+	// exact blend at a plain-bg pixel: #ff0000 over #0000ff at f=0.3
+	// (regression: compositeFade once wrapped bytes with *255 into
+	// uint8 mod-256, producing scrambled chroma like #54f084)
+	r, g, b, _ := RenderFrame(tl, 2.15).Image().At(10, 10).RGBA()
+	f := 0.3
+	wantR := uint8(0x00*f + 0xff*(1-f)) // red (scene 1) still dominant: 0.7
+	wantB := uint8(0xff*f + 0x00*(1-f)) // blue (scene 2) arriving: 0.3
+	if r>>8 != uint32(wantR) || b>>8 != uint32(wantB) || g>>8 != 0 {
+		t.Fatalf("exact fade = r%d g%d b%d, want r%d b%d", r>>8, g>>8, b>>8, wantR, wantB)
+	}
 	// end of window: blue wins
 	r, _, b, _ = RenderFrame(tl, 2.5).Image().At(320, 180).RGBA()
 	if r>>8 != 0x00 || b>>8 != 0xff {
