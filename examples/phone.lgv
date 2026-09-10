@@ -1,0 +1,54 @@
+scene(4.0, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 720, h: 1280, color: "#0d0d10"}
+})
+
+shape("glow", "circle", table{
+  "0.00": table{x: 360, y: 550, r: 60, color: "#3a3a55", alpha: 0},
+  "1.00": table{x: 360, y: 550, r: 340, color: "#3a3a55", alpha: 0.35},
+  "4.00": table{x: 360, y: 550, r: 340, color: "#3a3a55", alpha: 0.35}
+})
+
+shape("floor", "ellipse", table{
+  "0.00": table{x: 360, y: 890, r: 0, color: "#000000", alpha: 0},
+  "1.00": table{x: 360, y: 890, r: 140, ry: 30, color: "#000000", alpha: 0.5},
+  "2.50": table{x: 360, y: 890, r: 100, ry: 22, color: "#000000", alpha: 0.3},
+  "4.00": table{x: 360, y: 890, r: 140, ry: 30, color: "#000000", alpha: 0.5}
+})
+
+group("phone", table{
+  "0.00": table{x: 360, y: 1150, scale: 0.85, alpha: 0, rotate: 0, ease: "cubicOut"},
+  "1.00": table{x: 360, y: 550, scale: 1.0, alpha: 1, rotate: 0},
+  "2.50": table{x: 360, y: 550, scale: 0.88, alpha: 1, rotate: 180, ease: "sine"},
+  "4.00": table{x: 360, y: 550, scale: 1.0, alpha: 1, rotate: 360}
+})
+
+shape("body", "roundRect", table{
+  "0": table{x: -150, y: -310, w: 300, h: 620, radius: 44, color: "#0a0a0a"}
+}, "phone")
+
+shape("screen", "roundRect", table{
+  "0": table{x: -140, y: -276, w: 280, h: 552, radius: 24, color: "#141414", gradFrom: "#1a1a1a", gradTo: "#0d0d0d", gradAngle: 90}
+}, "phone")
+
+shape("camdot", "circle", table{
+  "0": table{x: 0, y: -298, r: 6, color: "#050505"}
+}, "phone")
+
+shape("btn_power", "roundRect", table{
+  "0": table{x: 150, y: -60, w: 4, h: 70, radius: 2, color: "#0a0a0a"}
+}, "phone")
+
+shape("btn_vol1", "roundRect", table{
+  "0": table{x: -154, y: -90, w: 4, h: 40, radius: 2, color: "#0a0a0a"}
+}, "phone")
+
+shape("btn_vol2", "roundRect", table{
+  "0": table{x: -154, y: -140, w: 4, h: 40, radius: 2, color: "#0a0a0a"}
+}, "phone")
+
+shape("homebar", "rect", table{
+  "1.00": table{x: -55, y: 298, w: 110, h: 4, color: "#ffffff", alpha: 0},
+  "1.30": table{x: -55, y: 298, w: 110, h: 4, color: "#ffffff", alpha: 0.6}
+}, "phone")

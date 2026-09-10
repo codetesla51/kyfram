@@ -499,14 +499,14 @@ shape("wC", "text", table{
 shape("subA", "text", table{
   "0.15": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
   "0.45": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.85},
-  "1.90": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35},
-  "5.40": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35}
+  "1.90": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0},
+  "5.40": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}
 })
 shape("subB", "text", table{
   "2.05": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
   "2.35": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.85},
-  "3.60": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35},
-  "5.40": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35}
+  "3.60": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0},
+  "5.40": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}
 })
 shape("subC", "text", table{
   "3.70": table{content: "edit the numbers. re-render in 0.31s.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
