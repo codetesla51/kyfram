@@ -46,8 +46,10 @@ func TestLoadScript(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
-	if len(tl.Entities) != 2 {
-		t.Fatalf("entities = %d, want 2", len(tl.Entities))
+	// "dep" is declared before scene() (lib inline), so it lands global;
+	// "own" lands in the scene. Together they are both entities.
+	if len(tl.Entities)+len(tl.Scenes[0].Entities) != 2 {
+		t.Fatalf("global=%d scene=%d, want total 2", len(tl.Entities), len(tl.Scenes[0].Entities))
 	}
 
 	// Cycles error instead of hanging.

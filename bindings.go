@@ -23,14 +23,16 @@ import (
 type Builder struct {
 	tl       Timeline
 	sceneSet bool
+	curScene int // index into tl.Scenes, -1 while declarations are global
 }
 
 // Bind registers the declaration builtins on vm. Call before Run, then
 // Build the Timeline after Run returns.
 func (b *Builder) Bind(vm *interpreter.Interpreter) {
+	b.curScene = -1
 	vm.Register("scene", func(args ...interpreter.Object) interpreter.Object {
-		if len(args) != 2 {
-			return &interpreter.Error{Message: fmt.Sprintf("scene() takes 2 arguments, got %d", len(args))}
+		if len(args) < 2 || len(args) > 3 {
+			return &interpreter.Error{Message: fmt.Sprintf("scene() takes 2 arguments plus optional transition, got %d", len(args))}
 		}
 		dur, err := numArg(args[0], "duration")
 		if err != nil {
@@ -40,8 +42,27 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		if err != nil {
 			return &interpreter.Error{Message: err.Error()}
 		}
-		b.tl.Duration = dur
+		fade := 0.0
+		if len(args) == 3 {
+			tr, err := strArg(args[2], "transition")
+			if err != nil {
+				return &interpreter.Error{Message: err.Error()}
+			}
+			switch tr {
+			case "fade":
+				fade = 0.5 // ponytail: fixed crossfade duration, add a duration arg when needed
+			case "", "cut":
+			default:
+				return &interpreter.Error{Message: fmt.Sprintf("scene: unknown transition %q (want \"fade\")", tr)}
+			}
+		}
 		b.tl.FPS = int(fps)
+		b.tl.Scenes = append(b.tl.Scenes, Scene{
+			Name:     fmt.Sprintf("scene%d", len(b.tl.Scenes)+1),
+			Duration: dur,
+			Fade:     fade,
+		})
+		b.curScene = len(b.tl.Scenes) - 1
 		b.sceneSet = true
 		return interpreter.NULL
 	})
@@ -68,7 +89,7 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 				return &interpreter.Error{Message: fmt.Sprintf("shape %q: %v", name, err)}
 			}
 		}
-		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs, Group: group})
+		b.addEntity(name, kind, kfs, group)
 		return interpreter.NULL
 	})
 	vm.Register("text", func(args ...interpreter.Object) interpreter.Object {
@@ -90,7 +111,7 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 				return &interpreter.Error{Message: fmt.Sprintf("text %q: %v", name, err)}
 			}
 		}
-		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: "text", Keyframes: kfs, Group: group})
+		b.addEntity(name, "text", kfs, group)
 		return interpreter.NULL
 	})
 	vm.Register("group", func(args ...interpreter.Object) interpreter.Object {
@@ -105,7 +126,7 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		if err != nil {
 			return &interpreter.Error{Message: fmt.Sprintf("group %q: %v", name, err)}
 		}
-		b.tl.Groups = append(b.tl.Groups, Group{Name: name, Keyframes: kfs})
+		b.addGroup(name, kfs)
 		return interpreter.NULL
 	})
 	vm.Register("audio", func(args ...interpreter.Object) interpreter.Object {
@@ -143,7 +164,7 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		if err != nil {
 			return &interpreter.Error{Message: fmt.Sprintf("camera: %v", err)}
 		}
-		b.tl.Camera = kfs
+		b.addCamera(kfs)
 		return interpreter.NULL
 	})
 	vm.Register("transparent", func(args ...interpreter.Object) interpreter.Object {
@@ -234,12 +255,73 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 	})
 }
 
+// scOffset returns the absolute time where the open scene starts
+// (sum of completed scene durations). Declarations before any scene()
+// (curScene == -1) get no offset and land on the global lists.
+func (b *Builder) scOffset() float64 {
+	var s float64
+	for i := 0; i < b.curScene && i < len(b.tl.Scenes); i++ {
+		s += b.tl.Scenes[i].Duration
+	}
+	return s
+}
+
+func (b *Builder) addEntity(name, kind string, kfs []Keyframe, group string) {
+	if off := b.scOffset(); off > 0 {
+		for i := range kfs {
+			kfs[i].Time += off
+		}
+	}
+	if b.curScene >= 0 {
+		sc := &b.tl.Scenes[b.curScene]
+		sc.Entities = append(sc.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs, Group: group})
+		return
+	}
+	b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs, Group: group})
+}
+
+func (b *Builder) addGroup(name string, kfs []Keyframe) {
+	if off := b.scOffset(); off > 0 {
+		for i := range kfs {
+			kfs[i].Time += off
+		}
+	}
+	if b.curScene >= 0 {
+		sc := &b.tl.Scenes[b.curScene]
+		sc.Groups = append(sc.Groups, Group{Name: name, Keyframes: kfs})
+		return
+	}
+	b.tl.Groups = append(b.tl.Groups, Group{Name: name, Keyframes: kfs})
+}
+
+func (b *Builder) addCamera(kfs []Keyframe) {
+	if off := b.scOffset(); off > 0 {
+		for i := range kfs {
+			kfs[i].Time += off
+		}
+	}
+	if b.curScene >= 0 {
+		sc := &b.tl.Scenes[b.curScene]
+		sc.Camera = kfs
+		return
+	}
+	b.tl.Camera = kfs
+}
+
 // Build returns the declared Timeline. A script with entities but no
-// scene() has no header to render under, so that's an error. Entities
-// then pass fail-fast validation (kind/prop/group checks).
+// scene() has no header to render under, so that's an error. Scenes
+// total their durations into Duration. Entities then pass fail-fast
+// validation (kind/prop/group checks).
 func (b *Builder) Build() (Timeline, error) {
 	if !b.sceneSet {
 		return Timeline{}, fmt.Errorf("no scene() declaration")
+	}
+	if len(b.tl.Scenes) > 0 {
+		var d float64
+		for _, s := range b.tl.Scenes {
+			d += s.Duration
+		}
+		b.tl.Duration = d
 	}
 	if err := b.validate(); err != nil {
 		return Timeline{}, err

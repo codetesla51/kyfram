@@ -39,10 +39,14 @@ text("caption", table{
 	if tl.Duration != 2 || tl.FPS != 30 {
 		t.Fatalf("header = %v/%v, want 2/30", tl.Duration, tl.FPS)
 	}
-	if len(tl.Entities) != 2 {
-		t.Fatalf("entities = %d, want 2", len(tl.Entities))
+	if len(tl.Scenes) != 1 {
+		t.Fatalf("scenes = %d, want 1", len(tl.Scenes))
 	}
-	ball := tl.Entities[0]
+	ents := tl.Scenes[0].Entities
+	if len(ents) != 2 {
+		t.Fatalf("entities = %d, want 2", len(ents))
+	}
+	ball := ents[0]
 	if ball.Name != "ball" || ball.Kind != "circle" {
 		t.Fatalf("ball = %+v", ball)
 	}
@@ -52,8 +56,8 @@ text("caption", table{
 	if ball.Keyframes[0].Props["x"] != 100.0 {
 		t.Fatalf("x at t=0 = %v, want 100", ball.Keyframes[0].Props["x"])
 	}
-	if tl.Entities[1].Kind != "text" {
-		t.Fatalf("caption kind = %q, want text", tl.Entities[1].Kind)
+	if ents[1].Kind != "text" {
+		t.Fatalf("caption kind = %q, want text", ents[1].Kind)
 	}
 }
 
@@ -143,7 +147,8 @@ camera(table{
 	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
-	if len(tl.Camera) != 2 || tl.Camera[1].Props["zoom"] != int64(2) {
-		t.Fatalf("camera = %+v", tl.Camera)
+	cam := tl.Scenes[0].Camera
+	if len(cam) != 2 || cam[1].Props["zoom"] != int64(2) {
+		t.Fatalf("camera = %+v", cam)
 	}
 }

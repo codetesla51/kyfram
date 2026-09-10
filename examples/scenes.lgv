@@ -1,0 +1,23 @@
+scene(2, 30)
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#101018"},
+  "2": table{x: 0, y: 0, w: 640, h: 360, color: "#101018"}
+})
+shape("panel", "rect", table{
+  "0": table{x: 80, y: 90, w: 480, h: 180, color: "#1c1c28"}
+})
+shape("intro", "text", table{
+  "0": table{x: 320, y: 180, content: "scene one", size: 44, color: "#e8e8f0", ease: "easeOut"}
+})
+
+scene(2, 30, "fade")
+shape("bg2", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#181010"},
+  "2": table{x: 0, y: 0, w: 640, h: 360, color: "#181010"}
+})
+shape("panel2", "roundRect", table{
+  "0": table{x: 120, y: 60, w: 400, h: 240, radius: 24, color: "#301818"}
+})
+shape("outro", "text", table{
+  "0": table{x: 320, y: 180, content: "scene two", size: 44, color: "#f0d8d8", ease: "easeIn"}
+})

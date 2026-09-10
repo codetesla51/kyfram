@@ -4,6 +4,11 @@ package kyfram
 // at what frame rate, and every animated entity in it. Width/Height
 // of zero mean the default canvas (CLI flags or scene defaults win).
 // Empty Font means the built-in default typeface.
+//
+// A script may declare one or more scenes; with scenes, each scene
+// owns its entities/groups/camera (declared after its scene() call,
+// times auto-offset to absolute) and Duration is the sum. Entities
+// declared before any scene() are global and drawn in every scene.
 type Timeline struct {
 	Duration    float64
 	FPS         int
@@ -13,9 +18,24 @@ type Timeline struct {
 	Transparent bool
 	Entities    []Entity
 	Groups      []Group
+	Scenes      []Scene
 	Audio       []AudioTrack
 	// Camera holds x/y/zoom keyframes; empty means a locked frame.
+	// Used directly when there are no scenes; scenes carry their own.
 	Camera []Keyframe
+}
+
+// Scene is one segment of a multi-scene timeline. Duration is the
+// scene's own length in seconds (declared keyframes use scene-local
+// times, offset to absolute at bind). Fade > 0 crossfades from the
+// previous scene over that many seconds at the scene start.
+type Scene struct {
+	Name     string
+	Duration float64
+	Entities []Entity
+	Groups   []Group
+	Camera   []Keyframe
+	Fade     float64
 }
 
 // AudioTrack lays one sound file under the video at Offset seconds.

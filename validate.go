@@ -28,21 +28,40 @@ func (b *Builder) validate() error {
 	for _, g := range b.tl.Groups {
 		groups[g.Name] = true
 	}
-	for _, e := range b.tl.Entities {
+	for _, sc := range b.tl.Scenes {
+		for _, g := range sc.Groups {
+			groups[g.Name] = true
+		}
+	}
+	check := func(where string, e Entity) error {
 		if !contains(knownKinds, e.Kind) {
-			return fmt.Errorf("entity %q: unknown kind %q (want one of %v)%s",
-				e.Name, e.Kind, knownKinds, suggest(knownKinds, e.Kind))
+			return fmt.Errorf("%s entity %q: unknown kind %q (want one of %v)%s",
+				where, e.Name, e.Kind, knownKinds, suggest(knownKinds, e.Kind))
 		}
 		if e.Group != "" && !groups[e.Group] {
-			return fmt.Errorf("entity %q: group %q does not exist (declare group(%q, ...) before use)",
-				e.Name, e.Group, e.Group)
+			return fmt.Errorf("%s entity %q: group %q does not exist (declare group(%q, ...) before use)",
+				where, e.Name, e.Group, e.Group)
 		}
 		for _, kf := range e.Keyframes {
 			for p := range kf.Props {
 				if !contains(knownProps, p) {
-					return fmt.Errorf("entity %q: unknown prop %q at t=%g%s",
-						e.Name, p, kf.Time, suggest(knownProps, p))
+					return fmt.Errorf("%s entity %q: unknown prop %q at t=%g%s",
+						where, e.Name, p, kf.Time, suggest(knownProps, p))
 				}
+			}
+		}
+		return nil
+	}
+	for _, e := range b.tl.Entities {
+		if err := check("global", e); err != nil {
+			return err
+		}
+	}
+	for si, sc := range b.tl.Scenes {
+		where := fmt.Sprintf("scene %d", si+1)
+		for _, e := range sc.Entities {
+			if err := check(where, e); err != nil {
+				return err
 			}
 		}
 	}

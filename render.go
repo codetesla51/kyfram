@@ -29,9 +29,9 @@ const (
 	defaultFont = "examples/assets/fonts/ArchivoBlack-Regular.ttf"
 )
 
-// RenderFrame paints every entity at time t onto one canvas: resolve
-// values through Interpolate, then dispatch on Kind. Unknown kinds are
-// skipped so one experimental entity can't kill the whole frame.
+// RenderFrame paints the frame at time t: find the active scene (or the
+// single implicit scene when none were declared), crossfade across scene
+// boundaries when a transition is set, and draw.
 func RenderFrame(tl Timeline, t float64) *gg.Context {
 	w, h := tl.size()
 	dc := gg.NewContext(w, h)
@@ -42,15 +42,84 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		dc.SetRGB(0.1, 0.1, 0.12)
 		dc.Clear()
 	}
+	if len(tl.Scenes) == 0 {
+		// single implicit scene: everything declared, its own camera
+		renderScene(dc, tl, tl.Entities, tl.Groups, tl.Camera, t)
+		return dc
+	}
+	idx, start := sceneAt(tl, t)
+	if idx < 0 {
+		return dc
+	}
+	sc := &tl.Scenes[idx]
+	// crossfade window: previous scene frozen at its end, this scene
+	// faded in on top via compositeFade
+	if sc.Fade > 0 && idx > 0 && t >= start && t < start+sc.Fade {
+		prev := &tl.Scenes[idx-1]
+		prevEnd := start // previous scene ends exactly where this one starts
+		renderScene(dc, tl, sceneLists(tl, prev), sceneGroups(tl, prev), prev.Camera, prevEnd)
+		f := (t - start) / sc.Fade
+		layer := gg.NewContext(w, h)
+		renderScene(layer, tl, sceneLists(tl, sc), sceneGroups(tl, sc), sc.Camera, t)
+		compositeFade(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), f)
+		return dc
+	}
+	renderScene(dc, tl, sceneLists(tl, sc), sceneGroups(tl, sc), sc.Camera, t)
+	return dc
+}
 
+// sceneLists merges global (pre-scene) declarations with a scene's own
+// entities, so e.g. a watermark declared before scene() draws everywhere.
+func sceneLists(tl Timeline, sc *Scene) []Entity {
+	es := make([]Entity, 0, len(tl.Entities)+len(sc.Entities))
+	es = append(es, tl.Entities...)
+	es = append(es, sc.Entities...)
+	return es
+}
+
+// sceneGroups mirrors sceneLists for groups.
+func sceneGroups(tl Timeline, sc *Scene) []Group {
+	gs := make([]Group, 0, len(tl.Groups)+len(sc.Groups))
+	gs = append(gs, tl.Groups...)
+	gs = append(gs, sc.Groups...)
+	return gs
+}
+
+// sceneStartAt returns the absolute time scene i begins.
+func sceneStartAt(tl Timeline, i int) float64 {
+	var s float64
+	for j := 0; j < i && j < len(tl.Scenes); j++ {
+		s += tl.Scenes[j].Duration
+	}
+	return s
+}
+
+// sceneAt returns the scene covering time t and its start. Past the
+// end, the last scene's start is returned (interpolation holds values).
+func sceneAt(tl Timeline, t float64) (int, float64) {
+	for i := range tl.Scenes {
+		start := sceneStartAt(tl, i)
+		if t < start+tl.Scenes[i].Duration {
+			return i, start
+		}
+	}
+	last := len(tl.Scenes) - 1
+	return last, sceneStartAt(tl, last)
+}
+
+// renderScene draws one scene's entities/groups onto dc under cam,
+// using this timeline's global groups as fallback. Shared by the
+// single-scene path, per-scene dispatch, and offscreen crossfade layers.
+func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group, cam []Keyframe, t float64) {
+	w, h := tl.size()
 	// Camera reframes the world (see frameCamera); the background clear
 	// stays put while entities travel.
-	frameCamera(dc, tl, w, h, t)
+	frameCamera(dc, cam, w, h, t)
 
 	// Group transforms: map name -> interpolated props
-	groupProps := make(map[string]map[string]any, len(tl.Groups))
-	groupLayer := make(map[string]float64, len(tl.Groups))
-	for _, g := range tl.Groups {
+	groupProps := make(map[string]map[string]any, len(groups))
+	groupLayer := make(map[string]float64, len(groups))
+	for _, g := range groups {
 		props := Interpolate(g.Keyframes, t)
 		groupProps[g.Name] = props
 		groupLayer[g.Name] = propNum(props, "layer", 0)
@@ -65,7 +134,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 	}
 	var root []framed
 	grouped := make(map[string][]framed)
-	for _, e := range tl.Entities {
+	for _, e := range entities {
 		props := Interpolate(e.Keyframes, t)
 		f := framed{e.Kind, props, propNum(props, "layer", 0), e.Group}
 		if e.Group != "" {
@@ -93,7 +162,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 	for _, f := range root {
 		order = append(order, drawItem{isGroup: false, layer: f.layer, framed: f})
 	}
-	for _, g := range tl.Groups {
+	for _, g := range groups {
 		order = append(order, drawItem{isGroup: true, layer: groupLayer[g.Name], name: g.Name})
 	}
 	sort.SliceStable(order, func(i, j int) bool { return order[i].layer < order[j].layer })
@@ -137,7 +206,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 				}
 				if mode, ok := props["blend"].(string); ok && blendModes[mode] {
 					layer := gg.NewContext(w, h)
-					frameCamera(layer, tl, w, h, t)
+					frameCamera(layer, cam, w, h, t)
 					layer.Push()
 					layer.Translate(gx, gy)
 					layer.Rotate(gg.Radians(gRot))
@@ -154,7 +223,7 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			f := it.framed
 			if mode, ok := f.props["blend"].(string); ok && blendModes[mode] {
 				layer := gg.NewContext(w, h)
-				frameCamera(layer, tl, w, h, t)
+				frameCamera(layer, cam, w, h, t)
 				drawEntity(layer, w, h, f.kind, f.props, defaultFace(tl))
 				composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
 				continue
@@ -163,7 +232,6 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		}
 	}
 	dc.Pop()
-	return dc
 }
 
 // defaultFace resolves the fallback typeface: explicit Timeline font
@@ -443,11 +511,24 @@ func RenderSequence(tl Timeline, dir string) error {
 // frameCount converts Duration*FPS to a frame total (minimum 1), so a
 // zero-length timeline still yields one still instead of nothing.
 func frameCount(tl Timeline) int {
-	n := int(math.Round(tl.Duration * float64(tl.FPS)))
+	n := int(math.Round(totalDuration(tl) * float64(tl.FPS)))
 	if n < 1 {
 		n = 1
 	}
 	return n
+}
+
+// totalDuration resolves how long the video runs: the sum of scenes
+// when scenes were declared, else the single Duration.
+func totalDuration(tl Timeline) float64 {
+	if len(tl.Scenes) > 0 {
+		var d float64
+		for _, s := range tl.Scenes {
+			d += s.Duration
+		}
+		return d
+	}
+	return tl.Duration
 }
 
 // EncodeOpts controls x264 quality. CRF 0-51 lower is better (18 high, 23 default, 28 small),
@@ -897,20 +978,43 @@ func composite(dst, src *image.RGBA, mode string) {
 	}
 }
 
+// compositeFade alpha-blends src over dst by factor f (0..1) in the
+// source-over sense: where src has painted pixels they appear at
+// intensity f over the dst content — a crossfade. Unpainted src
+// pixels leave dst untouched.
+func compositeFade(dst, src *image.RGBA, f float64) {
+	for i := 0; i+3 < len(dst.Pix) && i+3 < len(src.Pix); i += 4 {
+		sa := float64(src.Pix[i+3]) / 255
+		w := sa * f
+		if w == 0 {
+			continue
+		}
+		da := float64(dst.Pix[i+3]) / 255
+		oa := w + da*(1-w)
+		if oa == 0 {
+			continue
+		}
+		dst.Pix[i] = uint8((float64(src.Pix[i])*w + float64(dst.Pix[i])*da*(1-w)) / oa * 255)
+		dst.Pix[i+1] = uint8((float64(src.Pix[i+1])*w + float64(dst.Pix[i+1])*da*(1-w)) / oa * 255)
+		dst.Pix[i+2] = uint8((float64(src.Pix[i+2])*w + float64(dst.Pix[i+2])*da*(1-w)) / oa * 255)
+		dst.Pix[i+3] = uint8(oa*255 + 0.5)
+	}
+}
+
 // frameCamera pushes the world-to-screen transform: the x/y world point
 // lands on the screen center, scaled by zoom. Empty keys interpolate to
 // nothing, so the transform is identity and costs one matrix. The caller
 // pops after drawing (or discards the context for offscreen layers).
-func frameCamera(dc *gg.Context, tl Timeline, w, h int, t float64) {
+func frameCamera(dc *gg.Context, cam []Keyframe, w, h int, t float64) {
 	dc.Push()
-	cam := Interpolate(tl.Camera, t)
-	zoom := propNum(cam, "zoom", 1)
+	props := Interpolate(cam, t)
+	zoom := propNum(props, "zoom", 1)
 	if zoom <= 0 {
 		zoom = 1
 	}
 	dc.Translate(float64(w)/2, float64(h)/2)
 	dc.Scale(zoom, zoom)
-	dc.Translate(-propNum(cam, "x", float64(w)/2), -propNum(cam, "y", float64(h)/2))
+	dc.Translate(-propNum(props, "x", float64(w)/2), -propNum(props, "y", float64(h)/2))
 }
 
 // drawTextOnPath lays runes along a flat [x1,y1,...] polyline, each
