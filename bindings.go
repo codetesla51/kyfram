@@ -258,6 +258,32 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		return &interpreter.Array{Elements: arr}
 	})
 
+	// sin/cos can't be expressed in-logos (no trig in std/math); bind
+	// them here so keyframe tables can be computed with loops.
+	vm.Register("pi", func(args ...interpreter.Object) interpreter.Object {
+		return &interpreter.Float{Value: math.Pi}
+	})
+	vm.Register("sin", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) != 1 {
+			return &interpreter.Error{Message: "sin(): exactly 1 argument required"}
+		}
+		f, err := numArg(args[0], "angle")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		return &interpreter.Float{Value: math.Sin(f)}
+	})
+	vm.Register("cos", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) != 1 {
+			return &interpreter.Error{Message: "cos(): exactly 1 argument required"}
+		}
+		f, err := numArg(args[0], "angle")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		return &interpreter.Float{Value: math.Cos(f)}
+	})
+
 	// stamp(base, overrides) returns a new keyframe table where
 	// every keyframe in base gets the overrides merged on top. Useful for
 	// stamping out N copies of an animation with one field changed.
