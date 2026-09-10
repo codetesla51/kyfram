@@ -52,17 +52,19 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 		return dc
 	}
 	sc := &tl.Scenes[idx]
-	// crossfade window: previous scene frozen at its end, this scene
-	// faded in on top via compositeFade
-	if sc.Fade > 0 && idx > 0 && t >= start && t < start+sc.Fade {
-		prev := &tl.Scenes[idx-1]
-		prevEnd := start // previous scene ends exactly where this one starts
-		renderScene(dc, tl, sceneLists(tl, prev), sceneGroups(tl, prev), prev.Camera, prevEnd)
-		f := (t - start) / sc.Fade
-		layer := gg.NewContext(w, h)
-		renderScene(layer, tl, sceneLists(tl, sc), sceneGroups(tl, sc), sc.Camera, t)
-		compositeFade(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), f)
-		return dc
+	// transition window: previous scene frozen at its end, this scene
+	// composited in by the chosen effect over its duration
+	if idx > 0 && sc.Transition != "" && sc.Transition != "cut" {
+		trDur := transitionDuration(normTransition(sc.Transition), sc.TransitionDur)
+		if t >= start && t < start+trDur {
+			prev := &tl.Scenes[idx-1]
+			prevEnd := start // previous scene ends exactly where this one starts
+			renderScene(dc, tl, sceneLists(tl, prev), sceneGroups(tl, prev), prev.Camera, prevEnd)
+			layer := gg.NewContext(w, h)
+			renderScene(layer, tl, sceneLists(tl, sc), sceneGroups(tl, sc), sc.Camera, t)
+			applyTransition(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), sc.Transition, (t-start)/trDur, w, h)
+			return dc
+		}
 	}
 	renderScene(dc, tl, sceneLists(tl, sc), sceneGroups(tl, sc), sc.Camera, t)
 	return dc

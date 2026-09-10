@@ -31,8 +31,8 @@ type Builder struct {
 func (b *Builder) Bind(vm *interpreter.Interpreter) {
 	b.curScene = -1
 	vm.Register("scene", func(args ...interpreter.Object) interpreter.Object {
-		if len(args) < 2 || len(args) > 3 {
-			return &interpreter.Error{Message: fmt.Sprintf("scene() takes 2 arguments plus optional transition, got %d", len(args))}
+		if len(args) < 2 || len(args) > 4 {
+			return &interpreter.Error{Message: fmt.Sprintf("scene() takes 2-4 arguments, got %d", len(args))}
 		}
 		dur, err := numArg(args[0], "duration")
 		if err != nil {
@@ -42,25 +42,29 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		if err != nil {
 			return &interpreter.Error{Message: err.Error()}
 		}
-		fade := 0.0
-		if len(args) == 3 {
-			tr, err := strArg(args[2], "transition")
+		tr := "cut"
+		trDur := 0.0
+		if len(args) >= 3 {
+			tr, err = strArg(args[2], "transition")
 			if err != nil {
 				return &interpreter.Error{Message: err.Error()}
 			}
-			switch tr {
-			case "fade":
-				fade = 0.5 // ponytail: fixed crossfade duration, add a duration arg when needed
-			case "", "cut":
-			default:
-				return &interpreter.Error{Message: fmt.Sprintf("scene: unknown transition %q (want \"fade\")", tr)}
+			if !contains(transitionModes, tr) {
+				return &interpreter.Error{Message: fmt.Sprintf("scene: unknown transition %q (want one of %v)%s", tr, transitionModes, suggest(transitionModes, tr))}
+			}
+		}
+		if len(args) == 4 {
+			trDur, err = numArg(args[3], "transition duration")
+			if err != nil {
+				return &interpreter.Error{Message: err.Error()}
 			}
 		}
 		b.tl.FPS = int(fps)
 		b.tl.Scenes = append(b.tl.Scenes, Scene{
-			Name:     fmt.Sprintf("scene%d", len(b.tl.Scenes)+1),
-			Duration: dur,
-			Fade:     fade,
+			Name:          fmt.Sprintf("scene%d", len(b.tl.Scenes)+1),
+			Duration:      dur,
+			Transition:    tr,
+			TransitionDur: trDur,
 		})
 		b.curScene = len(b.tl.Scenes) - 1
 		b.sceneSet = true

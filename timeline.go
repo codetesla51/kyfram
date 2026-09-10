@@ -27,15 +27,18 @@ type Timeline struct {
 
 // Scene is one segment of a multi-scene timeline. Duration is the
 // scene's own length in seconds (declared keyframes use scene-local
-// times, offset to absolute at bind). Fade > 0 crossfades from the
-// previous scene over that many seconds at the scene start.
+// times, offset to absolute at bind). Transition names the effect at
+// the scene's start ("fade", "to-black", "push-left", ...; empty or
+// "cut" = instant) and TransitionDur its length in seconds; zero uses
+// the mode's default.
 type Scene struct {
-	Name     string
-	Duration float64
-	Entities []Entity
-	Groups   []Group
-	Camera   []Keyframe
-	Fade     float64
+	Name          string
+	Duration      float64
+	Entities      []Entity
+	Groups        []Group
+	Camera        []Keyframe
+	Transition    string
+	TransitionDur float64
 }
 
 // AudioTrack lays one sound file under the video at Offset seconds.
