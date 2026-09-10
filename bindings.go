@@ -257,6 +257,39 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		}
 		return &interpreter.Array{Elements: arr}
 	})
+
+	// mergeKeyframes(base, overrides) returns a new keyframe table where
+	// every keyframe in base gets the overrides merged on top. Useful for
+	// stamping out N copies of an animation with one field changed.
+	vm.Register("mergeKeyframes", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) != 2 {
+			return &interpreter.Error{Message: "mergeKeyframes(base, overrides): exactly 2 arguments required"}
+		}
+		base, ok := args[0].(*interpreter.Table)
+		if !ok {
+			return &interpreter.Error{Message: "mergeKeyframes: first argument must be a table"}
+		}
+		over, ok := args[1].(*interpreter.Table)
+		if !ok {
+			return &interpreter.Error{Message: "mergeKeyframes: second argument must be a table"}
+		}
+		result := make(map[string]interpreter.Object, len(base.Pairs))
+		for timeKey, kfObj := range base.Pairs {
+			kf, ok := kfObj.(*interpreter.Table)
+			if !ok {
+				continue
+			}
+			merged := make(map[string]interpreter.Object, len(kf.Pairs)+len(over.Pairs))
+			for k, v := range kf.Pairs {
+				merged[k] = v
+			}
+			for k, v := range over.Pairs {
+				merged[k] = v
+			}
+			result[timeKey] = &interpreter.Table{Pairs: merged}
+		}
+		return &interpreter.Table{Pairs: result}
+	})
 }
 
 // scOffset returns the absolute time where the open scene starts

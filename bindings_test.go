@@ -152,3 +152,46 @@ camera(table{
 		t.Fatalf("camera = %+v", cam)
 	}
 }
+
+func TestMergeKeyframes(t *testing.T) {
+	tl, err := sceneScript(t, `
+scene(1, 30)
+let base = table{"0": table{x: 0, y: 0, w: 640, h: 360, color: "#ff0000"}, "1": table{x: 0, y: 0, w: 640, h: 360, color: "#ff0000"}}
+shape("s", "rect", mergeKeyframes(base, table{color: "#0000ff"}))
+`)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	dc := RenderFrame(tl, 0)
+	r, g, b, _ := dc.Image().At(320, 180).RGBA()
+	r8, g8, b8 := uint8(r>>8), uint8(g>>8), uint8(b>>8)
+	if b8 < 200 || r8 > 50 {
+		t.Fatalf("override: got #%02x%02x%02x, want blue", r8, g8, b8)
+	}
+}
+
+func TestMergeKeyframesBaseUntouched(t *testing.T) {
+	_, err := sceneScript(t, `
+scene(1, 30)
+let base = table{"0": table{x: 0, y: 0, w: 640, h: 360, color: "#ff0000"}}
+shape("a", "rect", mergeKeyframes(base, table{color: "#0000ff"}))
+shape("b", "rect", base)
+`)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+}
+
+func TestMergeKeyframesBadArgs(t *testing.T) {
+	_, err := sceneScript(t, `let x = mergeKeyframes()`)
+	if err == nil {
+		t.Fatal("expected arg error")
+	}
+}
+
+func TestMergeKeyframesTypeMismatch(t *testing.T) {
+	_, err := sceneScript(t, `mergeKeyframes(1, 2)`)
+	if err == nil {
+		t.Fatal("expected type error")
+	}
+}
