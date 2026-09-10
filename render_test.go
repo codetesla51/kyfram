@@ -551,3 +551,58 @@ func TestRenderTextOnPath(t *testing.T) {
 		t.Fatalf("flat text leaked %d pixels up-right", n)
 	}
 }
+
+// wrap prop breaks long text into multiple lines.
+func TestRenderTextWrap(t *testing.T) {
+	bright := func(img image.Image, x0, y0, x1, y1 int) int {
+		n := 0
+		for y := y0; y < y1; y += 2 {
+			for x := x0; x < x1; x += 2 {
+				if r, _, _, _ := img.At(x, y).RGBA(); r>>8 > 60 {
+					n++
+				}
+			}
+		}
+		return n
+	}
+	// long text without wrap: paint band is wide
+	nowrap := RenderFrame(Timeline{
+		Entities: []Entity{{
+			Name: "t", Kind: "text",
+			Keyframes: []Keyframe{{
+				Time: 0, Props: map[string]any{"content": "hello world this is long text", "x": 320.0, "y": 180.0, "size": 24.0, "color": "#ffffff"},
+			}},
+		}},
+	}, 0).Image()
+	// long text with wrap: paint spreads vertically
+	wrapped := RenderFrame(Timeline{
+		Entities: []Entity{{
+			Name: "t", Kind: "text",
+			Keyframes: []Keyframe{{
+				Time: 0, Props: map[string]any{"content": "hello world this is long text", "x": 320.0, "y": 180.0, "size": 24.0, "color": "#ffffff", "wrap": 200.0},
+			}},
+		}},
+	}, 0).Image()
+
+	nw := bright(nowrap, 200, 160, 440, 200)
+	wp := bright(wrapped, 200, 160, 440, 200)
+	// wrapped should have fewer bright pixels in the single-line band
+	// (text broke into shorter lines)
+	if wp >= nw {
+		t.Fatalf("wrap should reduce single-line paint: nowrap=%d wrapped=%d", nw, wp)
+	}
+}
+
+// frameCount uses math.Round, not +0.5 truncation.
+func TestFrameCountRounding(t *testing.T) {
+	// 1.5s @ 30fps = 45 frames exactly
+	got := frameCount(Timeline{Duration: 1.5, FPS: 30})
+	if got != 45 {
+		t.Fatalf("1.5s@30fps: got %d, want 45", got)
+	}
+	// edge: tiny duration still gives 1 frame
+	got = frameCount(Timeline{Duration: 0.001, FPS: 30})
+	if got != 1 {
+		t.Fatalf("tiny duration: got %d, want 1", got)
+	}
+}

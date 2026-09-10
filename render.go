@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/fogleman/gg"
@@ -201,7 +202,11 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 				drawTextOnPath(dc, content, pts)
 				return
 			}
-			dc.DrawStringAnchored(content, cx, cy, 0.5, 0.5)
+			if wrapW := propNum(props, "wrap", 0); wrapW > 0 {
+				drawWrappedText(dc, content, cx, cy, wrapW)
+			} else {
+				dc.DrawStringAnchored(content, cx, cy, 0.5, 0.5)
+			}
 		})
 	case "rect":
 		// x,y is the top-left corner; w,h default to a 100px square.
@@ -331,7 +336,7 @@ func drawWave(dc *gg.Context, props map[string]any, canvasW float64) {
 	amp := propNum(props, "amplitude", 30)
 	freq := propNum(props, "frequency", 1)
 	cyc := propNum(props, "phase", 0) / 360
-	step := 3.0
+	step := 1.0
 	if width < 0 {
 		step = -step
 	}
@@ -353,6 +358,47 @@ func drawWave(dc *gg.Context, props map[string]any, canvasW float64) {
 			break
 		}
 	}
+}
+
+// drawWrappedText breaks content on spaces to fit within wrapW pixels,
+// centering the block vertically around cy.
+func drawWrappedText(dc *gg.Context, content string, cx, cy, wrapW float64) {
+	lines := wrapLines(dc, content, wrapW)
+	// estimate line height from current font size (gg has no FontMetrics)
+	lineH := 0.0
+	if _, h := dc.MeasureString("Mj"); h > 0 {
+		lineH = h * 1.2
+	} else {
+		lineH = 28 // fallback
+	}
+	blockH := lineH * float64(len(lines))
+	y := cy - blockH/2 + lineH/2
+	for _, line := range lines {
+		dc.DrawStringAnchored(line, cx, y, 0.5, 0.5)
+		y += lineH
+	}
+}
+
+// wrapLines greedily breaks s on spaces so each line fits within maxW.
+func wrapLines(dc *gg.Context, s string, maxW float64) []string {
+	words := strings.Fields(s)
+	if len(words) == 0 {
+		return []string{""}
+	}
+	var lines []string
+	cur := words[0]
+	for _, w := range words[1:] {
+		try := cur + " " + w
+		tw, _ := dc.MeasureString(try)
+		if tw > maxW {
+			lines = append(lines, cur)
+			cur = w
+		} else {
+			cur = try
+		}
+	}
+	lines = append(lines, cur)
+	return lines
 }
 
 // requested, passing straight through otherwise so the common path
@@ -397,7 +443,7 @@ func RenderSequence(tl Timeline, dir string) error {
 // frameCount converts Duration*FPS to a frame total (minimum 1), so a
 // zero-length timeline still yields one still instead of nothing.
 func frameCount(tl Timeline) int {
-	n := int(tl.Duration*float64(tl.FPS) + 0.5)
+	n := int(math.Round(tl.Duration * float64(tl.FPS)))
 	if n < 1 {
 		n = 1
 	}

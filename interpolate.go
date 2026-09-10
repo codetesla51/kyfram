@@ -65,14 +65,15 @@ var easeNames = []string{
 	"cubicIn", "cubicOut", "cubicInOut", "sine",
 }
 
-// validEase reports whether name is a known curve.
+// validEase reports whether name is a known curve or a cubic-bezier(...).
 func validEase(name string) bool {
 	for _, e := range easeNames {
 		if e == name {
 			return true
 		}
 	}
-	return false
+	_, ok := parseBezier(name)
+	return ok
 }
 
 // applyEase reshapes the linear fraction into a named curve. Unknown
@@ -102,6 +103,9 @@ func applyEase(name string, f float64) float64 {
 		return 1 - 4*(1-f)*(1-f)*(1-f)
 	case "sine":
 		return 0.5 - 0.5*math.Cos(math.Pi*f)
+	}
+	if pts, ok := parseBezier(name); ok {
+		return bezierEval(pts, f)
 	}
 	return f
 }
@@ -207,6 +211,52 @@ func mixHex(a, b [3]float64, f float64) string {
 		uint8(a[0]+(b[0]-a[0])*f+0.5),
 		uint8(a[1]+(b[1]-a[1])*f+0.5),
 		uint8(a[2]+(b[2]-a[2])*f+0.5))
+}
+
+// parseBezier extracts control points from "cubic-bezier(x1,y1,x2,y2)".
+func parseBezier(s string) ([4]float64, bool) {
+	var pts [4]float64
+	s = strings.TrimSpace(s)
+	s = strings.TrimPrefix(s, "cubic-bezier")
+	s = strings.TrimSpace(s)
+	s = strings.Trim(s, "()")
+	parts := strings.Split(s, ",")
+	if len(parts) != 4 {
+		return pts, false
+	}
+	for i, p := range parts {
+		v, err := strconv.ParseFloat(strings.TrimSpace(p), 64)
+		if err != nil {
+			return pts, false
+		}
+		pts[i] = v
+	}
+	return pts, true
+}
+
+// bezierEval evaluates a cubic Bezier at input x (0..1).
+// P0=(0,0), P1=(pts[0],pts[1]), P2=(pts[2],pts[3]), P3=(1,1).
+// Uses Newton-Raphson to find the t parameter for the given x.
+func bezierEval(pts [4]float64, x float64) float64 {
+	if x <= 0 {
+		return 0
+	}
+	if x >= 1 {
+		return 1
+	}
+	// Newton-Raphson: find t where bezierX(t) = x
+	t := x // initial guess
+	for range 8 {
+		bx := 3*(1-t)*(1-t)*t*pts[0] + 3*(1-t)*t*t*pts[2] + t*t*t
+		dx := 3*(1-t)*(1-t)*pts[0] + 6*(1-t)*t*(pts[2]-pts[0]) + 3*t*t*(1-pts[2])
+		if math.Abs(dx) < 1e-6 {
+			break
+		}
+		t -= (bx - x) / dx
+		t = math.Max(0, math.Min(1, t))
+	}
+	// evaluate Y at t
+	return 3*(1-t)*(1-t)*t*pts[1] + 3*(1-t)*t*t*pts[3] + t*t*t
 }
 
 // copyProps duplicates a prop map so renders can't mutate keyframes.

@@ -65,7 +65,7 @@ shape("ball", "circle", table{
 ```
 
 ```sh
-go run ./cmd/kyfram render examples/intro.lgv --out out.mp4
+go run ./cmd/kyfram render --out out.mp4 examples/intro.lgv
 go run ./cmd/kyfram view examples/intro.lgv   # http://localhost:8080
 ```
 

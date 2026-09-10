@@ -106,7 +106,7 @@ func printHelpRender() {
 	fmt.Println("  -h, --help     Show this help")
 	fmt.Println()
 	fmt.Println("EXAMPLES:")
-	fmt.Println("  kyfram render examples/intro.lgv --out out.mp4")
+	fmt.Println("  kyfram render --out out.mp4 examples/intro.lgv")
 	fmt.Println("  kyfram render --crf 18 --preset slow examples/intro.lgv")
 	fmt.Println("  kyfram render --format png --out frame.png examples/intro.lgv")
 }
