@@ -10,7 +10,7 @@ let shrink = table{
 }
 
 scene(3, 30)
-shape("circle1", "circle", mergeKeyframes(slide, table{color: "#ff7675"}))
-shape("circle2", "circle", mergeKeyframes(slide, table{y: 260, color: "#55efc4"}))
-shape("circle3", "circle", mergeKeyframes(slide, table{y: 100, color: "#74b9ff"}))
-shape("pulse", "circle", mergeKeyframes(shrink, table{x: 320, y: 180, r: 80, color: "#a29bfe"}))
+shape("circle1", "circle", stamp(slide, table{color: "#ff7675"}))
+shape("circle2", "circle", stamp(slide, table{y: 260, color: "#55efc4"}))
+shape("circle3", "circle", stamp(slide, table{y: 100, color: "#74b9ff"}))
+shape("pulse", "circle", stamp(shrink, table{x: 320, y: 180, r: 80, color: "#a29bfe"}))

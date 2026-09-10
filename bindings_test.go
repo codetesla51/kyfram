@@ -157,7 +157,7 @@ func TestMergeKeyframes(t *testing.T) {
 	tl, err := sceneScript(t, `
 scene(1, 30)
 let base = table{"0": table{x: 0, y: 0, w: 640, h: 360, color: "#ff0000"}, "1": table{x: 0, y: 0, w: 640, h: 360, color: "#ff0000"}}
-shape("s", "rect", mergeKeyframes(base, table{color: "#0000ff"}))
+shape("s", "rect", stamp(base, table{color: "#0000ff"}))
 `)
 	if err != nil {
 		t.Fatalf("load: %v", err)
@@ -174,7 +174,7 @@ func TestMergeKeyframesBaseUntouched(t *testing.T) {
 	_, err := sceneScript(t, `
 scene(1, 30)
 let base = table{"0": table{x: 0, y: 0, w: 640, h: 360, color: "#ff0000"}}
-shape("a", "rect", mergeKeyframes(base, table{color: "#0000ff"}))
+shape("a", "rect", stamp(base, table{color: "#0000ff"}))
 shape("b", "rect", base)
 `)
 	if err != nil {
@@ -183,14 +183,14 @@ shape("b", "rect", base)
 }
 
 func TestMergeKeyframesBadArgs(t *testing.T) {
-	_, err := sceneScript(t, `let x = mergeKeyframes()`)
+	_, err := sceneScript(t, `let x = stamp()`)
 	if err == nil {
 		t.Fatal("expected arg error")
 	}
 }
 
 func TestMergeKeyframesTypeMismatch(t *testing.T) {
-	_, err := sceneScript(t, `mergeKeyframes(1, 2)`)
+	_, err := sceneScript(t, `stamp(1, 2)`)
 	if err == nil {
 		t.Fatal("expected type error")
 	}
