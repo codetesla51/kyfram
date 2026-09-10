@@ -59,13 +59,13 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		}
 		kfs, err := keyframesArg(args[2])
 		if err != nil {
-			return &interpreter.Error{Message: err.Error()}
+			return &interpreter.Error{Message: fmt.Sprintf("shape %q: %v", name, err)}
 		}
 		group := ""
 		if len(args) == 4 {
 			group, err = strArg(args[3], "group")
 			if err != nil {
-				return &interpreter.Error{Message: err.Error()}
+				return &interpreter.Error{Message: fmt.Sprintf("shape %q: %v", name, err)}
 			}
 		}
 		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs, Group: group})
@@ -81,13 +81,13 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		}
 		kfs, err := keyframesArg(args[1])
 		if err != nil {
-			return &interpreter.Error{Message: err.Error()}
+			return &interpreter.Error{Message: fmt.Sprintf("text %q: %v", name, err)}
 		}
 		group := ""
 		if len(args) == 3 {
 			group, err = strArg(args[2], "group")
 			if err != nil {
-				return &interpreter.Error{Message: err.Error()}
+				return &interpreter.Error{Message: fmt.Sprintf("text %q: %v", name, err)}
 			}
 		}
 		b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: "text", Keyframes: kfs, Group: group})
@@ -103,7 +103,7 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		}
 		kfs, err := keyframesArg(args[1])
 		if err != nil {
-			return &interpreter.Error{Message: err.Error()}
+			return &interpreter.Error{Message: fmt.Sprintf("group %q: %v", name, err)}
 		}
 		b.tl.Groups = append(b.tl.Groups, Group{Name: name, Keyframes: kfs})
 		return interpreter.NULL
@@ -141,7 +141,7 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		}
 		kfs, err := keyframesArg(args[0])
 		if err != nil {
-			return &interpreter.Error{Message: err.Error()}
+			return &interpreter.Error{Message: fmt.Sprintf("camera: %v", err)}
 		}
 		b.tl.Camera = kfs
 		return interpreter.NULL
@@ -235,10 +235,14 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 }
 
 // Build returns the declared Timeline. A script with entities but no
-// scene() has no header to render under, so that's an error.
+// scene() has no header to render under, so that's an error. Entities
+// then pass fail-fast validation (kind/prop/group checks).
 func (b *Builder) Build() (Timeline, error) {
 	if !b.sceneSet {
 		return Timeline{}, fmt.Errorf("no scene() declaration")
+	}
+	if err := b.validate(); err != nil {
+		return Timeline{}, err
 	}
 	return b.tl, nil
 }

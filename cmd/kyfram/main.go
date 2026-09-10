@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/codetesla51/logos/interpreter"
 	kyfram "gitlab.com/codetesla51/kyfram"
@@ -52,6 +53,12 @@ func main() {
 			return
 		}
 		runView(os.Args[2:])
+	case "new":
+		if hasHelp(os.Args[2:]) {
+			printHelpNew()
+			return
+		}
+		runNew(os.Args[2:])
 	default:
 		fmt.Fprintf(os.Stderr, "kyfram: unknown command %q\n\n", os.Args[1])
 		printHelp()
@@ -78,6 +85,7 @@ func printHelp() {
 	fmt.Println("COMMANDS:")
 	fmt.Println("  render    Render a .lgv script to video or image")
 	fmt.Println("  view      Live preview with scrub + hot reload")
+	fmt.Println("  new       Scaffold a starter project")
 	fmt.Println("  help      Show help (try \"help render\")")
 	fmt.Println()
 	fmt.Println("OPTIONS:")
@@ -123,6 +131,63 @@ func printHelpView() {
 	fmt.Println("  -h, --help     Show this help")
 	fmt.Println()
 	fmt.Println("then open http://localhost:8080")
+}
+
+func printHelpNew() {
+	fmt.Println("kyfram new — scaffold a starter project")
+	fmt.Println()
+	fmt.Println("USAGE:")
+	fmt.Println("  kyfram new <name>")
+	fmt.Println()
+	fmt.Println("Creates:")
+	fmt.Println("  <name>/scene.lgv    starter script (ball + text, 4s)")
+	fmt.Println("  <name>/assets/       images and fonts go here")
+	fmt.Println("  <name>/out/          rendered videos land here")
+	fmt.Println()
+	fmt.Println("Then:")
+	fmt.Println("  kyfram render --out <name>/out/demo.mp4 <name>/scene.lgv")
+}
+
+// runNew scaffolds a starter project directory.
+func runNew(args []string) {
+	if len(args) != 1 {
+		fmt.Fprintln(os.Stderr, "usage: kyfram new <name>")
+		os.Exit(1)
+	}
+	name := args[0]
+	if _, err := os.Stat(name); err == nil {
+		fmt.Fprintf(os.Stderr, "%s: already exists\n", name)
+		os.Exit(1)
+	}
+	dirs := []string{name, filepath.Join(name, "assets"), filepath.Join(name, "out")}
+	for _, d := range dirs {
+		if err := os.MkdirAll(d, 0o755); err != nil {
+			fmt.Fprintf(os.Stderr, "mkdir %s: %v\n", d, err)
+			os.Exit(1)
+		}
+	}
+	scene := `scene(4, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: "#101014"},
+})
+
+shape("ball", "circle", table{
+  "0": table{x: 80, y: 300, r: 40, color: "#e64c40", ease: "easeOut"},
+  "4": table{x: 560, y: 300, r: 40, color: "#40a3e6"},
+})
+
+shape("title", "text", table{
+  "0": table{x: 320, y: 60, content: "my first kyfram scene", size: 34, color: "#ffffff", ease: "cubic-bezier(0.68, -0.55, 0.27, 1.55)"},
+  "4": table{x: 320, y: 70, content: "my first kyfram scene", size: 34, color: "#ffffff"},
+})
+`
+	if err := os.WriteFile(filepath.Join(name, "scene.lgv"), []byte(scene), 0o644); err != nil {
+		fmt.Fprintf(os.Stderr, "write scene.lgv: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("created %s/ — edit scene.lgv, then:\n", name)
+	fmt.Printf("  kyfram render --out %s/out/demo.mp4 %s/scene.lgv\n", name, name)
 }
 
 // varFlags collects repeatable --var key=value flags.
