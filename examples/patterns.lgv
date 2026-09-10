@@ -1,16 +1,82 @@
-let slide = table{
-  "0": table{x: 60, y: 180, r: 50, color: "#e94560"},
-  "1": table{x: 320, y: 180, r: 50, color: "#e94560"},
-  "2": table{x: 580, y: 180, r: 50, color: "#e94560"}
-}
-let shrink = table{
-  "0": table{x: 320, y: 180, r: 100, color: "#0f3460"},
-  "1": table{x: 320, y: 180, r: 40, color: "#0f3460"},
-  "2": table{x: 320, y: 180, r: 100, color: "#0f3460"}
+// patterns.lgv — programmatic idioms: user functions, loops, computed keyframes.
+// Three things a .lgv can do with real programming logic:
+//   1. a user fn() synthesizes caption keyframes, called in a loop over words
+//   2. a loop + sin()/pi() builds sine-wave keyframes (two rows, two phase/amp)
+//   3. a loop-built keyframe table glides a group ("clip") along a track
+// B&W palette (#ffffff / #6a6a78 / #131318 / #101015), Geist typeface, 1920x1080.
+
+let ink = "#ffffff"
+let muted = "#6a6a78"
+let bg = "#101015"
+let fnt = "examples/assets/fonts/Geist-Bold.ttf"
+
+scene(11, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "11": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+})
+
+// --- 1. user-defined function: caption keyframes (pop in at t0, alpha 1 at t0+0.09, hold, fade out)
+let caption = fn(content, x, y, size, color, t0, t1, hold) {
+  let kf = table{}
+  let pop = t0 + 0.09
+  kf[toStr(t0)] = table{content: content, x: x, y: y, size: size, color: color, font: fnt, alpha: 0, scale: 1.06, ease: "cubicOut"}
+  kf[toStr(pop)] = table{content: content, x: x, y: y, size: size, color: color, font: fnt, alpha: 1, scale: 1.0}
+  kf[toStr(t0 + hold)] = table{content: content, x: x, y: y, size: size, color: color, font: fnt, alpha: 1, scale: 1.0}
+  kf[toStr(t1)] = table{content: content, x: x, y: y, size: size, color: color, font: fnt, alpha: 0, scale: 1.0}
+  return kf
 }
 
-scene(3, 30)
-shape("circle1", "circle", stamp(slide, table{color: "#ff7675"}))
-shape("circle2", "circle", stamp(slide, table{y: 260, color: "#55efc4"}))
-shape("circle3", "circle", stamp(slide, table{y: 100, color: "#74b9ff"}))
-shape("pulse", "circle", stamp(shrink, table{x: 320, y: 180, r: 80, color: "#a29bfe"}))
+let words = ["data", "driven", "renders"]
+for i, w in words {
+  let st = 0.4 + 1.9 * i
+  text(w, caption(w, 960, 250, 92, ink, st, st + 1.55, 1.2))
+}
+
+// --- 2. loop-built sine waves with sin()/pi(): rows of balls riding a wave
+let sineKeys = fn(bx, baseY, amp, period, phase, dur) {
+  let kf = table{}
+  let n = int(dur / 0.05 + 0.5)
+  for i in range(0, n) {
+    let t = 0.05 * i
+    let a = 6.28318 * ((t) / period) + phase
+    let y = baseY + amp * sin(a)
+    kf[toStr(t)] = table{x: bx, y: y, alpha: 1}
+  }
+  return kf
+}
+
+for i in range(0, 11) {
+  let bx = 140 + 152 * i
+  let sk = sineKeys(bx, 560, 90, 4, 0.62 * i, 10)
+  shape("ball" + toStr(i), "circle", stamp(sk, table{r: 16, color: ink}))
+  let sk2 = sineKeys(bx, 760, 45, 2.5, 3.1 + 0.62 * i, 10)
+  shape("dot" + toStr(i), "circle", stamp(sk2, table{r: 10, color: muted}))
+}
+
+// --- 3. computed keyframe table + group: a clip gliding along a track
+shape("track", "rect", table{
+  "0": table{x: 0, y: 962, w: 1920, h: 4, color: muted, alpha: 0.45},
+  "11": table{x: 0, y: 962, w: 1920, h: 4, color: muted, alpha: 0.45}
+})
+
+let gkf = table{}
+for i in range(0, 11) {
+  let t = i * 1.0
+  gkf[toStr(t)] = table{x: 160 + 160 * i, y: 920, alpha: 1, ease: "easeInOut"}
+}
+group("carriage", gkf)
+
+shape("clip", "roundRect", table{
+  "0": table{x: 0, y: 0, w: 130, h: 60, r: 14, color: ink},
+  "11": table{x: 0, y: 0, w: 130, h: 60, r: 14, color: ink}
+}, "carriage")
+shape("pin", "circle", table{
+  "0": table{x: 0, y: -52, r: 17, color: ink},
+  "11": table{x: 0, y: -52, r: 17, color: ink}
+}, "carriage")
+shape("notch", "circle", table{
+  "0": table{x: 42, y: 0, r: 9, color: bg},
+  "11": table{x: 42, y: 0, r: 9, color: bg}
+}, "carriage")
