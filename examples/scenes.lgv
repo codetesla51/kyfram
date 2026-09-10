@@ -19,5 +19,5 @@ shape("panel2", "roundRect", table{
   "0": table{x: 120, y: 60, w: 400, h: 240, radius: 24, color: "#301818"}
 })
 shape("outro", "text", table{
-  "0": table{x: 320, y: 180, content: "scene two", size: 44, color: "#f0d8d8", ease: "easeIn"}
+  "0": table{x: 320, y: 260, content: "scene two", size: 44, color: "#f0d8d8", ease: "easeIn"}
 })
