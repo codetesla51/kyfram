@@ -1,0 +1,403 @@
+// kyfram_ad.lgv — a 26s ad for kyfram: "video you declare, not direct."
+//
+// A single edge-tts narration drives everything: word boundaries are measured
+// first, scene cuts are placed in the ~0.86s gaps between sentences, and each
+// spoken word pops a caption exactly when it is heard. Six beats:
+//   1. brand slam        "Kyfram."
+//   2. tagline           "Video you declare, not direct."   (dot grid + flowing words)
+//   3. the pitch         "Motion graphics from a plain text file." (file -> animation)
+//   4. capability reel   "Scenes. Shapes. Transitions. Camera moves." (4 fast mini-scenes)
+//   5. the workflow      "Retime it. Recolor it. Re-render in seconds." (one showcased ball)
+//   6. bookend           "Kyfram. Video you declare, not direct." (lockup, fade to black)
+//
+// Render (1080p): kyfram render --width 1920 --height 1080 --crf 17
+//                       --out /tmp/kyfram_ad.mp4 examples/kyfram_ad.lgv
+// Preview:      kyfram view examples/kyfram_ad.lgv
+//
+// Retune: edit the narration text; every caption is tied to the returned
+// word timings, so timing follows the voice automatically. scene() durations
+// are the measured sentence boundaries — re-measure with tts() before editing.
+
+let s2_start   = 1.6       // "Kyfram." ends 0.75; 0.85s of air before "Video"
+let s3_start   = 4.5875    // after "direct" (3.725)
+let s4a_start  = 7.85      // after "file" (6.9875)
+let s4b_start  = 9.525     // after "Scenes" (8.675)
+let s4c_start  = 11.0875   // after "Shapes" (10.2375)
+let s4d_start  = 12.8875   // after "Transitions" (12.0375)
+let s5_start   = 14.775    // after "moves" (13.9125)
+let s6_start   = 20.375    // after "seconds" (19.5125)
+let s6_end     = 26.3      // audio ends 24.86 + a 1.4s tail to land the lockup
+
+let ink   = "#f2f2f5"   // headline paper-white
+let gold  = "#e6c040"   // brand gold
+let slate = "#8a8a9a"   // secondary
+let bg    = "#0a0a12"   // deep space
+
+// Word-synced caption entity: pops in on the word, holds while spoken
+// (hold=1) or fades out after (hold=0). t0/t1 are scene-LOCAL times.
+let capword = fn(idx, word, x, y, size, color, t0, t1, hold) {
+  if hold == 1 {
+    shape("cap" + str(idx), "text", table{
+      str(t0): table{content: word, x: x, y: y, size: size, color: color, alpha: 0, scale: 0.84, ease: "cubicOut"},
+      str(t0 + 0.09): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0},
+      str(t1 + 0.2): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0},
+    })
+  } else {
+    shape("cap" + str(idx), "text", table{
+      str(t0): table{content: word, x: x, y: y, size: size, color: color, alpha: 0, scale: 0.84, ease: "cubicOut"},
+      str(t0 + 0.09): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0},
+      str(t1): table{content: word, x: x, y: y, size: size, color: color, alpha: 1, scale: 1.0, ease: "easeIn"},
+      str(t1 + 0.12): table{content: word, x: x, y: y, size: size, color: color, alpha: 0, scale: 1.05},
+    })
+  }
+}
+
+// The narration — the source of all timing.
+let v = tts("Kyfram. Video you declare, not direct. Motion graphics from a plain text file. Scenes. Shapes. Transitions. Camera moves. Retime it. Recolor it. Re-render in seconds. Kyfram. Video you declare, not direct.", "/tmp/kyfram_ad.wav", table{
+    voice: "en-US-ChristopherNeural",
+    rate: "+0%",
+})
+
+audio(v.audio)
+
+// ======================================================================
+// BEAT 1 — brand slam (0 .. 1.6)        voice: "Kyfram."     (0.10-0.75)
+// ======================================================================
+scene(1.6, 30)
+shape("bg1", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: "#000000"},
+  "0.4": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.6": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+// the wordmark, one letter at a time — stagger sells the lockup
+let letters = ["K", "Y", "F", "R", "A", "M"]
+let lx = [590, 738, 886, 1034, 1182, 1330]
+for i, ch in letters {
+  text("let" + str(i), table{
+    str(0.10 + 0.07 * i): table{content: ch, x: lx[i], y: 480, size: 150, color: ink, alpha: 0, scale: 1.35, ease: "cubicOut"},
+    str(0.10 + 0.07 * i + 0.16): table{content: ch, x: lx[i], y: 480, size: 150, color: ink, alpha: 1, scale: 1.0},
+    "1.6": table{content: ch, x: lx[i], y: 480, size: 150, color: ink, alpha: 1, scale: 1.0},
+  })
+}
+// gold rule — lands on the beat after the voice finishes
+shape("rule1", "rect", table{
+  "0.75": table{x: 960, y: 640, w: 0, h: 8, color: gold, alpha: 0, ease: "cubicOut"},
+  "1.15": table{x: 400, y: 640, w: 1120, h: 8, color: gold, alpha: 1},
+  "1.6": table{x: 400, y: 640, w: 1120, h: 8, color: gold, alpha: 1},
+})
+text("sub1", table{
+  "0.95": table{content: "MOTION GRAPHICS · DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, alpha: 0, ease: "cubicOut"},
+  "1.35": table{content: "MOTION GRAPHICS · DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, alpha: 0.9},
+  "1.6": table{content: "MOTION GRAPHICS · DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, alpha: 0.9},
+})
+text("ver1", table{
+  "1.0": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, alpha: 0.35},
+  "1.6": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, alpha: 0.35},
+})
+
+// ======================================================================
+// BEAT 2 — the tagline (1.6 .. 4.5875)  "Video you declare, not direct."
+// ======================================================================
+scene(2.9875, 30, "fade", 0.4)
+shape("bg2", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "2.9875": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+// faint dot grid
+let gy = [120, 260, 400, 540, 680, 820, 960]
+for i, yy in gy {
+  shape("dotr" + str(i), "rect", table{
+    "0": table{x: 0, y: yy, w: 1920, h: 1, color: "#14141f", alpha: 1},
+    "2.9875": table{x: 0, y: yy, w: 1920, h: 1, color: "#14141f", alpha: 1},
+  })
+}
+text("prompt", table{
+  "0.1": table{content: "KYFRAM  ·  kai-fram", x: 960, y: 170, size: 30, color: slate, alpha: 0, ease: "cubicOut"},
+  "0.5": table{content: "KYFRAM  ·  kai-fram", x: 960, y: 170, size: 30, color: slate, alpha: 0.75},
+  "2.9875": table{content: "KYFRAM  ·  kai-fram", x: 960, y: 170, size: 30, color: slate, alpha: 0.75},
+})
+// the phrase builds left to right; each word lands on its own beat
+for i, w in v.words {
+  if i >= 1 {
+    if i <= 5 {
+      let t0 = w.start - s2_start
+      let t1 = w.end - s2_start
+      if i == 1 { capword(i, w.word, 374.8, 560, 88, gold, 0, t1, 1) }     // Video
+      if i == 2 { capword(i, w.word, 626.5, 560, 88, gold, t0, t1, 1) } // you
+      if i == 3 { capword(i, w.word, 932.7, 560, 88, gold, t0, t1, 1) } // declare
+      if i == 4 { capword(i, w.word, 1239.0, 560, 88, gold, t0, t1, 1) } // not
+      if i == 5 { capword(i, w.word, 1517.9, 560, 88, gold, t0, t1, 1) } // direct
+    }
+  }
+}
+
+// ======================================================================
+// BEAT 3 — the pitch (4.5875 .. 7.85)   "Motion graphics from a plain text file."
+// ======================================================================
+scene(3.2625, 30, "fade", 0.4)
+shape("bg3", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "3.2625": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+// captions: "Motion graphics" (row 1) / "from a plain text file" (row 2)
+for i, w in v.words {
+  if i >= 6 {
+    if i <= 12 {
+      let t0 = w.start - s3_start
+      let t1 = w.end - s3_start
+      if i == 6 { capword(i, w.word, 767.8, 200, 72, ink, t0, t1, 1) }
+      if i == 7 { capword(i, w.word, 1107.6, 200, 72, gold, t0, t1, 1) }
+      if i == 8 { capword(i, w.word, 664.2, 290, 58, ink, t0, t1, 1) }
+      if i == 9 { capword(i, w.word, 776.1, 290, 58, ink, t0, t1, 1) }
+      if i == 10 { capword(i, w.word, 906.1, 290, 58, ink, t0, t1, 1) }
+      if i == 11 { capword(i, w.word, 1089.9, 290, 58, gold, t0, t1, 1) }
+      if i == 12 { capword(i, w.word, 1255.8, 290, 58, ink, t0, t1, 1) }
+    }
+  }
+}
+// the file -> animation story: a document card types itself on the left,
+// the rendered ball glides on the right
+shape("card", "roundRect", table{
+  "0.15": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#0f1019", alpha: 0, scale: 0.94, ease: "cubicOut"},
+  "0.55": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#0f1019", alpha: 1, scale: 1.0},
+  "2.0": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#12141f", alpha: 1, scale: 1.0},
+  "3.2625": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#12141f", alpha: 1, scale: 1.0},
+})
+shape("frame3", "roundRect", table{
+  "0.2": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#0e0f18", alpha: 0, scale: 0.94, ease: "cubicOut"},
+  "0.6": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#0e0f18", alpha: 1, scale: 1.0},
+  "3.2625": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#0e0f18", alpha: 1, scale: 1.0},
+})
+// the ball that "renders" on the right
+shape("ball3", "circle", table{
+  "0.5": table{x: 1390, y: 620, r: 70, color: gold, alpha: 0, scale: 0.8, ease: "cubicOut"},
+  "0.9": table{x: 1390, y: 620, r: 70, color: gold, alpha: 1, scale: 1.0},
+  "1.5": table{x: 1420, y: 560, r: 70, color: gold, alpha: 1, scale: 1.0},
+  "2.2": table{x: 1480, y: 620, r: 70, color: gold, alpha: 1, scale: 1.05, ease: "cubicInOut"},
+  "3.2625": table{x: 1510, y: 660, r: 70, color: gold, alpha: 1, scale: 1.0},
+})
+// file lines that type themselves in, staggered
+let bars = [440, 320, 480, 360, 450, 300, 420, 380]
+for i, bw in bars {
+  shape("bar" + str(i), "rect", table{
+    str(0.6 + 0.11 * i): table{x: 380, y: 470 + 50 * i, w: bw, h: 18, color: "#23263a", alpha: 0, ease: "cubicOut"},
+    str(0.72 + 0.11 * i): table{x: 380, y: 470 + 50 * i, w: bw, h: 18, color: "#2b2e44", alpha: 1},
+    "2.2": table{x: 380, y: 470 + 50 * i, w: bw, h: 18, color: "#2b2e44", alpha: 1},
+  })
+}
+// the "reading" caret sweeps the file
+shape("caret", "rect", table{
+  "0.6": table{x: 356, y: 450, w: 8, h: 60, color: gold, alpha: 0, ease: "cubicOut"},
+  "0.75": table{x: 356, y: 450, w: 8, h: 60, color: gold, alpha: 0.9},
+  "2.1": table{x: 356, y: 880, w: 8, h: 60, color: gold, alpha: 0.9, ease: "sine"},
+  "2.4": table{x: 356, y: 880, w: 8, h: 60, color: gold, alpha: 0},
+})
+
+// ======================================================================
+// BEAT 4 — capability reel (7.85 .. 14.775)  hard cut in, fades between
+// ======================================================================
+// --- 4a: Scenes. ---
+scene(1.675, 30, "cut")
+shape("bg4a", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.675": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+shape("splitA", "rect", table{
+  "0": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69"},
+  "0.5": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69", ease: "easeInOut"},
+  "1.05": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69", alpha: 0.2},
+  "1.675": table{x: 500, y: 480, w: 920, h: 150, color: "#3a3f69", alpha: 0.2},
+})
+shape("splitB", "rect", table{
+  "0": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 0.2},
+  "0.5": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 0.2, ease: "easeInOut"},
+  "1.05": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 1},
+  "1.675": table{x: 500, y: 650, w: 920, h: 150, color: gold, alpha: 1},
+})
+for i, w in v.words {
+  if i == 13 { capword(i, w.word, 960, 230, 100, gold, 0, w.end - s4a_start, 1) }
+}
+// --- 4b: Shapes. ---
+scene(1.5625, 30, "fade", 0.25)
+shape("bg4b", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.5625": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+shape("circ4", "circle", table{
+  "0": table{x: 960, y: 600, r: 100, color: gold, alpha: 1, ease: "easeInOut"},
+  "0.4": table{x: 960, y: 600, r: 100, color: gold, alpha: 1},
+  "0.85": table{x: 960, y: 600, r: 100, color: gold, alpha: 0, scale: 1.15},
+  "1.5625": table{x: 960, y: 600, r: 100, color: gold, alpha: 0, scale: 1.15},
+})
+shape("star4", "star", table{
+  "0.5": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 0, scale: 0.7, ease: "cubicOut"},
+  "0.95": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 1, scale: 1.0},
+  "1.3": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 1, scale: 1.0, rotate: 14, ease: "cubicInOut"},
+  "1.5625": table{x: 960, y: 600, r: 90, points: 5, inner: 0.5, color: "coral", alpha: 1, scale: 1.0, rotate: 14},
+})
+for i, w in v.words {
+  if i == 14 { capword(i, w.word, 960, 230, 100, gold, 0, w.end - s4b_start, 1) }
+}
+// --- 4c: Transitions. ---
+scene(1.8, 30, "fade", 0.25)
+shape("bg4c", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.8": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+shape("tbar1", "rect", table{
+  "0.15": table{x: 480, y: 520, w: 300, h: 120, color: gold, alpha: 0, scale: 0.82, ease: "cubicOut"},
+  "0.4": table{x: 480, y: 520, w: 300, h: 120, color: gold, alpha: 1, scale: 1.0},
+  "1.8": table{x: 480, y: 520, w: 300, h: 120, color: gold, alpha: 1, scale: 1.0},
+})
+shape("tbar2", "rect", table{
+  "0.32": table{x: 810, y: 520, w: 300, h: 120, color: "#3a3f69", alpha: 0, scale: 0.82, ease: "cubicOut"},
+  "0.57": table{x: 810, y: 520, w: 300, h: 120, color: "#3a3f69", alpha: 1, scale: 1.0},
+  "1.8": table{x: 810, y: 520, w: 300, h: 120, color: "#3a3f69", alpha: 1, scale: 1.0},
+})
+shape("tbar3", "rect", table{
+  "0.49": table{x: 1140, y: 520, w: 300, h: 120, color: "coral", alpha: 0, scale: 0.82, ease: "cubicOut"},
+  "0.74": table{x: 1140, y: 520, w: 300, h: 120, color: "coral", alpha: 1, scale: 1.0},
+  "1.8": table{x: 1140, y: 520, w: 300, h: 120, color: "coral", alpha: 1, scale: 1.0},
+})
+for i, w in v.words {
+  if i == 15 { capword(i, w.word, 960, 230, 74, gold, 0, w.end - s4c_start, 1) }
+}
+// --- 4d: Camera moves. ---
+scene(1.8875, 30, "fade", 0.25)
+shape("bg4d", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "1.8875": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+shape("viewport", "roundRect", table{
+  "0.1": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#0e1019", alpha: 0, scale: 0.96, ease: "cubicOut"},
+  "0.5": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#0e1019", alpha: 1, scale: 1.0},
+  "1.8875": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#0e1019", alpha: 1, scale: 1.0},
+})
+for i, w in v.words {
+  if i == 16 { capword(i, w.word, 960, 130, 90, gold, 0, w.end - s4d_start, 1) }
+  if i == 17 { capword(i, w.word, 960, 185, 44, ink, w.start - s4d_start, w.end - s4d_start, 1) }
+}
+// the world that pans under the viewport
+group("world", table{
+  "0": table{x: 0, y: 0},
+  "0.45": table{x: 0, y: 0, ease: "linear"},
+  "2.1": table{x: -640, y: 0},
+  "1.8875": table{x: -640, y: 0},
+})
+shape("sun4", "circle", table{
+  "0.1": table{x: 1000, y: 380, r: 62, color: gold, alpha: 0, ease: "cubicOut"},
+  "0.6": table{x: 1000, y: 380, r: 62, color: gold, alpha: 1},
+  "1.8875": table{x: 1000, y: 380, r: 62, color: gold, alpha: 1}
+}, "world")
+shape("hillfar3", "rect", table{
+  "0.1": table{x: 0, y: 560, w: 2600, h: 200, color: "#232642", alpha: 0, ease: "cubicOut"},
+  "0.6": table{x: 0, y: 560, w: 2600, h: 200, color: "#232642", alpha: 1},
+  "1.8875": table{x: 0, y: 560, w: 2600, h: 200, color: "#232642", alpha: 1}
+}, "world")
+shape("hillnear3", "rect", table{
+  "0.1": table{x: 300, y: 660, w: 2500, h: 120, color: "#1a1d34", alpha: 0, ease: "cubicOut"},
+  "0.6": table{x: 300, y: 660, w: 2500, h: 120, color: "#1a1d34", alpha: 1},
+  "1.8875": table{x: 300, y: 660, w: 2500, h: 120, color: "#1a1d34", alpha: 1}
+}, "world")
+shape("ridge3", "rect", table{
+  "0.1": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2b2f52", alpha: 0, ease: "cubicOut"},
+  "0.6": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2b2f52", alpha: 1},
+  "1.8875": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2b2f52", alpha: 1}
+}, "world")
+shape("ground4", "rect", table{
+  "0.1": table{x: 0, y: 760, w: 2600, h: 12, color: "#31375f", alpha: 0, ease: "cubicOut"},
+  "0.6": table{x: 0, y: 760, w: 2600, h: 12, color: "#31375f", alpha: 1},
+  "1.8875": table{x: 0, y: 760, w: 2600, h: 12, color: "#31375f", alpha: 1}
+}, "world")
+
+// ======================================================================
+// BEAT 5 — the workflow (14.775 .. 20.375)
+//          "Retime it. Recolor it. Re-render in seconds."
+// ======================================================================
+scene(5.6, 30, "fade", 0.4)
+shape("bg5", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "5.6": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+})
+for i, w in v.words {
+  if i >= 18 {
+    if i <= 24 {
+      let t0 = w.start - s5_start
+      let t1 = w.end - s5_start
+      if i == 18 { capword(i, w.word, 593.8, 200, 92, ink, t0, t1, 0) }
+      if i == 19 { capword(i, w.word, 857.0, 200, 92, ink, t0, t1, 0) }
+      if i == 20 { capword(i, w.word, 1148.6, 200, 92, gold, t0, t1, 0) }
+      if i == 21 { capword(i, w.word, 1440.2, 200, 92, ink, t0, t1, 0) }
+      if i == 22 { capword(i, w.word, 681.0, 300, 88, gold, t0, t1, 0) }
+      if i == 23 { capword(i, w.word, 1014.6, 300, 88, ink, t0, t1, 0) }
+      if i == 24 { capword(i, w.word, 1293.5, 300, 88, ink, t0, t1, 0) }
+    }
+  }
+}
+// ghosts mark the tween path; the lead ball does all three verbs
+shape("ghost1", "circle", table{
+  "0": table{x: 520, y: 620, r: 66, color: gold, alpha: 0.13},
+  "5.6": table{x: 520, y: 620, r: 66, color: gold, alpha: 0.13},
+})
+shape("ghost2", "circle", table{
+  "0": table{x: 970, y: 620, r: 66, color: gold, alpha: 0.13},
+  "5.6": table{x: 970, y: 620, r: 66, color: gold, alpha: 0.13},
+})
+shape("ghost3", "circle", table{
+  "0": table{x: 1420, y: 620, r: 66, color: gold, alpha: 0.13},
+  "5.6": table{x: 1420, y: 620, r: 66, color: gold, alpha: 0.13},
+})
+shape("ball5", "circle", table{
+  "0": table{x: 400, y: 620, r: 76, color: gold, ease: "cubicInOut"},
+  "0.55": table{x: 950, y: 620, r: 76, color: gold, ease: "cubicInOut"},
+  "1.0": table{x: 1520, y: 620, r: 76, color: gold},
+  "1.65": table{x: 1520, y: 620, r: 76, color: gold, ease: "linear"},
+  "2.2": table{x: 1520, y: 620, r: 76, color: "coral"},
+  "2.7": table{x: 1520, y: 620, r: 76, color: "mint"},
+  "3.3125": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0, ease: "cubicOut"},
+  "3.62": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.26},
+  "3.85": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0},
+  "4.05": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0, ease: "cubicOut"},
+  "4.35": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.16},
+  "4.6": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0},
+  "5.6": table{x: 1520, y: 620, r: 76, color: "mint", scale: 1.0},
+})
+shape("ring5", "arc", table{
+  "3.4": table{x: 1520, y: 620, r: 80, start: 0, end: 360, width: 6, color: gold, alpha: 0, ease: "cubicOut"},
+  "3.62": table{x: 1520, y: 620, r: 80, start: 0, end: 360, width: 6, color: gold, alpha: 0.6},
+  "3.95": table{x: 1520, y: 620, r: 175, start: 0, end: 360, width: 5, color: gold, alpha: 0},
+  "5.6": table{x: 1520, y: 620, r: 175, start: 0, end: 360, width: 5, color: gold, alpha: 0},
+})
+shape("wire5", "rect", table{
+  "0": table{x: 340, y: 780, w: 1240, h: 5, color: "#22263c"},
+  "5.6": table{x: 340, y: 780, w: 1240, h: 5, color: "#22263c"},
+})
+
+// ======================================================================
+// BEAT 6 — bookend (20.375 .. 26.3)     "Kyfram. Video you declare, not direct."
+// ======================================================================
+scene(5.925, 30, "fade", 0.5)
+shape("bg6", "rect", table{
+  "0": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
+  "4.9": table{x: 0, y: 0, w: 1920, h: 1080, color: bg, ease: "easeIn"},
+  "5.925": table{x: 0, y: 0, w: 1920, h: 1080, color: "#000000"},
+})
+for i, w in v.words {
+  if i >= 25 {
+    if i <= 30 {
+      let t0 = w.start - s6_start
+      let t1 = w.end - s6_start
+      if i == 25 { capword(i, w.word, 960, 400, 150, ink, 0, t1, 1) }       // Kyfram.
+      if i == 26 { capword(i, w.word, 654.1, 640, 46, ink, t0, t1, 1) }    // Video
+      if i == 27 { capword(i, w.word, 785.7, 640, 46, ink, t0, t1, 1) }    // you
+      if i == 28 { capword(i, w.word, 945.7, 640, 46, gold, t0, t1, 1) }   // declare
+      if i == 29 { capword(i, w.word, 1105.8, 640, 46, ink, t0, t1, 1) }   // not
+      if i == 30 { capword(i, w.word, 1251.6, 640, 46, ink, t0, t1, 1) }   // direct
+    }
+  }
+}
+shape("rule6", "rect", table{
+  "0.35": table{x: 960, y: 540, w: 0, h: 8, color: gold, alpha: 0, ease: "cubicOut"},
+  "0.75": table{x: 700, y: 540, w: 520, h: 8, color: gold, alpha: 1},
+  "5.925": table{x: 700, y: 540, w: 520, h: 8, color: gold, alpha: 1},
+})
