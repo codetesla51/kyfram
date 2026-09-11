@@ -11,7 +11,7 @@
 
 > Keyframe-driven rendering engine — declare what shapes look like at specific times, Go renders to `mp4`/`png` via `gg` + `ffmpeg`.
 
-**Docs → [codetesla51.gitlab.io/kyfram](https://codetesla51.gitlab.io/kyfram)** — install, quickstart, and reference. This README is the quick pitch.
+**Docs → [kyfram-site-68056d.gitlab.io](https://kyfram-site-68056d.gitlab.io/index.html)** — install, quickstart, and reference. This README is the quick pitch.
 
 ## What is kyfram?
 
