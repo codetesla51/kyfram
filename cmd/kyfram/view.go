@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"image/png"
 	"net/http"
@@ -14,25 +13,21 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spf13/cobra"
 	kyfram "gitlab.com/codetesla51/kyfram"
 )
 
 // runView serves a live preview: scrub slider, play button, and hot
 // reload for free — every request re-reads the script from disk, so
 // saving the file updates the preview with no watcher and no restart.
-func runView(args []string) {
-	fs := flag.NewFlagSet("view", flag.ExitOnError)
-	port := fs.Int("port", 8080, "preview server port")
-	font := fs.String("font", "", "default typeface path")
-	if err := fs.Parse(args); err != nil {
-		fmt.Fprintln(os.Stderr, "flags:", err)
-		os.Exit(1)
-	}
-	if fs.NArg() != 1 {
+func runView(cmd *cobra.Command, args []string) {
+	port, _ := cmd.Flags().GetInt("port")
+	font, _ := cmd.Flags().GetString("font")
+	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "usage: kyfram view [--port n] [--font f] <script.lgv>")
 		os.Exit(1)
 	}
-	script := fs.Arg(0)
+	script := args[0]
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -46,7 +41,7 @@ func runView(args []string) {
 		w.Write(kyfram.DisplayFont())
 	})
 	http.HandleFunc("/meta", func(w http.ResponseWriter, r *http.Request) {
-		tl, err := loadScript(script, *font)
+		tl, err := loadScript(script, font)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -64,7 +59,7 @@ func runView(args []string) {
 			http.Error(w, "bad t", http.StatusBadRequest)
 			return
 		}
-		tl, err := loadScript(script, *font)
+		tl, err := loadScript(script, font)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -81,7 +76,7 @@ func runView(args []string) {
 		w.Write(buf.Bytes())
 	})
 
-	addr := "localhost:" + strconv.Itoa(*port)
+	addr := "localhost:" + strconv.Itoa(port)
 	fmt.Println("view:", "http://"+addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		fmt.Fprintln(os.Stderr, "view:", err)

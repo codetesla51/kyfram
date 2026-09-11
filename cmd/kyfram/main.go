@@ -1,14 +1,17 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/codetesla51/logos/interpreter"
+	"github.com/spf13/cobra"
 	kyfram "gitlab.com/codetesla51/kyfram"
 )
+
+// version is the only copy — help text and --version both read it.
+const version = "v0.2.0"
 
 // newVM creates the sandboxed Logos VM used by kyfram.
 func newVM() *interpreter.Interpreter {
@@ -21,58 +24,64 @@ func newVM() *interpreter.Interpreter {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		printHelp()
-		os.Exit(0)
-	}
-	switch os.Args[1] {
-	case "help", "--help", "-h":
-		if len(os.Args) == 3 {
-			switch os.Args[2] {
-			case "render":
-				printHelpRender()
-			case "view":
-				printHelpView()
-			default:
-				printHelp()
+	root := &cobra.Command{
+		Use:   "kyfram",
+		Short: "Keyframe-driven rendering engine",
+		Run: func(cmd *cobra.Command, _ []string) {
+			if v, _ := cmd.Flags().GetBool("version"); v {
+				fmt.Println("kyfram", version)
+				return
 			}
-		} else {
+			printHelp()
+		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
+	}
+	root.CompletionOptions.DisableDefaultCmd = true
+	root.Flags().BoolP("version", "v", false, "Show version")
+	root.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
+		switch cmd.Name() {
+		case "render":
+			printHelpRender()
+		case "view":
+			printHelpView()
+		case "new":
+			printHelpNew()
+		default:
 			printHelp()
 		}
-	case "version", "--version", "-v":
-		fmt.Println("kyfram v0.2.0")
-	case "render":
-		if hasHelp(os.Args[2:]) {
-			printHelpRender()
-			return
-		}
-		runRender(os.Args[2:])
-	case "view":
-		if hasHelp(os.Args[2:]) {
-			printHelpView()
-			return
-		}
-		runView(os.Args[2:])
-	case "new":
-		if hasHelp(os.Args[2:]) {
-			printHelpNew()
-			return
-		}
-		runNew(os.Args[2:])
-	default:
-		fmt.Fprintf(os.Stderr, "kyfram: unknown command %q\n\n", os.Args[1])
+	})
+	root.SetHelpCommand(helpCommand())
+	root.AddCommand(renderCommand(), viewCommand(), newCommand())
+	if err := root.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "kyfram: %v\n\n", err)
 		printHelp()
 		os.Exit(1)
 	}
 }
 
-func hasHelp(args []string) bool {
-	for _, a := range args {
-		if a == "--help" || a == "-h" || a == "help" {
-			return true
-		}
+// helpCommand reproduces "kyfram help [render|view|new]".
+func helpCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "help [command]",
+		Short: "Show help (try \"help render\")",
+		Run: func(_ *cobra.Command, args []string) {
+			if len(args) == 1 {
+				switch args[0] {
+				case "render":
+					printHelpRender()
+					return
+				case "view":
+					printHelpView()
+					return
+				case "new":
+					printHelpNew()
+					return
+				}
+			}
+			printHelp()
+		},
 	}
-	return false
 }
 
 func printHelp() {
@@ -190,14 +199,52 @@ shape("title", "text", table{
 	fmt.Printf("  kyfram render --out %s/out/demo.mp4 %s/scene.lgv\n", name, name)
 }
 
-// varFlags collects repeatable --var key=value flags.
-type varFlags []string
+// renderCommand builds "kyfram render [options] <script.lgv]".
+// pflag accepts flags before or after the script, so the old
+// flags-must-precede-the-script rule is gone.
+func renderCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "render [options] <script.lgv>",
+		Short: "Render a .lgv script to video or image",
+		Run: func(cmd *cobra.Command, args []string) {
+			runRender(cmd, args)
+		},
+	}
+	cmd.Flags().String("out", "out.mp4", "output file path")
+	cmd.Flags().Int("fps", 0, "override scene fps")
+	cmd.Flags().Int("width", 0, "override canvas width")
+	cmd.Flags().Int("height", 0, "override canvas height")
+	cmd.Flags().String("font", "", "default typeface path")
+	cmd.Flags().Int("crf", 23, "x264 CRF quality 0-51, lower is better (18 high, 28 small)")
+	cmd.Flags().String("preset", "medium", "x264 preset: ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
+	cmd.Flags().String("format", "mp4", "output format: mp4 or png (single frame at t=0)")
+	cmd.Flags().StringArray("var", nil, "template variable as key=value (repeatable)")
+	return cmd
+}
 
-func (v *varFlags) String() string { return "" }
+// viewCommand builds "kyfram view [options] <script.lgv>".
+func viewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "view [options] <script.lgv>",
+		Short: "Live preview with scrub + hot reload",
+		Run: func(cmd *cobra.Command, args []string) {
+			runView(cmd, args)
+		},
+	}
+	cmd.Flags().Int("port", 8080, "preview server port")
+	cmd.Flags().String("font", "", "default typeface path")
+	return cmd
+}
 
-func (v *varFlags) Set(s string) error {
-	*v = append(*v, s)
-	return nil
+// newCommand builds "kyfram new <name>".
+func newCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "new <name>",
+		Short: "Scaffold a starter project",
+		Run: func(_ *cobra.Command, args []string) {
+			runNew(args)
+		},
+	}
 }
 
 // splitVar cuts key=value on the first equals; values may contain more.
@@ -211,46 +258,41 @@ func splitVar(s string) (string, string, bool) {
 }
 
 // runRender renders one script file to a video or single PNG.
-func runRender(args []string) {
-	fs := flag.NewFlagSet("render", flag.ExitOnError)
-	out := fs.String("out", "out.mp4", "output file path")
-	fps := fs.Int("fps", 0, "override scene fps")
-	width := fs.Int("width", 0, "override canvas width")
-	height := fs.Int("height", 0, "override canvas height")
-	font := fs.String("font", "", "default typeface path")
-	crf := fs.Int("crf", 23, "x264 CRF quality 0-51, lower is better (18 high, 28 small)")
-	preset := fs.String("preset", "medium", "x264 preset: ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
-	format := fs.String("format", "mp4", "output format: mp4 or png (single frame at t=0)")
-	var vars varFlags
-	fs.Var(&vars, "var", "template variable as key=value (repeatable)")
-	if err := fs.Parse(args); err != nil {
-		fmt.Fprintln(os.Stderr, "flags:", err)
-		os.Exit(1)
-	}
-	if fs.NArg() != 1 {
+func runRender(cmd *cobra.Command, args []string) {
+	flags := cmd.Flags()
+	out, _ := flags.GetString("out")
+	fps, _ := flags.GetInt("fps")
+	width, _ := flags.GetInt("width")
+	height, _ := flags.GetInt("height")
+	font, _ := flags.GetString("font")
+	crf, _ := flags.GetInt("crf")
+	preset, _ := flags.GetString("preset")
+	format, _ := flags.GetString("format")
+	vars, _ := flags.GetStringArray("var")
+	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--var k=v ...] <script.lgv>")
 		os.Exit(1)
 	}
-	for _, v := range []int{*fps, *width, *height} {
+	for _, v := range []int{fps, width, height} {
 		if v < 0 {
 			fmt.Fprintln(os.Stderr, "flags: sizes must be positive")
 			os.Exit(1)
 		}
 	}
-	if *crf < 0 || *crf > 51 {
+	if crf < 0 || crf > 51 {
 		fmt.Fprintln(os.Stderr, "crf must be 0-51")
 		os.Exit(1)
 	}
 	validPreset := map[string]bool{"ultrafast": true, "superfast": true, "veryfast": true, "faster": true, "fast": true, "medium": true, "slow": true, "slower": true, "veryslow": true}
-	if !validPreset[*preset] {
+	if !validPreset[preset] {
 		fmt.Fprintln(os.Stderr, "preset must be one of ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
 		os.Exit(1)
 	}
-	if *format != "mp4" && *format != "png" {
+	if format != "mp4" && format != "png" {
 		fmt.Fprintln(os.Stderr, "format must be mp4 or png")
 		os.Exit(1)
 	}
-	source, err := kyfram.LoadScript(fs.Arg(0))
+	source, err := kyfram.LoadScript(args[0])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "load:", err)
 		os.Exit(1)
@@ -275,29 +317,38 @@ func runRender(args []string) {
 		fmt.Fprintln(os.Stderr, "build:", err)
 		os.Exit(1)
 	}
-	if *fps > 0 {
-		tl.FPS = *fps
+	if fps > 0 {
+		tl.FPS = fps
 	}
-	if *width > 0 {
-		tl.Width = *width
+	if width > 0 {
+		tl.Width = width
 	}
-	if *height > 0 {
-		tl.Height = *height
+	if height > 0 {
+		tl.Height = height
 	}
-	if *font != "" {
-		tl.Font = *font
+	if font != "" {
+		tl.Font = font
 	}
-	if *format == "png" {
-		if err := kyfram.RenderFrame(tl, 0).SavePNG(*out); err != nil {
+	if format == "png" && out == "out.mp4" {
+		out = "out.png"
+	}
+	frames := int(tl.Duration*float64(tl.FPS) + 0.5)
+	if frames < 1 {
+		frames = 1
+	}
+	fmt.Fprintf(os.Stderr, "rendering %d frames (%dx%d @ %dfps, %.1fs) → %s\n",
+		frames, tl.Width, tl.Height, tl.FPS, tl.Duration, out)
+	if format == "png" {
+		if err := kyfram.RenderFrame(tl, 0).SavePNG(out); err != nil {
 			fmt.Fprintln(os.Stderr, "png:", err)
 			os.Exit(1)
 		}
-		fmt.Println("ok:", *out)
+		fmt.Println("ok:", out)
 		return
 	}
-	if err := kyfram.EncodeWithOpts(tl, *out, kyfram.EncodeOpts{CRF: *crf, Preset: *preset}); err != nil {
+	if err := kyfram.EncodeWithOpts(tl, out, kyfram.EncodeOpts{CRF: crf, Preset: preset}); err != nil {
 		fmt.Fprintln(os.Stderr, "encode:", err)
 		os.Exit(1)
 	}
-	fmt.Println("ok:", *out)
+	fmt.Println("ok:", out)
 }

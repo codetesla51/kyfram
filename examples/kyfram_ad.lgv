@@ -1,616 +1,135 @@
 let ink = "#ffffff"
-let fnt = "examples/assets/fonts/Geist-Bold.ttf"
 let mint = "#7fd1a9"
+let coral = "#e64c40"
 let slate = "#6a6a78"
 let bg = "#000000"
-scene(1.6, 30)
-shape("bg1", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.60": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
-})
-shape("let0", "text", table{
-  "0.10": table{content: "K", x: 590, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
-  "0.26": table{content: "K", x: 590, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.60": table{content: "K", x: 590, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("let1", "text", table{
-  "0.17": table{content: "Y", x: 738, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
-  "0.33": table{content: "Y", x: 738, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.60": table{content: "Y", x: 738, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("let2", "text", table{
-  "0.24": table{content: "F", x: 886, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
-  "0.40": table{content: "F", x: 886, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.60": table{content: "F", x: 886, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("let3", "text", table{
-  "0.31": table{content: "R", x: 1034, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
-  "0.47": table{content: "R", x: 1034, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.60": table{content: "R", x: 1034, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("let4", "text", table{
-  "0.38": table{content: "A", x: 1182, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
-  "0.54": table{content: "A", x: 1182, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.60": table{content: "A", x: 1182, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("let5", "text", table{
-  "0.45": table{content: "M", x: 1330, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 1.35, ease: "cubicOut"},
-  "0.61": table{content: "M", x: 1330, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.60": table{content: "M", x: 1330, y: 480, size: 160, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("rule1", "rect", table{
-  "0.75": table{x: 960, y: 640, w: 0, h: 8, color: ink, alpha: 0, ease: "cubicOut"},
-  "1.15": table{x: 400, y: 640, w: 1120, h: 8, color: ink, alpha: 1},
-  "1.60": table{x: 400, y: 640, w: 1120, h: 8, color: ink, alpha: 1}
-})
-shape("sub1", "text", table{
-  "0.95": table{content: "MOTION GRAPHICS - DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
-  "1.35": table{content: "MOTION GRAPHICS - DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.9},
-  "1.60": table{content: "MOTION GRAPHICS - DECLARED LIKE CODE", x: 960, y: 705, size: 34, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.9}
-})
-shape("ver1", "text", table{
-  "1.00": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35},
-  "1.60": table{content: "v0.2.0", x: 90, y: 1010, size: 22, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.35}
+let fnt = "examples/assets/fonts/Geist-Bold.ttf"
+let fntr = "examples/assets/fonts/Geist-Regular.ttf"
+
+// ---- scene 1: wordmark ----
+scene(1.75, 30)
+shape("bg1", "rect", table{"0": table{x: 0, y: 0, w: 1080, h: 1350, color: bg}})
+text("word1", table{
+  "0.562": table{content: "kyfram", x: 540, y: 675, size: 72, color: ink, font: fnt, alpha: 0, scale: 0.9, ease: "cubicOut"},
+  "0.812": table{content: "kyfram", x: 540, y: 675, size: 72, color: ink, font: fnt, alpha: 1, scale: 1.0}
 })
 
-scene(3.0, 30, "fade", 0.4)
-shape("bg2", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "3.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+// ---- scene 2: you declare states, kyfram fills the rest ----
+scene(2.375, 30, "fade", 0.375)
+shape("bg2", "rect", table{"0": table{x: 0, y: 0, w: 1080, h: 1350, color: bg}})
+text("h2", table{
+  "0.062": table{content: "you declare states", x: 540, y: 300, size: 40, color: ink, font: fnt, alpha: 0, ease: "cubicOut"},
+  "0.312": table{content: "you declare states", x: 540, y: 300, size: 40, color: ink, font: fnt, alpha: 1}
 })
-shape("dotr0", "rect", table{
-  "0.00": table{x: 0, y: 120, w: 1920, h: 1, color: "#131318"},
-  "3.00": table{x: 0, y: 120, w: 1920, h: 1, color: "#131318"}
+shape("markA", "roundRect", table{
+  "0": table{x: 280, y: 570, w: 40, h: 40, radius: 6, color: slate, alpha: 0, scale: 0.6, ease: "cubicOut"},
+  "0.188": table{x: 280, y: 570, w: 40, h: 40, radius: 6, color: slate, alpha: 1, scale: 1.0},
+  "2.375": table{x: 280, y: 570, w: 40, h: 40, radius: 6, color: slate, alpha: 1, scale: 1.0}
 })
-shape("dotr1", "rect", table{
-  "0.00": table{x: 0, y: 260, w: 1920, h: 1, color: "#131318"},
-  "3.00": table{x: 0, y: 260, w: 1920, h: 1, color: "#131318"}
+shape("markB", "roundRect", table{
+  "0.25": table{x: 520, y: 420, w: 40, h: 40, radius: 6, color: slate, alpha: 0, scale: 0.6, ease: "cubicOut"},
+  "0.438": table{x: 520, y: 420, w: 40, h: 40, radius: 6, color: slate, alpha: 1, scale: 1.0},
+  "2.375": table{x: 520, y: 420, w: 40, h: 40, radius: 6, color: slate, alpha: 1, scale: 1.0}
 })
-shape("dotr2", "rect", table{
-  "0.00": table{x: 0, y: 400, w: 1920, h: 1, color: "#131318"},
-  "3.00": table{x: 0, y: 400, w: 1920, h: 1, color: "#131318"}
+shape("markC", "roundRect", table{
+  "0.5": table{x: 760, y: 570, w: 40, h: 40, radius: 6, color: slate, alpha: 0, scale: 0.6, ease: "cubicOut"},
+  "0.688": table{x: 760, y: 570, w: 40, h: 40, radius: 6, color: slate, alpha: 1, scale: 1.0},
+  "2.375": table{x: 760, y: 570, w: 40, h: 40, radius: 6, color: slate, alpha: 1, scale: 1.0}
 })
-shape("dotr3", "rect", table{
-  "0.00": table{x: 0, y: 540, w: 1920, h: 1, color: "#131318"},
-  "3.00": table{x: 0, y: 540, w: 1920, h: 1, color: "#131318"}
+shape("filler", "circle", table{
+  "0.938": table{x: 300, y: 590, r: 24, color: mint, alpha: 0, ease: "cubicInOut"},
+  "1.062": table{x: 300, y: 590, r: 24, color: mint, alpha: 1},
+  "1.625": table{x: 540, y: 440, r: 24, color: mint, alpha: 1, ease: "cubicInOut"},
+  "2.188": table{x: 780, y: 590, r: 24, color: mint, alpha: 1},
+  "2.375": table{x: 780, y: 590, r: 24, color: mint, alpha: 1}
 })
-shape("dotr4", "rect", table{
-  "0.00": table{x: 0, y: 680, w: 1920, h: 1, color: "#131318"},
-  "3.00": table{x: 0, y: 680, w: 1920, h: 1, color: "#131318"}
-})
-shape("dotr5", "rect", table{
-  "0.00": table{x: 0, y: 820, w: 1920, h: 1, color: "#131318"},
-  "3.00": table{x: 0, y: 820, w: 1920, h: 1, color: "#131318"}
-})
-shape("dotr6", "rect", table{
-  "0.00": table{x: 0, y: 960, w: 1920, h: 1, color: "#131318"},
-  "3.00": table{x: 0, y: 960, w: 1920, h: 1, color: "#131318"}
-})
-shape("prompt", "text", table{
-  "0.15": table{content: "KYFRAM  /  kai-fram", x: 960, y: 170, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
-  "0.55": table{content: "KYFRAM  /  kai-fram", x: 960, y: 170, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.75},
-  "3.00": table{content: "KYFRAM  /  kai-fram", x: 960, y: 170, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.75}
-})
-shape("cap20", "text", table{
-  "0.35": table{content: "video", x: 375, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "0.44": table{content: "video", x: 375, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "0.97": table{content: "video", x: 375, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap21", "text", table{
-  "0.85": table{content: "you", x: 626, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "0.94": table{content: "you", x: 626, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.47": table{content: "you", x: 626, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap22", "text", table{
-  "1.35": table{content: "declare", x: 933, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "1.44": table{content: "declare", x: 933, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.97": table{content: "declare", x: 933, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap23", "text", table{
-  "1.85": table{content: "not", x: 1239, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "1.94": table{content: "not", x: 1239, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.47": table{content: "not", x: 1239, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap24", "text", table{
-  "2.35": table{content: "direct", x: 1518, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "2.44": table{content: "direct", x: 1518, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.97": table{content: "direct", x: 1518, y: 560, size: 88, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+text("h2b", table{
+  "1.25": table{content: "kyfram fills the rest", x: 540, y: 850, size: 32, color: slate, font: fntr, alpha: 0, ease: "cubicOut"},
+  "1.562": table{content: "kyfram fills the rest", x: 540, y: 850, size: 32, color: slate, font: fntr, alpha: 0.85}
 })
 
-scene(3.4, 30, "fade", 0.4)
-shape("bg3", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "3.40": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+// ---- scene 3: the keyframe table, made visible ----
+scene(2.75, 30, "fade", 0.375)
+shape("bg3", "rect", table{"0": table{x: 0, y: 0, w: 1080, h: 1350, color: bg}})
+text("h3", table{
+  "0.062": table{content: "a table of times and values", x: 540, y: 260, size: 32, color: ink, font: fnt, alpha: 0, ease: "cubicOut"},
+  "0.312": table{content: "a table of times and values", x: 540, y: 260, size: 32, color: ink, font: fnt, alpha: 1}
 })
-shape("cap30", "text", table{
-  "0.20": table{content: "motion", x: 768, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "0.29": table{content: "motion", x: 768, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "0.80": table{content: "motion", x: 768, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+shape("panel3", "roundRect", table{"0": table{x: 160, y: 420, w: 380, h: 280, radius: 16, color: "#101015"}})
+shape("row0", "rect", table{
+  "0.438": table{x: 190, y: 460, w: 320, h: 60, color: "#1c1c24", alpha: 0.3},
+  "0.562": table{x: 190, y: 460, w: 320, h: 60, color: mint, alpha: 0.35, ease: "cubicOut"},
+  "0.812": table{x: 190, y: 460, w: 320, h: 60, color: "#1c1c24", alpha: 0.3}
 })
-shape("cap31", "text", table{
-  "0.50": table{content: "graphics", x: 1108, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "0.59": table{content: "graphics", x: 1108, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.10": table{content: "graphics", x: 1108, y: 200, size: 72, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+shape("row1", "rect", table{
+  "1.125": table{x: 190, y: 540, w: 320, h: 60, color: "#1c1c24", alpha: 0.3},
+  "1.25": table{x: 190, y: 540, w: 320, h: 60, color: mint, alpha: 0.35, ease: "cubicOut"},
+  "1.5": table{x: 190, y: 540, w: 320, h: 60, color: "#1c1c24", alpha: 0.3}
 })
-shape("cap32", "text", table{
-  "1.00": table{content: "from", x: 664, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "1.09": table{content: "from", x: 664, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.50": table{content: "from", x: 664, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+shape("row2", "rect", table{
+  "1.812": table{x: 190, y: 620, w: 320, h: 60, color: "#1c1c24", alpha: 0.3},
+  "1.938": table{x: 190, y: 620, w: 320, h: 60, color: mint, alpha: 0.35, ease: "cubicOut"},
+  "2.188": table{x: 190, y: 620, w: 320, h: 60, color: "#1c1c24", alpha: 0.3}
 })
-shape("cap33", "text", table{
-  "1.33": table{content: "a", x: 776, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "1.42": table{content: "a", x: 776, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.83": table{content: "a", x: 776, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap34", "text", table{
-  "1.66": table{content: "plain", x: 906, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "1.75": table{content: "plain", x: 906, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.16": table{content: "plain", x: 906, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap35", "text", table{
-  "1.99": table{content: "text", x: 1090, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "2.08": table{content: "text", x: 1090, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.49": table{content: "text", x: 1090, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap36", "text", table{
-  "2.32": table{content: "file", x: 1256, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "2.41": table{content: "file", x: 1256, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.82": table{content: "file", x: 1256, y: 290, size: 58, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("card", "roundRect", table{
-  "0.15": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#101015", alpha: 0, scale: 0.94, ease: "cubicOut"},
-  "0.55": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#101015", alpha: 1, scale: 1.0},
-  "3.40": table{x: 320, y: 380, w: 580, h: 560, radius: 20, color: "#101015", alpha: 1, scale: 1.0}
-})
-shape("frame3", "roundRect", table{
-  "0.20": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#1c1c24", alpha: 0, scale: 0.94, ease: "cubicOut"},
-  "0.60": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#1c1c24", alpha: 1, scale: 1.0},
-  "3.40": table{x: 1140, y: 380, w: 500, h: 560, radius: 20, color: "#1c1c24", alpha: 1, scale: 1.0}
-})
-shape("ball3", "circle", table{
-  "0.50": table{x: 1390, y: 620, r: 70, color: "#ffffff", alpha: 0, scale: 0.8, ease: "cubicOut"},
-  "0.90": table{x: 1390, y: 620, r: 70, color: "#ffffff", alpha: 1, scale: 1.0},
-  "1.50": table{x: 1420, y: 560, r: 70, color: "#ffffff", alpha: 1, scale: 1.0},
-  "2.20": table{x: 1480, y: 620, r: 70, color: "#ffffff", alpha: 1, scale: 1.05, ease: "cubicInOut"},
-  "3.40": table{x: 1510, y: 660, r: 70, color: "#ffffff", alpha: 1, scale: 1.0}
-})
-shape("bar0", "rect", table{
-  "0.60": table{x: 380, y: 470, w: 440, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "0.72": table{x: 380, y: 470, w: 440, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 470, w: 440, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("bar1", "rect", table{
-  "0.71": table{x: 380, y: 520, w: 320, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "0.83": table{x: 380, y: 520, w: 320, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 520, w: 320, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("bar2", "rect", table{
-  "0.82": table{x: 380, y: 570, w: 480, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "0.94": table{x: 380, y: 570, w: 480, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 570, w: 480, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("bar3", "rect", table{
-  "0.93": table{x: 380, y: 620, w: 360, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "1.05": table{x: 380, y: 620, w: 360, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 620, w: 360, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("bar4", "rect", table{
-  "1.04": table{x: 380, y: 670, w: 450, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "1.16": table{x: 380, y: 670, w: 450, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 670, w: 450, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("bar5", "rect", table{
-  "1.15": table{x: 380, y: 720, w: 300, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "1.27": table{x: 380, y: 720, w: 300, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 720, w: 300, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("bar6", "rect", table{
-  "1.26": table{x: 380, y: 770, w: 420, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "1.38": table{x: 380, y: 770, w: 420, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 770, w: 420, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("bar7", "rect", table{
-  "1.37": table{x: 380, y: 820, w: 380, h: 18, color: "#2a2a33", alpha: 0, ease: "cubicOut"},
-  "1.49": table{x: 380, y: 820, w: 380, h: 18, color: "#2a2a33", alpha: 1},
-  "2.20": table{x: 380, y: 820, w: 380, h: 18, color: "#2a2a33", alpha: 1}
-})
-shape("caret", "rect", table{
-  "0.60": table{x: 356, y: 450, w: 8, h: 60, color: "#ffffff", alpha: 0, ease: "cubicOut"},
-  "0.75": table{x: 356, y: 450, w: 8, h: 60, color: "#ffffff", alpha: 0.9},
-  "2.10": table{x: 356, y: 880, w: 8, h: 60, color: "#ffffff", alpha: 0.9, ease: "sine"},
-  "2.40": table{x: 356, y: 880, w: 8, h: 60, color: "#ffffff", alpha: 0}
+text("t0", table{"0.375": table{content: "0.00  →  x: 240", x: 350, y: 490, size: 22, color: ink, font: fntr, alpha: 0.9}, "2.75": table{content: "0.00  →  x: 240", x: 350, y: 490, size: 22, color: ink, font: fntr, alpha: 0.9}})
+text("t1", table{"0.375": table{content: "0.45  →  x: 540", x: 350, y: 570, size: 22, color: ink, font: fntr, alpha: 0.9}, "2.75": table{content: "0.45  →  x: 540", x: 350, y: 570, size: 22, color: ink, font: fntr, alpha: 0.9}})
+text("t2", table{"0.375": table{content: "1.00  →  x: 840", x: 350, y: 650, size: 22, color: ink, font: fntr, alpha: 0.9}, "2.75": table{content: "1.00  →  x: 840", x: 350, y: 650, size: 22, color: ink, font: fntr, alpha: 0.9}})
+shape("liveball", "circle", table{
+  "0.438": table{x: 740, y: 490, r: 22, color: coral, alpha: 0, ease: "cubicOut"},
+  "0.562": table{x: 740, y: 490, r: 22, color: coral, alpha: 1},
+  "1.25": table{x: 740, y: 570, r: 22, color: coral, alpha: 1, ease: "cubicInOut"},
+  "1.938": table{x: 740, y: 650, r: 22, color: coral, alpha: 1},
+  "2.75": table{x: 740, y: 650, r: 22, color: coral, alpha: 1}
 })
 
-scene(1.15, 30, "cut")
-shape("bg4a", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.15": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+// ---- scene 4: groups move as one, children stay local ----
+scene(2.375, 30, "fade", 0.375)
+shape("bg4", "rect", table{"0": table{x: 0, y: 0, w: 1080, h: 1350, color: bg}})
+text("h4", table{
+  "0.062": table{content: "groups move as one", x: 540, y: 300, size: 36, color: ink, font: fnt, alpha: 0, ease: "cubicOut"},
+  "0.312": table{content: "groups move as one", x: 540, y: 300, size: 36, color: ink, font: fnt, alpha: 1}
 })
-shape("cap40", "text", table{
-  "0.10": table{content: "Scenes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
-  "0.45": table{content: "Scenes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.15": table{content: "Scenes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+group("trio", table{
+  "0.438": table{x: 300, y: 650, rotate: 0, ease: "cubicInOut"},
+  "1.25": table{x: 540, y: 650, rotate: 12},
+  "2.062": table{x: 780, y: 650, rotate: 0}
 })
-shape("splitA", "rect", table{
-  "0.00": table{x: 500, y: 480, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.05": table{x: 500, y: 487, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.10": table{x: 500, y: 494, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.15": table{x: 500, y: 499, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.20": table{x: 500, y: 503, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.25": table{x: 500, y: 505, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.30": table{x: 500, y: 506, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.35": table{x: 500, y: 504, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.40": table{x: 500, y: 501, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.45": table{x: 500, y: 496, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.50": table{x: 500, y: 490, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.55": table{x: 500, y: 484, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.60": table{x: 500, y: 476, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.65": table{x: 500, y: 470, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.70": table{x: 500, y: 464, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.75": table{x: 500, y: 459, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.80": table{x: 500, y: 456, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.85": table{x: 500, y: 454, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.90": table{x: 500, y: 455, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "0.95": table{x: 500, y: 457, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "1.00": table{x: 500, y: 461, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "1.05": table{x: 500, y: 466, color: "#ffffff", w: 920, h: 150, alpha: 0.15},
-  "1.10": table{x: 500, y: 473, color: "#ffffff", w: 920, h: 150, alpha: 0.15}
-})
-shape("splitB", "rect", table{
-  "0.00": table{x: 500, y: 650, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.05": table{x: 500, y: 643, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.10": table{x: 500, y: 636, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.15": table{x: 500, y: 631, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.20": table{x: 500, y: 627, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.25": table{x: 500, y: 625, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.30": table{x: 500, y: 624, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.35": table{x: 500, y: 626, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.40": table{x: 500, y: 629, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.45": table{x: 500, y: 634, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.50": table{x: 500, y: 640, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.55": table{x: 500, y: 646, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.60": table{x: 500, y: 654, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.65": table{x: 500, y: 660, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.70": table{x: 500, y: 666, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.75": table{x: 500, y: 671, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.80": table{x: 500, y: 674, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.85": table{x: 500, y: 676, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.90": table{x: 500, y: 675, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "0.95": table{x: 500, y: 673, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "1.00": table{x: 500, y: 669, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "1.05": table{x: 500, y: 664, color: "#ffffff", w: 920, h: 150, alpha: 0.9},
-  "1.10": table{x: 500, y: 657, color: "#ffffff", w: 920, h: 150, alpha: 0.9}
+shape("dot0", "circle", table{"0": table{x: -80, y: 0, r: 26, color: coral}}, "trio")
+shape("dot1", "circle", table{"0": table{x: 0, y: 0, r: 26, color: mint}}, "trio")
+shape("dot2", "circle", table{"0": table{x: 80, y: 0, r: 26, color: ink}}, "trio")
+text("h4b", table{
+  "1.125": table{content: "local coordinates never move", x: 540, y: 850, size: 28, color: slate, font: fntr, alpha: 0, ease: "cubicOut"},
+  "1.438": table{content: "local coordinates never move", x: 540, y: 850, size: 28, color: slate, font: fntr, alpha: 0.85}
 })
 
-scene(1.2, 30, "fade", 0.2)
-shape("bg4b", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.20": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
+// ---- scene 5: stamp() reuses one animation ----
+scene(2.125, 30, "fade", 0.375)
+shape("bg5", "rect", table{"0": table{x: 0, y: 0, w: 1080, h: 1350, color: bg}})
+text("h5", table{
+  "0.062": table{content: "one animation, stamped x3", x: 540, y: 280, size: 32, color: ink, font: fnt, alpha: 0, ease: "cubicOut"},
+  "0.312": table{content: "one animation, stamped x3", x: 540, y: 280, size: 32, color: ink, font: fnt, alpha: 1}
 })
-shape("cap41", "text", table{
-  "0.10": table{content: "Shapes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
-  "0.45": table{content: "Shapes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.20": table{content: "Shapes", x: 960, y: 240, size: 100, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("wA", "circle", table{
-  "0.00": table{x: 700, y: 620, color: "#ffffff", r: 64},
-  "0.05": table{x: 700, y: 654, color: "#ffffff", r: 64},
-  "0.10": table{x: 700, y: 685, color: "#ffffff", r: 64},
-  "0.15": table{x: 700, y: 712, color: "#ffffff", r: 64},
-  "0.20": table{x: 700, y: 733, color: "#ffffff", r: 64},
-  "0.25": table{x: 700, y: 746, color: "#ffffff", r: 64},
-  "0.30": table{x: 700, y: 750, color: "#ffffff", r: 64},
-  "0.35": table{x: 700, y: 746, color: "#ffffff", r: 64},
-  "0.40": table{x: 700, y: 733, color: "#ffffff", r: 64},
-  "0.45": table{x: 700, y: 712, color: "#ffffff", r: 64},
-  "0.50": table{x: 700, y: 685, color: "#ffffff", r: 64},
-  "0.55": table{x: 700, y: 654, color: "#ffffff", r: 64},
-  "0.60": table{x: 700, y: 620, color: "#ffffff", r: 64},
-  "0.65": table{x: 700, y: 586, color: "#ffffff", r: 64},
-  "0.70": table{x: 700, y: 555, color: "#ffffff", r: 64},
-  "0.75": table{x: 700, y: 528, color: "#ffffff", r: 64},
-  "0.80": table{x: 700, y: 507, color: "#ffffff", r: 64},
-  "0.85": table{x: 700, y: 494, color: "#ffffff", r: 64},
-  "0.90": table{x: 700, y: 490, color: "#ffffff", r: 64},
-  "0.95": table{x: 700, y: 494, color: "#ffffff", r: 64},
-  "1.00": table{x: 700, y: 507, color: "#ffffff", r: 64},
-  "1.05": table{x: 700, y: 528, color: "#ffffff", r: 64},
-  "1.10": table{x: 700, y: 555, color: "#ffffff", r: 64},
-  "1.15": table{x: 700, y: 586, color: "#ffffff", r: 64}
-})
-shape("wB", "circle", table{
-  "0.00": table{x: 960, y: 771, color: "#6a6a78", r: 44},
-  "0.05": table{x: 960, y: 745, color: "#6a6a78", r: 44},
-  "0.10": table{x: 960, y: 703, color: "#6a6a78", r: 44},
-  "0.15": table{x: 960, y: 651, color: "#6a6a78", r: 44},
-  "0.20": table{x: 960, y: 595, color: "#6a6a78", r: 44},
-  "0.25": table{x: 960, y: 543, color: "#6a6a78", r: 44},
-  "0.30": table{x: 960, y: 499, color: "#6a6a78", r: 44},
-  "0.35": table{x: 960, y: 471, color: "#6a6a78", r: 44},
-  "0.40": table{x: 960, y: 460, color: "#6a6a78", r: 44},
-  "0.45": table{x: 960, y: 469, color: "#6a6a78", r: 44},
-  "0.50": table{x: 960, y: 495, color: "#6a6a78", r: 44},
-  "0.55": table{x: 960, y: 537, color: "#6a6a78", r: 44},
-  "0.60": table{x: 960, y: 589, color: "#6a6a78", r: 44},
-  "0.65": table{x: 960, y: 645, color: "#6a6a78", r: 44},
-  "0.70": table{x: 960, y: 697, color: "#6a6a78", r: 44},
-  "0.75": table{x: 960, y: 741, color: "#6a6a78", r: 44},
-  "0.80": table{x: 960, y: 769, color: "#6a6a78", r: 44},
-  "0.85": table{x: 960, y: 780, color: "#6a6a78", r: 44},
-  "0.90": table{x: 960, y: 771, color: "#6a6a78", r: 44},
-  "0.95": table{x: 960, y: 745, color: "#6a6a78", r: 44},
-  "1.00": table{x: 960, y: 703, color: "#6a6a78", r: 44},
-  "1.05": table{x: 960, y: 651, color: "#6a6a78", r: 44},
-  "1.10": table{x: 960, y: 595, color: "#6a6a78", r: 44},
-  "1.15": table{x: 960, y: 543, color: "#6a6a78", r: 44}
-})
-shape("wC", "star", table{
-  "0.00": table{x: 1220, y: 682, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.05": table{x: 1220, y: 710, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.10": table{x: 1220, y: 731, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.15": table{x: 1220, y: 745, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.20": table{x: 1220, y: 750, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.25": table{x: 1220, y: 746, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.30": table{x: 1220, y: 734, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.35": table{x: 1220, y: 714, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.40": table{x: 1220, y: 688, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.45": table{x: 1220, y: 657, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.50": table{x: 1220, y: 623, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.55": table{x: 1220, y: 589, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.60": table{x: 1220, y: 558, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.65": table{x: 1220, y: 530, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.70": table{x: 1220, y: 509, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.75": table{x: 1220, y: 495, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.80": table{x: 1220, y: 490, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.85": table{x: 1220, y: 494, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.90": table{x: 1220, y: 506, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "0.95": table{x: 1220, y: 526, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "1.00": table{x: 1220, y: 552, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "1.05": table{x: 1220, y: 583, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "1.10": table{x: 1220, y: 617, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12},
-  "1.15": table{x: 1220, y: 651, color: "#ffffff", r: 78, points: 5, inner: 0.5, rotate: 12}
-})
-shape("wD", "arc", table{
-  "0.00": table{x: 960, y: 592, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.05": table{x: 960, y: 563, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.10": table{x: 960, y: 539, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.15": table{x: 960, y: 521, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.20": table{x: 960, y: 512, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.25": table{x: 960, y: 511, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.30": table{x: 960, y: 519, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.35": table{x: 960, y: 535, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.40": table{x: 960, y: 558, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.45": table{x: 960, y: 586, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.50": table{x: 960, y: 617, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.55": table{x: 960, y: 648, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.60": table{x: 960, y: 677, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.65": table{x: 960, y: 701, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.70": table{x: 960, y: 719, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.75": table{x: 960, y: 728, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.80": table{x: 960, y: 729, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.85": table{x: 960, y: 721, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.90": table{x: 960, y: 705, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "0.95": table{x: 960, y: 682, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "1.00": table{x: 960, y: 654, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "1.05": table{x: 960, y: 623, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "1.10": table{x: 960, y: 592, color: "#ffffff", r: 60, start: 0, end: 360, width: 8},
-  "1.15": table{x: 960, y: 563, color: "#ffffff", r: 60, start: 0, end: 360, width: 8}
-})
-
-scene(1.25, 30, "fade", 0.2)
-shape("bg4c", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "1.25": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
-})
-shape("cap42", "text", table{
-  "0.10": table{content: "Transitions", x: 960, y: 240, size: 74, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
-  "0.45": table{content: "Transitions", x: 960, y: 240, size: 74, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.25": table{content: "Transitions", x: 960, y: 240, size: 74, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("tbar0", "rect", table{
-  "0.15": table{x: 480, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 0, scale: 0.82, ease: "cubicOut"},
-  "0.40": table{x: 480, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0},
-  "1.25": table{x: 480, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0}
-})
-shape("tbar1", "rect", table{
-  "0.32": table{x: 810, y: 520, w: 300, h: 120, color: "#6a6a78", alpha: 0, scale: 0.82, ease: "cubicOut"},
-  "0.57": table{x: 810, y: 520, w: 300, h: 120, color: "#6a6a78", alpha: 1, scale: 1.0},
-  "1.25": table{x: 810, y: 520, w: 300, h: 120, color: "#6a6a78", alpha: 1, scale: 1.0}
-})
-shape("tbar2", "rect", table{
-  "0.49": table{x: 1140, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 0, scale: 0.82, ease: "cubicOut"},
-  "0.74": table{x: 1140, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0},
-  "1.25": table{x: 1140, y: 520, w: 300, h: 120, color: "#ffffff", alpha: 1, scale: 1.0}
-})
-
-scene(2.4, 30, "fade", 0.2)
-shape("bg4d", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "2.40": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
-})
-shape("cap43", "text", table{
-  "0.10": table{content: "Camera", x: 960, y: 130, size: 90, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
-  "0.45": table{content: "Camera", x: 960, y: 130, size: 90, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.40": table{content: "Camera", x: 960, y: 130, size: 90, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap44", "text", table{
-  "0.55": table{content: "moves", x: 960, y: 185, size: 44, color: slate, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.88, ease: "cubicOut"},
-  "0.85": table{content: "moves", x: 960, y: 185, size: 44, color: slate, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.40": table{content: "moves", x: 960, y: 185, size: 44, color: slate, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("viewport", "roundRect", table{
-  "0.10": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#101015", alpha: 0, scale: 0.96, ease: "cubicOut"},
-  "0.50": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#101015", alpha: 1, scale: 1.0},
-  "2.40": table{x: 300, y: 260, w: 1320, h: 520, radius: 22, color: "#101015", alpha: 1, scale: 1.0}
-})
-camera(table{"0.25": table{x: 960, y: 540, zoom: 1.0}, "0.7": table{x: 1140, y: 530, zoom: 1.06, ease: "easeInOut"}, "1.6": table{x: 1450, y: 515, zoom: 1.22, ease: "easeInOut"}, "2.4": table{x: 1450, y: 515, zoom: 1.22}})
-shape("sun4", "circle", table{
-  "0.10": table{x: 1500, y: 380, r: 62, color: "#ffffff", alpha: 0, ease: "cubicOut"},
-  "0.60": table{x: 1500, y: 380, r: 62, color: "#ffffff", alpha: 1},
-  "2.40": table{x: 1500, y: 380, r: 62, color: "#ffffff", alpha: 1}
-})
-shape("hillfar4", "rect", table{
-  "0.10": table{x: 0, y: 560, w: 2600, h: 200, color: "#1c1c24", alpha: 0, ease: "cubicOut"},
-  "0.60": table{x: 0, y: 560, w: 2600, h: 200, color: "#1c1c24", alpha: 1},
-  "2.40": table{x: 0, y: 560, w: 2600, h: 200, color: "#1c1c24", alpha: 1}
-})
-shape("hillnear4", "rect", table{
-  "0.10": table{x: 300, y: 660, w: 2500, h: 120, color: "#101015", alpha: 0, ease: "cubicOut"},
-  "0.60": table{x: 300, y: 660, w: 2500, h: 120, color: "#101015", alpha: 1},
-  "2.40": table{x: 300, y: 660, w: 2500, h: 120, color: "#101015", alpha: 1}
-})
-shape("ridge4", "rect", table{
-  "0.10": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2e2e3a", alpha: 0, ease: "cubicOut"},
-  "0.60": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2e2e3a", alpha: 1},
-  "2.40": table{x: 1500, y: 430, w: 1100, h: 130, color: "#2e2e3a", alpha: 1}
-})
-shape("ground4", "rect", table{
-  "0.10": table{x: 0, y: 760, w: 2600, h: 12, color: "#3a3a48", alpha: 0, ease: "cubicOut"},
-  "0.60": table{x: 0, y: 760, w: 2600, h: 12, color: "#3a3a48", alpha: 1},
-  "2.40": table{x: 0, y: 760, w: 2600, h: 12, color: "#3a3a48", alpha: 1}
-})
-
-scene(5.4, 30, "fade", 0.4)
-shape("bg5", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "5.40": table{x: 0, y: 0, w: 1920, h: 1080, color: bg}
-})
-shape("wf_title", "text", table{
-  "0.10": table{content: "WORKFLOW", x: 150, y: 80, size: 26, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.7},
-  "5.40": table{content: "WORKFLOW", x: 150, y: 80, size: 26, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.7}
-})
-shape("wA", "text", table{
-  "0.10": table{content: "stamp", x: 720, y: 160, size: 52, color: ink, font: fnt, alpha: 0, scale: 0.9, ease: "cubicOut"},
-  "0.30": table{content: "stamp", x: 720, y: 160, size: 52, color: ink, font: fnt, alpha: 1, scale: 1.0},
-  "1.90": table{content: "stamp", x: 720, y: 160, size: 52, color: slate, font: fnt, alpha: 0.5, scale: 0.97},
-  "5.40": table{content: "stamp", x: 720, y: 160, size: 52, color: slate, font: fnt, alpha: 0.5, scale: 0.97}
-})
-shape("wB", "text", table{
-  "1.90": table{content: "group", x: 960, y: 160, size: 52, color: slate, font: fnt, alpha: 0.5, scale: 0.97},
-  "2.10": table{content: "group", x: 960, y: 160, size: 52, color: ink, font: fnt, alpha: 1, scale: 1.0},
-  "3.60": table{content: "group", x: 960, y: 160, size: 52, color: slate, font: fnt, alpha: 0.5, scale: 0.97},
-  "5.40": table{content: "group", x: 960, y: 160, size: 52, color: slate, font: fnt, alpha: 0.5, scale: 0.97}
-})
-shape("wC", "text", table{
-  "3.60": table{content: "re-render", x: 1200, y: 160, size: 52, color: slate, font: fnt, alpha: 0.5, scale: 0.97},
-  "3.80": table{content: "re-render", x: 1200, y: 160, size: 52, color: ink, font: fnt, alpha: 1, scale: 1.0},
-  "5.40": table{content: "re-render", x: 1200, y: 160, size: 52, color: ink, font: fnt, alpha: 1, scale: 1.0}
-})
-shape("subA", "text", table{
-  "0.15": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
-  "0.45": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.85},
-  "1.90": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0},
-  "5.40": table{content: "one keyframe table - any color, any spot.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}
-})
-shape("subB", "text", table{
-  "2.05": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
-  "2.35": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.85},
-  "3.60": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0},
-  "5.40": table{content: "one keyframe drags the whole clip.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}
-})
-shape("subC", "text", table{
-  "3.70": table{content: "edit the numbers. re-render in 0.31s.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
-  "4.00": table{content: "edit the numbers. re-render in 0.31s.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.85},
-  "5.40": table{content: "edit the numbers. re-render in 0.31s.", x: 960, y: 250, size: 30, color: slate, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0.85}
-})
-let hop = table{
-  "0.00": table{x: 0, y: 0, r: 32, color: "#ffffff", alpha: 0, scale: 0.4, ease: "cubicOut"},
-  "0.22": table{x: 0, y: 0, r: 32, color: "#ffffff", alpha: 1, scale: 1.0},
-  "0.40": table{x: 0, y: -70, r: 32, color: "#ffffff", scale: 0.9, ease: "cubicOut"},
-  "0.58": table{x: 0, y: 0, r: 32, color: "#ffffff", scale: 1.0, ease: "cubicInOut"},
-  "0.80": table{x: 0, y: -50, r: 32, color: "#ffffff", scale: 0.92, ease: "cubicOut"},
-  "0.98": table{x: 0, y: 0, r: 32, color: "#ffffff", scale: 1.0, ease: "cubicInOut"},
-  "1.90": table{x: 0, y: 0, r: 32, color: "#ffffff", scale: 1.0}
+let hop5 = table{
+  "0.438": table{y: 0, r: 30, alpha: 0, scale: 0.4, ease: "cubicOut"},
+  "0.688": table{y: 0, r: 30, alpha: 1, scale: 1.0},
+  "1.062": table{y: -90, scale: 0.9, ease: "cubicOut"},
+  "1.375": table{y: 0, scale: 1.0, ease: "cubicInOut"},
+  "2.125": table{y: 0, scale: 1.0}
 }
-group("rowA", table{"0.00": table{y: 430}, "1.95": table{y: 430, alpha: 0.45, ease: "easeIn"}, "3.60": table{y: 430, alpha: 0.3}, "5.40": table{y: 430, alpha: 0.3}})
-shape("hA", "circle", stamp(hop, table{x: -330, color: "#7fd1a9"}), "rowA")
-shape("hB", "circle", stamp(hop, table{x: 0, color: "#ff9d7a"}), "rowA")
-shape("hC", "circle", stamp(hop, table{x: 330, color: "#ffffff"}), "rowA")
-group("codecard", table{"0.30": table{alpha: 0}, "0.55": table{alpha: 1, ease: "cubicOut"}, "1.95": table{alpha: 0.4, ease: "easeIn"}, "3.60": table{alpha: 0.3}, "5.40": table{alpha: 0.3}})
-shape("cc_panel", "roundRect", table{"0.3": table{x: 1180, y: 300, w: 660, h: 380, radius: 18, color: "#101015", alpha: 1}, "5.4": table{x: 1180, y: 300, w: 660, h: 380, radius: 18, color: "#101015", alpha: 1}}, "codecard")
-shape("cc0", "rect", table{"0.65": table{x: 1210, y: 340, w: 224, h: 3, color: "#6a6a78", alpha: 0, ease: "cubicOut"}, "0.79": table{x: 1210, y: 340, w: 224, h: 3, color: "#6a6a78", alpha: 0.9}, "1.9": table{x: 1210, y: 340, w: 224, h: 3, color: "#6a6a78", alpha: 0.9}}, "codecard")
-text("cct0", table{"0.70": table{content: "let hop = table{", x: 1210, y: 348, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}, "0.84": table{content: "let hop = table{", x: 1210, y: 348, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}, "5.4": table{content: "let hop = table{", x: 1210, y: 348, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}}, "codecard")
-shape("cc1", "rect", table{"0.87": table{x: 1210, y: 382, w: 336, h: 3, color: "#6a6a78", alpha: 0, ease: "cubicOut"}, "1.01": table{x: 1210, y: 382, w: 336, h: 3, color: "#6a6a78", alpha: 0.9}, "1.9": table{x: 1210, y: 382, w: 336, h: 3, color: "#6a6a78", alpha: 0.9}}, "codecard")
-text("cct1", table{"0.92": table{content: "  \"0.45\": table{y: -70},", x: 1210, y: 390, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}, "1.06": table{content: "  \"0.45\": table{y: -70},", x: 1210, y: 390, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}, "5.4": table{content: "  \"0.45\": table{y: -70},", x: 1210, y: 390, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}}, "codecard")
-shape("cc2", "rect", table{"1.09": table{x: 1210, y: 424, w: 434, h: 3, color: "#ffffff", alpha: 0, ease: "cubicOut"}, "1.23": table{x: 1210, y: 424, w: 434, h: 3, color: "#ffffff", alpha: 0.9}, "1.9": table{x: 1210, y: 424, w: 434, h: 3, color: "#ffffff", alpha: 0.9}}, "codecard")
-text("cct2", table{"1.14": table{content: "shape(\"a\", \"circle\", stamp(hop,", x: 1210, y: 432, size: 22, color: "#ffffff", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}, "1.28": table{content: "shape(\"a\", \"circle\", stamp(hop,", x: 1210, y: 432, size: 22, color: "#ffffff", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}, "5.4": table{content: "shape(\"a\", \"circle\", stamp(hop,", x: 1210, y: 432, size: 22, color: "#ffffff", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}}, "codecard")
-shape("cc3", "rect", table{"1.31": table{x: 1210, y: 466, w: 616, h: 3, color: "#ffffff", alpha: 0, ease: "cubicOut"}, "1.45": table{x: 1210, y: 466, w: 616, h: 3, color: "#ffffff", alpha: 0.9}, "1.9": table{x: 1210, y: 466, w: 616, h: 3, color: "#ffffff", alpha: 0.9}}, "codecard")
-text("cct3", table{"1.36": table{content: "  table{x: -330, color: \"#7fd1a9\"}), \"rowA\")", x: 1210, y: 474, size: 22, color: "#ffffff", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}, "1.50": table{content: "  table{x: -330, color: \"#7fd1a9\"}), \"rowA\")", x: 1210, y: 474, size: 22, color: "#ffffff", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}, "5.4": table{content: "  table{x: -330, color: \"#7fd1a9\"}), \"rowA\")", x: 1210, y: 474, size: 22, color: "#ffffff", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}}, "codecard")
-shape("cc4", "rect", table{"1.53": table{x: 1210, y: 508, w: 434, h: 3, color: "#6a6a78", alpha: 0, ease: "cubicOut"}, "1.67": table{x: 1210, y: 508, w: 434, h: 3, color: "#6a6a78", alpha: 0.9}, "1.9": table{x: 1210, y: 508, w: 434, h: 3, color: "#6a6a78", alpha: 0.9}}, "codecard")
-text("cct4", table{"1.58": table{content: "shape(\"b\", \"circle\", stamp(hop,", x: 1210, y: 516, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}, "1.72": table{content: "shape(\"b\", \"circle\", stamp(hop,", x: 1210, y: 516, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}, "5.4": table{content: "shape(\"b\", \"circle\", stamp(hop,", x: 1210, y: 516, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}}, "codecard")
-shape("cc5", "rect", table{"1.75": table{x: 1210, y: 550, w: 574, h: 3, color: "#6a6a78", alpha: 0, ease: "cubicOut"}, "1.89": table{x: 1210, y: 550, w: 574, h: 3, color: "#6a6a78", alpha: 0.9}, "1.9": table{x: 1210, y: 550, w: 574, h: 3, color: "#6a6a78", alpha: 0.9}}, "codecard")
-text("cct5", table{"1.80": table{content: "  table{x: 0, color: \"#ff9d7a\"}), \"rowA\")", x: 1210, y: 558, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0}, "1.94": table{content: "  table{x: 0, color: \"#ff9d7a\"}), \"rowA\")", x: 1210, y: 558, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}, "5.4": table{content: "  table{x: 0, color: \"#ff9d7a\"}), \"rowA\")", x: 1210, y: 558, size: 22, color: "#6a6a78", font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}}, "codecard")
-text("cc_tag", table{"0.4": table{content: "stamp", x: 1625, y: 322, size: 20, color: ink, font: fnt, alpha: 0.9}, "5.4": table{content: "stamp", x: 1625, y: 322, size: 20, color: ink, font: fnt, alpha: 0.9}}, "codecard")
-shape("track", "rect", table{
-  "2.05": table{x: 430, y: 460, w: 1060, h: 5, color: "#2a2a33", alpha: 0},
-  "2.25": table{x: 430, y: 460, w: 1060, h: 5, color: "#2a2a33", alpha: 1},
-  "5.40": table{x: 430, y: 460, w: 1060, h: 5, color: "#2a2a33", alpha: 1}
-})
-group("clipB", table{"2.15": table{x: 430, y: 460, scale: 0.85, alpha: 0}, "2.35": table{x: 430, y: 460, scale: 1.0, alpha: 1, ease: "cubicOut"}, "3.15": table{x: 1460, y: 460, scale: 1.0, alpha: 1, ease: "cubicInOut"}, "3.45": table{x: 1460, y: 460, scale: 1.1, alpha: 1}, "5.4": table{x: 1460, y: 460, scale: 1.1, alpha: 0.4}})
-shape("ballB", "circle", table{"2.35": table{x: 0, y: 0, r: 30, color: ink, alpha: 1}, "5.4": table{x: 0, y: 0, r: 30, color: ink, alpha: 1}}, "clipB")
-shape("ballB2", "circle", table{"2.35": table{x: -120, y: 12, r: 14, color: slate, alpha: 0.9}, "5.4": table{x: -120, y: 12, r: 14, color: slate, alpha: 0.9}}, "clipB")
-shape("ringB", "arc", table{"2.35": table{x: 0, y: 0, r: 46, start: 0, end: 360, width: 5, color: ink, alpha: 0.15}, "2.6": table{x: 0, y: 0, r: 46, start: 0, end: 360, width: 5, color: ink, alpha: 0.5}, "2.85": table{x: 0, y: 0, r: 46, start: 0, end: 360, width: 5, color: ink, alpha: 0.25}, "3.1": table{x: 0, y: 0, r: 46, start: 0, end: 360, width: 5, color: ink, alpha: 0.5}, "3.35": table{x: 0, y: 0, r: 46, start: 0, end: 360, width: 5, color: ink, alpha: 0.15}, "5.4": table{x: 0, y: 0, r: 46, start: 0, end: 360, width: 5, color: ink, alpha: 0.15}}, "clipB")
-text("lblB", table{"2.35": table{content: "clip", x: 0, y: 52, size: 20, color: slate, font: "{GR}", alpha: 0.9}, "5.4": table{content: "clip", x: 0, y: 52, size: 20, color: slate, font: "{GR}", alpha: 0.9}}, "clipB")
-shape("progress", "rect", table{
-  "3.70": table{x: 430, y: 460, w: 0, h: 5, color: "#ffffff"},
-  "4.15": table{x: 430, y: 460, w: 1060, h: 5, color: "#ffffff", ease: "cubicOut"},
-  "5.40": table{x: 430, y: 460, w: 1060, h: 5, color: "#ffffff"}
-})
-shape("rr_ok", "text", table{
-  "4.20": table{content: "rendered in 0.31s", x: 960, y: 545, size: 32, color: mint, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 0, ease: "cubicOut"},
-  "4.50": table{content: "rendered in 0.31s", x: 960, y: 545, size: 32, color: mint, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1},
-  "5.40": table{content: "rendered in 0.31s", x: 960, y: 545, size: 32, color: mint, font: "examples/assets/fonts/Geist-Regular.ttf", alpha: 1}
-})
-shape("ballR", "circle", table{
-  "4.25": table{x: 960, y: 400, r: 56, color: "#ffffff", alpha: 0, scale: 0.4, ease: "cubicOut"},
-  "4.60": table{x: 960, y: 400, r: 56, color: "#ffffff", alpha: 1, scale: 1.0},
-  "5.40": table{x: 960, y: 400, r: 56, color: "#ffffff", alpha: 1, scale: 1.0}
-})
-shape("ringR", "arc", table{
-  "4.40": table{x: 960, y: 400, r: 70, start: 0, end: 360, width: 6, color: "#ffffff", alpha: 0, ease: "cubicOut"},
-  "4.60": table{x: 960, y: 400, r: 70, start: 0, end: 360, width: 6, color: "#ffffff", alpha: 0.5},
-  "5.00": table{x: 960, y: 400, r: 150, start: 0, end: 360, width: 5, color: "#ffffff", alpha: 0},
-  "5.40": table{x: 960, y: 400, r: 150, start: 0, end: 360, width: 5, color: "#ffffff", alpha: 0}
-})
+group("hopRow", table{"0": table{x: 540, y: 700}})
+shape("hopA", "circle", stamp(hop5, table{x: -220, color: coral}), "hopRow")
+shape("hopB", "circle", stamp(hop5, table{x: 0, color: mint}), "hopRow")
+shape("hopC", "circle", stamp(hop5, table{x: 220, color: ink}), "hopRow")
 
-scene(5.0, 30, "fade", 0.5)
-shape("bg6", "rect", table{
-  "0.00": table{x: 0, y: 0, w: 1920, h: 1080, color: bg},
-  "4.30": table{x: 0, y: 0, w: 1920, h: 1080, color: bg, ease: "easeIn"},
-  "5.00": table{x: 0, y: 0, w: 1920, h: 1080, color: "#000000"}
+// ---- scene 6: closer ----
+scene(1.75, 30, "fade", 0.5)
+shape("bg6", "rect", table{"0": table{x: 0, y: 0, w: 1080, h: 1350, color: bg}})
+text("word6", table{
+  "0.375": table{content: "kyfram.", x: 540, y: 650, size: 56, color: ink, font: fnt, alpha: 0, scale: 0.9, ease: "cubicOut"},
+  "0.625": table{content: "kyfram.", x: 540, y: 650, size: 56, color: ink, font: fnt, alpha: 1, scale: 1.0}
 })
-shape("lock6", "text", table{
-  "0.15": table{content: "Kyfram.", x: 960, y: 400, size: 150, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.92, ease: "cubicOut"},
-  "0.55": table{content: "Kyfram.", x: 960, y: 400, size: 150, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "5.00": table{content: "Kyfram.", x: 960, y: 400, size: 150, color: ink, font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("rule6", "rect", table{
-  "0.50": table{x: 960, y: 540, w: 0, h: 8, color: "#ffffff", alpha: 0, ease: "cubicOut"},
-  "0.90": table{x: 700, y: 540, w: 520, h: 8, color: "#ffffff", alpha: 1},
-  "5.00": table{x: 700, y: 540, w: 520, h: 8, color: "#ffffff", alpha: 1}
-})
-shape("cap60", "text", table{
-  "1.20": table{content: "video", x: 654, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "1.29": table{content: "video", x: 654, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "1.80": table{content: "video", x: 654, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap61", "text", table{
-  "1.65": table{content: "you", x: 786, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "1.74": table{content: "you", x: 786, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.25": table{content: "you", x: 786, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap62", "text", table{
-  "2.10": table{content: "declare", x: 946, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "2.19": table{content: "declare", x: 946, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "2.70": table{content: "declare", x: 946, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap63", "text", table{
-  "2.55": table{content: "not", x: 1106, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "2.64": table{content: "not", x: 1106, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "3.15": table{content: "not", x: 1106, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
-})
-shape("cap64", "text", table{
-  "3.00": table{content: "direct", x: 1252, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 0, scale: 0.84, ease: "cubicOut"},
-  "3.09": table{content: "direct", x: 1252, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0},
-  "3.60": table{content: "direct", x: 1252, y: 640, size: 46, color: "#ffffff", font: "examples/assets/fonts/Geist-Bold.ttf", alpha: 1, scale: 1.0}
+text("tag6", table{
+  "0.688": table{content: "video you declare, not direct", x: 540, y: 715, size: 22, color: slate, font: fntr, alpha: 0, ease: "sine"},
+  "1": table{content: "video you declare, not direct", x: 540, y: 715, size: 22, color: slate, font: fntr, alpha: 0.85},
+  "1.75": table{content: "video you declare, not direct", x: 540, y: 715, size: 22, color: slate, font: fntr, alpha: 0.85}
 })
