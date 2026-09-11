@@ -163,21 +163,22 @@ const viewPage = `<!doctype html>
 <title>kyfram — {{SCRIPT}}</title>
 <style>
 @font-face {
-  font-family: "Archivo Black";
+  font-family: "kyfram display";
   src: url("/font") format("truetype");
   font-display: swap;
 }
 * { box-sizing: border-box; }
 :root {
-  --bg: #0a0a18;
-  --surface: #14141c;
-  --surface-2: #1a1a28;
-  --line: #2a2a38;
-  --text: #ece8df;
-  --muted: #8a877f;
-  --gold: #e6c040;
-  --gold-2: #f0d060;
-  --red: #e64c40;
+  /* kyfram-site palette — warm zinc, monochrome */
+  --bg: #0d0d0c;
+  --surface: #171816;
+  --surface-2: #232421;
+  --line: #343531;
+  --line-strong: #4b4c46;
+  --text: #f5f5f4;
+  --muted: #8f8f86;
+  --muted-2: #8a8a80;
+  --error: #d05448;
   --radius: 14px;
 }
 html, body { height: 100%; }
@@ -185,209 +186,124 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Inter", Segoe UI, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-a { color: var(--gold); }
-.wrap {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 28px 20px 48px;
-}
-/* header — editorial, not SaaS card */
+a { color: var(--text); }
+.wrap { max-width: 880px; margin: 0 auto; padding: 28px 20px 48px; }
 .top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 18px;
 }
 .brand {
-  font-family: "Archivo Black", system-ui, sans-serif;
-  font-size: 28px;
-  letter-spacing: -0.02em;
-  margin: 0;
-  line-height: 1;
+  font-family: "kyfram display", system-ui, sans-serif;
+  font-size: 26px; letter-spacing: -0.02em; margin: 0; line-height: 1;
 }
-.brand span { color: var(--gold); }
+.brand span { color: var(--muted-2); }
 .file {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex; align-items: center; gap: 8px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  color: var(--muted);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  padding: 6px 10px;
-  border-radius: 999px;
+  font-size: 12px; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--line);
+  padding: 6px 11px; border-radius: 999px;
 }
-.dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 0 6px rgba(230,192,64,0.12);
+.file::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text);
 }
-/* stage — cinematic 16:9 card with subtle grain border */
 .stage {
-  background: #000;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset;
-}
-.stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.06), transparent 18%, transparent 82%, rgba(0,0,0,0.22));
+  background: #000; border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden; position: relative;
 }
 .frame {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  display: block;
-  background: #000;
-  object-fit: contain;
+  width: 100%; aspect-ratio: 16 / 9; display: block;
+  background: #000; object-fit: contain;
 }
 .frame--loading { opacity: 0.35; filter: blur(1px); }
-/* transport — instrument, not form */
 .transport {
-  margin-top: 16px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px 16px 16px;
+  margin-top: 16px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 16px 18px;
 }
 .time-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
 }
 .time {
-  font-family: "Archivo Black", system-ui, sans-serif;
-  font-size: 42px;
-  line-height: 1;
-  color: var(--gold);
-  letter-spacing: -0.03em;
+  font-family: "kyfram display", system-ui, sans-serif;
+  font-size: 40px; line-height: 1; color: var(--text);
+  letter-spacing: -0.02em;
 }
 .time small {
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0;
-  margin-left: 10px;
-  font-weight: 400;
+  font-family: ui-monospace, monospace; font-size: 12px;
+  color: var(--muted); letter-spacing: 0; margin-left: 10px; font-weight: 400;
 }
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
+.meta { color: var(--muted); font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  padding: 4px 9px; border-radius: 999px;
+  font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted);
 }
+.controls { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .btn {
-  appearance: none;
-  border: 1px solid var(--gold);
-  background: var(--gold);
-  color: #16130a;
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  padding: 10px 18px;
-  border-radius: 999px;
-  cursor: pointer;
+  appearance: none; border: 1px solid var(--text); background: var(--text);
+  color: var(--bg); font-weight: 700; font-size: 13px; letter-spacing: 0.01em;
+  min-height: 44px; padding: 0 18px; border-radius: 999px; cursor: pointer;
   transition: transform 120ms, background 120ms, border-color 120ms;
 }
-.btn:hover { background: var(--gold-2); border-color: var(--gold-2); transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
+.btn:hover { background: #ffffff; border-color: #ffffff; }
+.btn:active { transform: translateY(1px); }
 .btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn.ghost:hover { background: var(--surface-2); border-color: var(--text); }
+.btn.ghost[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.ruler { position: relative; height: 14px; margin: 10px 4px 0; }
+.ruler .tick { position: absolute; top: 0; width: 1px; height: 7px; background: var(--line); }
+.ruler .tick.major { height: 10px; background: var(--line-strong); }
+.ruler .edge {
+  position: absolute; top: 9px; font-family: ui-monospace, monospace;
+  font-size: 10px; color: var(--muted-2);
+}
+.ruler .edge.l { left: 0; }
+.ruler .edge.r { right: 0; }
 .scrub {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  outline: none;
-  padding: 0 2px;
+  width: 100%; -webkit-appearance: none; appearance: none;
+  height: 24px; margin: 0; background: transparent; border: none;
+  outline: none; cursor: pointer;
 }
-.scrub::-webkit-slider-runnable-track { height: 6px; background: transparent; border-radius: 999px; }
+.scrub::-webkit-slider-runnable-track {
+  height: 10px; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 999px;
+}
 .scrub::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px; height: 18px;
-  margin-top: -6px;
-  background: var(--gold);
-  border: 2px solid #1a1a28;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  -webkit-appearance: none; width: 17px; height: 17px; margin-top: -4.5px;
+  background: var(--text); border: 1px solid var(--bg); border-radius: 50%;
 }
-.scrub::-moz-range-thumb {
-  width: 18px; height: 18px;
-  background: var(--gold);
-  border: 2px solid #1a1a28;
-  border-radius: 50%;
-  cursor: pointer;
+.scrub::-moz-range-track {
+  height: 10px; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 999px;
 }
+.scrub::-moz-range-thumb { width: 17px; height: 17px; background: var(--text); border: 1px solid var(--bg); border-radius: 50%; }
 .scrub:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-.meta {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 10px 2px 0;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--line);
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
-}
 .error {
-  color: #ffd1cc;
-  background: rgba(230,76,64,0.10);
-  border: 1px solid rgba(230,76,64,0.35);
-  border-radius: 10px;
-  padding: 12px 14px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin-top: 14px;
-  font-family: ui-monospace, monospace;
-  font-size: 13px;
-  line-height: 1.5;
+  color: #f2b6ae; background: rgba(208,84,72,0.12);
+  border: 1px solid rgba(208,84,72,0.45);
+  border-radius: 10px; padding: 12px 14px; white-space: pre-wrap; word-break: break-word;
+  margin-top: 14px; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.5;
 }
 .error:empty { display: none; }
 .foot {
-  color: var(--muted);
-  font-size: 13px;
-  margin-top: 18px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
+  color: var(--muted); font-size: 13px; margin-top: 18px;
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
 }
 .kbd {
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-bottom-width: 2px;
-  padding: 2px 6px;
-  border-radius: 6px;
-  color: var(--text);
+  font-family: ui-monospace, monospace; font-size: 11px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-bottom-width: 2px; padding: 2px 6px; border-radius: 6px; color: var(--text);
 }
 @media (max-width: 640px) {
-  .time { font-size: 32px; }
+  .time { font-size: 30px; }
   .wrap { padding: 18px 14px 36px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -399,38 +315,51 @@ a { color: var(--gold); }
 <div class="wrap">
   <div class="top">
     <h1 class="brand">kyfram<span>.</span></h1>
-    <span class="file"><span class="dot" aria-hidden="true"></span>{{SCRIPT}}</span>
+    <span class="file">{{SCRIPT}}</span>
   </div>
 
-  <div class="stage"><img id="f" class="frame" alt="preview frame" width="640" height="360"></div>
+  <div class="stage" id="stage"><img id="f" class="frame" alt="preview frame" width="640" height="360"></div>
 
   <div class="transport">
     <div class="time-row">
-      <div class="time" id="t">0.00<small id="tc">00:00 / 00:00</small></div>
+      <div class="time" id="t">0.00<small id="tc">00:00 / 00:00 &middot; f0</small></div>
       <div class="meta" id="m"></div>
     </div>
+    <div class="ruler" id="ruler">
+      <span class="edge l">0</span><span class="edge r" id="durLbl">-</span>
+    </div>
+    <input id="s" class="scrub" type="range" min="0" max="2" step="0.033" value="0" aria-label="scrub timeline">
     <div class="controls">
       <button id="p" class="btn" type="button" aria-label="Play">Play</button>
-      <input id="s" class="scrub" type="range" min="0" max="2" step="0.033" value="0" aria-label="scrub timeline">
+      <button id="lp" class="btn ghost" type="button" aria-pressed="true" aria-label="Loop">Loop</button>
+      <button id="dl" class="btn ghost" type="button" aria-label="Download current frame as PNG">PNG</button>
+      <button id="fs" class="btn ghost" type="button" aria-label="Fullscreen the stage">Full</button>
     </div>
     <div id="e" class="error" role="alert"></div>
   </div>
 
   <div class="foot">
     <span><span class="kbd">Space</span> play/pause</span>
-    <span>·</span>
-    <span><span class="kbd">←</span> <span class="kbd">→</span> step frame</span>
-    <span>·</span>
+    <span>&middot;</span>
+    <span><span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> step frame</span>
+    <span>&middot;</span>
+    <span><span class="kbd">Home</span> <span class="kbd">End</span> jump</span>
+    <span>&middot;</span>
+    <span><span class="kbd">F</span> fullscreen</span>
+    <span>&middot;</span>
     <span>save file to hot-reload</span>
   </div>
 </div>
 
 <script>
-let dur=2, fps=30, t=0, playing=false, timer=null, blobUrl=null;
+let dur=2, fps=30, t=0, playing=false, loop=true, timer=null, blobUrl=null;
+const base = '{{SCRIPT}}'.replace(/\.lgv$/,'');
 const img=document.getElementById('f'), s=document.getElementById('s'),
-      p=document.getElementById('p'), lbl=document.getElementById('t'),
-      tc=document.getElementById('tc'), meta=document.getElementById('m'),
-      err=document.getElementById('e');
+      p=document.getElementById('p'), lp=document.getElementById('lp'),
+      dl=document.getElementById('dl'), fs=document.getElementById('fs'),
+      lbl=document.getElementById('t'), tc=document.getElementById('tc'),
+      meta=document.getElementById('m'), err=document.getElementById('e'),
+      ruler=document.getElementById('ruler'), durLbl=document.getElementById('durLbl');
 
 function fmtTime(v){
   const m=Math.floor(v/60).toString().padStart(2,'0');
@@ -438,26 +367,32 @@ function fmtTime(v){
   return m+':'+sec;
 }
 
-fetch('/meta').then(async r=>{
-  const j=await r.json();
-  if(!r.ok) throw new Error(j.error || 'meta failed');
-  dur=j.duration; fps=j.fps;
+function setMeta(d, f){
+  dur=d; fps=f;
   s.max=dur.toFixed(3);
   s.step=(1/fps).toFixed(5);
-  meta.innerHTML = '<span class="pill">'+dur.toFixed(1)+'s</span><span class="pill">'+fps+' fps</span><span class="pill">'+Math.round(dur*fps)+' frames</span>';
-  show();
-}).catch(async e=>{
-  err.textContent = e.message || 'Could not load script.';
-});
+  meta.innerHTML='<span class="pill">'+dur.toFixed(1)+'s</span><span class="pill">'+fps+' fps</span><span class="pill">'+Math.round(dur*fps)+' frames</span>';
+  buildRuler();
+}
+
+function buildRuler(){
+  ruler.querySelectorAll('.tick').forEach(n=>n.remove());
+  durLbl.textContent=dur.toFixed(1)+'s';
+  if(!(dur>0)) return;
+  const step = dur<=5 ? 0.5 : dur<=20 ? 1 : dur<=60 ? 2 : 5;
+  for(let tv=step; tv<dur; tv+=step){
+    const d=document.createElement('span');
+    d.className='tick'+(Math.abs(tv-Math.round(tv))<1e-9 ? ' major' : '');
+    d.style.left=(tv/dur*100).toFixed(3)+'%';
+    ruler.appendChild(d);
+  }
+}
 
 async function show(){
   img.classList.add('frame--loading');
   try{
     const r=await fetch('/frame?t='+t.toFixed(3), {cache:'no-store'});
-    if(!r.ok){
-      const txt=await r.text();
-      throw new Error(txt);
-    }
+    if(!r.ok) throw new Error(await r.text());
     err.textContent='';
     const blob=await r.blob();
     const url=URL.createObjectURL(blob);
@@ -465,7 +400,7 @@ async function show(){
     blobUrl=url;
     img.src=url;
     lbl.firstChild.textContent=t.toFixed(2);
-    tc.textContent=fmtTime(t)+' / '+fmtTime(dur);
+    tc.textContent=fmtTime(t)+' / '+fmtTime(dur)+' \u00b7 f'+Math.round(t*fps);
     s.value=t.toFixed(3);
     img.classList.remove('frame--loading');
   }catch(e){
@@ -479,29 +414,59 @@ function toggle(){
   p.textContent=playing?'Pause':'Play';
   p.setAttribute('aria-label', playing?'Pause':'Play');
   if(playing){
-    timer=setInterval(()=>{ t+=1/fps; if(t>dur) t=0; show(); }, 1000/fps);
+    timer=setInterval(()=>{
+      t+=1/fps;
+      if(t>dur){
+        if(loop){ t=0; } else { t=dur; toggle(); return; }
+      }
+      show();
+    }, 1000/fps);
   } else {
     clearInterval(timer);
   }
 }
 p.onclick=toggle;
 s.oninput=()=>{ t=parseFloat(s.value); show(); };
+lp.onclick=()=>{ loop=!loop; lp.setAttribute('aria-pressed', String(loop)); };
+dl.onclick=()=>{
+  if(!blobUrl) return;
+  const a=document.createElement('a');
+  a.href=blobUrl;
+  a.download=base+'-f'+Math.round(t*fps)+'.png';
+  a.click();
+};
+fs.onclick=()=>{
+  const st=document.getElementById('stage');
+  if(!document.fullscreenEnabled) return;
+  if(document.fullscreenElement) document.exitFullscreen();
+  else st.requestFullscreen().catch(()=>{});
+};
+
 document.addEventListener('keydown', e=>{
-  if(e.code==='Space' && document.activeElement!==s){
-    e.preventDefault();
-    toggle();
-  }
-  if(e.code==='ArrowRight'){ t=Math.min(dur, t+1/fps); show(); }
-  if(e.code==='ArrowLeft'){ t=Math.max(0, t-1/fps); show(); }
+  const onCtrl = document.activeElement===s || document.activeElement.tagName==='BUTTON';
+  if(e.code==='Space' && !onCtrl){ e.preventDefault(); toggle(); }
+  if(onCtrl) return;
+  const st=1/fps;
+  if(e.code==='ArrowRight'){ t=Math.min(dur, t+st); show(); }
+  else if(e.code==='ArrowLeft'){ t=Math.max(0, t-st); show(); }
+  else if(e.code==='Home'){ t=0; show(); }
+  else if(e.code==='End'){ t=dur; show(); }
+  else if(e.code==='KeyF'){ fs.onclick(); }
 });
-// hot-reload hint: meta re-fetched on focus (saving file updates next frame fetch)
+
+fetch('/meta').then(async r=>{
+  const j=await r.json();
+  if(!r.ok) throw new Error(j.error || 'meta failed');
+  setMeta(j.duration, j.fps);
+  show();
+}).catch(e=>{ err.textContent=e.message || 'Could not load script.'; });
+
+// hot reload: on focus, re-fetch meta; duration/fps changes apply live
 window.addEventListener('focus', ()=>{
-  fetch('/meta').then(r=>r.json()).then(m=>{
-    if(m.duration && m.fps){
-      dur=m.duration; fps=m.fps;
-      s.max=dur.toFixed(3);
-      s.step=(1/fps).toFixed(5);
-      meta.innerHTML = '<span class="pill">'+dur.toFixed(1)+'s</span><span class="pill">'+fps+' fps</span><span class="pill">'+Math.round(dur*fps)+' frames</span>';
+  fetch('/meta').then(r=>r.json()).then(j=>{
+    if(j.duration && j.fps && (j.duration!==dur || j.fps!==fps)){
+      setMeta(j.duration, j.fps);
+      if(t>dur) { t=dur; show(); }
     }
   }).catch(()=>{});
 });
