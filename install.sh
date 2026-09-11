@@ -1,25 +1,18 @@
 #!/bin/sh
 set -e
-# kyfram installer — clones source and builds for the host (no prebuilt binaries to track)
+# kyfram installer bootstrap — fetches source, hands over to the
+# interactive Go installer (cmd/install, tracked in-repo).
 # usage:
 #   curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh
-#   curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh -s -- v0.2.0
-#   VERSION=v0.2.0 sh install.sh
+#   curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh -s -- v0.3.0
+#   VERSION=v0.3.0 sh install.sh
 REPO="codetesla51/kyfram"
-BIN="kyfram"
 VERSION="${VERSION:-${1:-latest}}"
-command -v go >/dev/null 2>&1 || { echo "go not found — install Go 1.25+" >&2; exit 1; }
+command -v go >/dev/null 2>&1 || { echo "go not found — install Go 1.25+ from https://go.dev/dl" >&2; exit 1; }
 command -v git >/dev/null 2>&1 || { echo "git not found — install git" >&2; exit 1; }
-INSTALL_DIR="/usr/local/bin"
-if [ ! -w "$INSTALL_DIR" ]; then INSTALL_DIR="$HOME/.local/bin"; mkdir -p "$INSTALL_DIR"; fi
-if [ "$VERSION" = "latest" ]; then TAG="master"; else case "$VERSION" in v*) TAG="$VERSION" ;; *) TAG="v$VERSION" ;; esac; fi
-echo "installing kyfram ($TAG) → $INSTALL_DIR/$BIN"
+case "$VERSION" in latest) TAG="master" ;; v*) TAG="$VERSION" ;; *) TAG="v$VERSION" ;; esac
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT INT TERM
-if [ "$TAG" = "master" ]; then
-  git clone --depth 1 "https://gitlab.com/${REPO}.git" "$TMPDIR"
-else
-  git clone --depth 1 --branch "$TAG" "https://gitlab.com/${REPO}.git" "$TMPDIR"
-fi
-(cd "$TMPDIR" && go build -o "$INSTALL_DIR/$BIN" ./cmd/kyfram)
-echo "kyfram ready: $INSTALL_DIR/$BIN --help"
+git clone --depth 1 ${TAG:+--branch "$TAG"} "https://gitlab.com/${REPO}.git" "$TMPDIR" >/dev/null
+# Piped stdin can't prompt, so the bootstrap always answers yes.
+(cd "$TMPDIR" && go run ./cmd/install --yes --version "$VERSION")
