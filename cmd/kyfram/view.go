@@ -24,7 +24,7 @@ func runView(cmd *cobra.Command, args []string) {
 	port, _ := cmd.Flags().GetInt("port")
 	font, _ := cmd.Flags().GetString("font")
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "usage: kyfram view [--port n] [--font f] <script.lgv>")
+		errln("usage: kyfram view [--port n] [--font f] <script.lgv>")
 		os.Exit(1)
 	}
 	script := args[0]
@@ -79,7 +79,7 @@ func runView(cmd *cobra.Command, args []string) {
 	addr := "localhost:" + strconv.Itoa(port)
 	fmt.Println("view:", "http://"+addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
-		fmt.Fprintln(os.Stderr, "view:", err)
+		errln("view:", err)
 		os.Exit(1)
 	}
 }

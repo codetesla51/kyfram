@@ -538,6 +538,10 @@ func totalDuration(tl Timeline) float64 {
 type EncodeOpts struct {
 	CRF    int
 	Preset string
+	// Progress reports piped frames as (done, total), same goroutine as
+	// the encode loop. done counts frames handed to ffmpeg, so the final
+	// call is always (total, total) — percent is done*100/total.
+	Progress func(done, total int)
 }
 
 // Encode renders tl and pipes raw RGBA frames to ffmpeg's stdin, which
@@ -609,11 +613,14 @@ func EncodeWithOpts(tl Timeline, outPath string, opts EncodeOpts) error {
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("ffmpeg start (%s): %w", cmd.String(), err)
 	}
-	for i := range frameCount(tl) {
+	for i, n := 0, frameCount(tl); i < n; i++ {
 		if _, err := stdin.Write(rgbaBytes(RenderFrame(tl, float64(i)/float64(tl.FPS)).Image())); err != nil {
 			stdin.Close()
 			waitErr := cmd.Wait()
 			return fmt.Errorf("frame %d: %w (ffmpeg: %v\n%s)", i, err, waitErr, stderr.String())
+		}
+		if opts.Progress != nil {
+			opts.Progress(i+1, n)
 		}
 	}
 	stdin.Close()

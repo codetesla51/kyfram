@@ -1,68 +1,46 @@
-scene(36, 30)
+// touch-light-motivation.lgv — motivation lines, soft white light rising from below.
+// 1080x1350 portrait. Canvas center = (540, 675).
 
-shape("bg", "rect", table{
-    "0": table{x: -2000, y: -2000, w: 6000, h: 6000, color: "#05050a", gradFrom: "#05050a", gradTo: "#0a1e3f", gradAngle: 60, layer: -10},
-})
+let lines = ["You don't need motivation.", "You need discipline.", "Show up when it's hard.", "Especially when it's hard.", "That's how you win."]
+let sizes = [48, 56, 52, 48, 62]
+let fontPath = "examples/assets/fonts/Iceland-Regular.ttf"
 
-shape("glow", "circle", table{
-    "0":  table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5, ease: "sine"},
-    "9":  table{x: 540, y: 960, r: 580, color: "#1f6feb", alpha: 0.22, blend: "screen", layer: -5, ease: "sine"},
-    "18": table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5, ease: "sine"},
-    "27": table{x: 540, y: 960, r: 580, color: "#1f6feb", alpha: 0.22, blend: "screen", layer: -5, ease: "sine"},
-    "36": table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5},
-})
+for i, word in lines {
+  if i == 0 {
+    scene(4, 30)
+  } else {
+    scene(4, 30, "fade", 1.2)
+  }
 
-let line = fn(content, y, tStart, holdEnd, size, color) {
-  let kf = table{}
-  kf[toStr(tStart)]       = table{content: content, x: 540, y: y + 60, size: size, scale: 0.7,  rotate: -4, alpha: 0, color: color, ease: "cubicOut"}
-  kf[toStr(tStart + 0.7)] = table{content: content, x: 540, y: y - 10, size: size, scale: 1.08, rotate: 1,  alpha: 1, color: color, ease: "cubicOut"}
-  kf[toStr(tStart + 1.0)] = table{content: content, x: 540, y: y,      size: size, scale: 1.0,  rotate: 0,  alpha: 1, color: color}
-  kf[toStr(holdEnd)]      = table{content: content, x: 540, y: y,      size: size, scale: 1.0,  rotate: 0,  alpha: 1, color: color}
-  return kf
+  let n = toStr(i)
+  let sz = sizes[i]
+  let isLast = i == 4
+  let col = isLast ? "#ffd166" : "#f5f1e6"
+
+  shape("bg${n}", "rect", table{
+    "0": table{x: 0, y: 0, w: 1080, h: 1350, color: "#060609"}
+  })
+
+  // Outer glow: rises from below frame, soft white touch-light bloom.
+  shape("glow${n}", "circle", table{
+    "0":   table{x: 540, y: 1750, r: 430, color: "#ffffff", alpha: 0,    blend: "screen", ease: "cubicOut"},
+    "2.2": table{x: 540, y: 1440, r: 430, color: "#ffffff", alpha: 0.18, blend: "screen"},
+    "4":   table{x: 540, y: 1440, r: 430, color: "#ffffff", alpha: 0.18, blend: "screen"}
+  })
+
+  // Hot core: tighter, brighter — the "touch point" of the light.
+  shape("core${n}", "circle", table{
+    "0":   table{x: 540, y: 1750, r: 190, color: "#ffffff", alpha: 0,    blend: "screen", ease: "cubicOut"},
+    "2.2": table{x: 540, y: 1470, r: 190, color: "#ffffff", alpha: 0.35, blend: "screen"},
+    "4":   table{x: 540, y: 1470, r: 190, color: "#ffffff", alpha: 0.35, blend: "screen"}
+  })
+
+  // The line: fades in cubicOut, holds, fades out cubicInOut with a
+  // slight upward drift on exit.
+  text("word${n}", table{
+    "0":   table{content: word, x: 540, y: 715, size: sz, color: col, font: fontPath, alpha: 0, ease: "cubicOut"},
+    "0.9": table{content: word, x: 540, y: 675, size: sz, color: col, font: fontPath, alpha: 1},
+    "2.8": table{content: word, x: 540, y: 675, size: sz, color: col, font: fontPath, alpha: 1, ease: "cubicInOut"},
+    "3.8": table{content: word, x: 540, y: 665, size: sz, color: col, font: fontPath, alpha: 0}
+  })
 }
-
-text("l1", line("You don't need motivation.", 700, 0, 36, 48, "#4da6ff"))
-text("l2", line("You need discipline.", 830, 5, 36, 48, "#4da6ff"))
-text("l3", line("Show up when it's hard.", 960, 10, 36, 48, "#4da6ff"))
-text("l4", line("Especially when it's hard.", 1090, 15, 36, 48, "#4da6ff"))
-text("l5", line("That's how you win.", 1220, 20, 36, 60, "#ffd166"))
-
-scene(36, 30, "fade", 1)
-
-shape("bg2", "rect", table{
-    "0": table{x: -2000, y: -2000, w: 6000, h: 6000, color: "#05050a", gradFrom: "#05050a", gradTo: "#0a1e3f", gradAngle: 60, layer: -10},
-})
-
-shape("glow2", "circle", table{
-    "0":  table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5, ease: "sine"},
-    "9":  table{x: 540, y: 960, r: 580, color: "#1f6feb", alpha: 0.22, blend: "screen", layer: -5, ease: "sine"},
-    "18": table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5, ease: "sine"},
-    "27": table{x: 540, y: 960, r: 580, color: "#1f6feb", alpha: 0.22, blend: "screen", layer: -5, ease: "sine"},
-    "36": table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5},
-})
-
-text("m1", line("The days will get hard.", 700, 0, 36, 48, "#4da6ff"))
-text("m2", line("Do it anyway.", 830, 5, 36, 48, "#4da6ff"))
-text("m3", line("No one is coming to save you.", 960, 10, 36, 48, "#4da6ff"))
-text("m4", line("So save yourself.", 1090, 15, 36, 48, "#4da6ff"))
-text("m5", line("One step. Then another.", 1220, 20, 36, 60, "#ef476f"))
-
-scene(36, 30, "fade", 1)
-
-shape("bg3", "rect", table{
-    "0": table{x: -2000, y: -2000, w: 6000, h: 6000, color: "#05050a", gradFrom: "#05050a", gradTo: "#0a1e3f", gradAngle: 60, layer: -10},
-})
-
-shape("glow3", "circle", table{
-    "0":  table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5, ease: "sine"},
-    "9":  table{x: 540, y: 960, r: 580, color: "#1f6feb", alpha: 0.22, blend: "screen", layer: -5, ease: "sine"},
-    "18": table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5, ease: "sine"},
-    "27": table{x: 540, y: 960, r: 580, color: "#1f6feb", alpha: 0.22, blend: "screen", layer: -5, ease: "sine"},
-    "36": table{x: 540, y: 960, r: 500, color: "#1f6feb", alpha: 0.15, blend: "screen", layer: -5},
-})
-
-text("n1", line("Your only limit is you.", 700, 0, 36, 48, "#4da6ff"))
-text("n2", line("Not your past.", 830, 5, 36, 48, "#4da6ff"))
-text("n3", line("Not your circumstances.", 960, 10, 36, 48, "#4da6ff"))
-text("n4", line("Just you.", 1090, 15, 36, 48, "#4da6ff"))
-text("n5", line("Prove it wrong.", 1220, 20, 36, 60, "#06d6a0"))

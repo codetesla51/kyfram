@@ -4,14 +4,41 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/codetesla51/logos/interpreter"
 	"github.com/spf13/cobra"
 	kyfram "gitlab.com/codetesla51/kyfram"
+	"golang.org/x/term"
 )
 
 // version is the only copy — help text and --version both read it.
-const version = "v0.2.0"
+const version = "v0.3.0"
+
+// paint wraps s in an ANSI code on terminals only — pipes and NO_COLOR
+// stay plain. A little color on results, none anywhere else.
+func paint(f *os.File, code, s string) string {
+	if os.Getenv("NO_COLOR") == "" && term.IsTerminal(int(f.Fd())) {
+		return code + s + "\x1b[0m"
+	}
+	return s
+}
+
+// errln prints a red error line to stderr.
+func errln(a ...any) {
+	fmt.Fprint(os.Stderr, paint(os.Stderr, "\x1b[31m", fmt.Sprintln(a...)))
+}
+
+// errf prints a red formatted error to stderr.
+func errf(format string, a ...any) {
+	fmt.Fprint(os.Stderr, paint(os.Stderr, "\x1b[31m", fmt.Sprintf(format, a...)))
+}
+
+// okln prints a green line to stdout.
+func okln(a ...any) {
+	fmt.Println(paint(os.Stdout, "\x1b[32m", fmt.Sprint(a...)))
+}
 
 // newVM creates the sandboxed Logos VM used by kyfram.
 func newVM() *interpreter.Interpreter {
@@ -54,7 +81,7 @@ func main() {
 	root.SetHelpCommand(helpCommand())
 	root.AddCommand(renderCommand(), viewCommand(), newCommand())
 	if err := root.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "kyfram: %v\n\n", err)
+		errf("kyfram: %v\n\n", err)
 		printHelp()
 		os.Exit(1)
 	}
@@ -160,7 +187,7 @@ func printHelpNew() {
 // runNew scaffolds a starter project directory.
 func runNew(args []string) {
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "usage: kyfram new <name>")
+		errln("usage: kyfram new <name>")
 		os.Exit(1)
 	}
 	name := args[0]
@@ -257,6 +284,27 @@ func splitVar(s string) (string, string, bool) {
 	return "", "", false
 }
 
+// fileSize stats path for the finish line; missing file reports "?".
+func fileSize(path string) string {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return "?"
+	}
+	n := fi.Size()
+	if n < 1024 {
+		return fmt.Sprintf("%dB", n)
+	}
+	f := float64(n) / 1024
+	if f < 1024 {
+		return fmt.Sprintf("%.1fKB", f)
+	}
+	f /= 1024
+	if f < 1024 {
+		return fmt.Sprintf("%.1fMB", f)
+	}
+	return fmt.Sprintf("%.1fGB", f/1024)
+}
+
 // runRender renders one script file to a video or single PNG.
 func runRender(cmd *cobra.Command, args []string) {
 	flags := cmd.Flags()
@@ -270,31 +318,31 @@ func runRender(cmd *cobra.Command, args []string) {
 	format, _ := flags.GetString("format")
 	vars, _ := flags.GetStringArray("var")
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--var k=v ...] <script.lgv>")
+		errln("usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--var k=v ...] <script.lgv>")
 		os.Exit(1)
 	}
 	for _, v := range []int{fps, width, height} {
 		if v < 0 {
-			fmt.Fprintln(os.Stderr, "flags: sizes must be positive")
+			errln("flags: sizes must be positive")
 			os.Exit(1)
 		}
 	}
 	if crf < 0 || crf > 51 {
-		fmt.Fprintln(os.Stderr, "crf must be 0-51")
+		errln("crf must be 0-51")
 		os.Exit(1)
 	}
 	validPreset := map[string]bool{"ultrafast": true, "superfast": true, "veryfast": true, "faster": true, "fast": true, "medium": true, "slow": true, "slower": true, "veryslow": true}
 	if !validPreset[preset] {
-		fmt.Fprintln(os.Stderr, "preset must be one of ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
+		errln("preset must be one of ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
 		os.Exit(1)
 	}
 	if format != "mp4" && format != "png" {
-		fmt.Fprintln(os.Stderr, "format must be mp4 or png")
+		errln("format must be mp4 or png")
 		os.Exit(1)
 	}
 	source, err := kyfram.LoadScript(args[0])
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "load:", err)
+		errln("load:", err)
 		os.Exit(1)
 	}
 	vm := newVM()
@@ -303,18 +351,18 @@ func runRender(cmd *cobra.Command, args []string) {
 	for _, v := range vars {
 		key, val, ok := splitVar(v)
 		if !ok {
-			fmt.Fprintln(os.Stderr, "var: want key=value, got", v)
+			errln("var: want key=value, got", v)
 			os.Exit(1)
 		}
 		vm.SetVar(key, val)
 	}
 	if err := vm.Run(string(source)); err != nil {
-		fmt.Fprintln(os.Stderr, "run:", err)
+		errln("run:", err)
 		os.Exit(1)
 	}
 	tl, err := b.Build()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "build:", err)
+		errln("build:", err)
 		os.Exit(1)
 	}
 	if fps > 0 {
@@ -336,19 +384,48 @@ func runRender(cmd *cobra.Command, args []string) {
 	if frames < 1 {
 		frames = 1
 	}
-	fmt.Fprintf(os.Stderr, "rendering %d frames (%dx%d @ %dfps, %.1fs) → %s\n",
-		frames, tl.Width, tl.Height, tl.FPS, tl.Duration, out)
+	// Width/height default like the renderer (640x360) when the script
+	// leaves them 0 — tl.size() is private, so mirror it here.
+	dw, dh := tl.Width, tl.Height
+	if dw <= 0 {
+		dw = 640
+	}
+	if dh <= 0 {
+		dh = 360
+	}
 	if format == "png" {
+		fmt.Fprintf(os.Stderr, "rendering 1 frame (%dx%d) → %s\n", dw, dh, out)
 		if err := kyfram.RenderFrame(tl, 0).SavePNG(out); err != nil {
-			fmt.Fprintln(os.Stderr, "png:", err)
+			errln("png:", err)
 			os.Exit(1)
 		}
-		fmt.Println("ok:", out)
+		fmt.Println(paint(os.Stdout, "\x1b[32m", fmt.Sprintf("ok: %s — %dx%d, %s", out, dw, dh, fileSize(out))))
 		return
 	}
-	if err := kyfram.EncodeWithOpts(tl, out, kyfram.EncodeOpts{CRF: crf, Preset: preset}); err != nil {
-		fmt.Fprintln(os.Stderr, "encode:", err)
+	// Spinner on terminals (CharSets[36] is the bar); plain line when piped.
+	var spin *spinner.Spinner
+	if term.IsTerminal(int(os.Stderr.Fd())) {
+		spin = spinner.New(spinner.CharSets[36], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		spin.Prefix = "rendering "
+		spin.Start()
+	} else {
+		fmt.Fprintf(os.Stderr, "rendering %d frames (%dx%d @ %dfps, %.1fs) → %s\n",
+			frames, dw, dh, tl.FPS, tl.Duration, out)
+	}
+	err = kyfram.EncodeWithOpts(tl, out, kyfram.EncodeOpts{CRF: crf, Preset: preset,
+		Progress: func(done, total int) {
+			if spin != nil {
+				// Rewritten 1/frame; a torn read garbles one tick max.
+				spin.Suffix = fmt.Sprintf(" %d/%d (%d%%)", done, total, done*100/total)
+			}
+		}})
+	if spin != nil {
+		spin.Stop()
+	}
+	if err != nil {
+		errln("encode:", err)
 		os.Exit(1)
 	}
-	fmt.Println("ok:", out)
+	fmt.Println(paint(os.Stdout, "\x1b[32m", fmt.Sprintf("ok: %s — %.1fs, %dx%d @%dfps, %d frames, %s",
+		out, tl.Duration, dw, dh, tl.FPS, frames, fileSize(out))))
 }
