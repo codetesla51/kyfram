@@ -72,9 +72,13 @@ fi
 echo
 printf '  fetching  %s (%s)\n' kyfram "$TAG"
 url="https://gitlab.com/$REPO/-/jobs/artifacts/$TAG/raw/dist/kyfram-$osarch?job=build-binaries"
-if ! curl -fsSL -o "$bin_dir/kyfram" "$url"; then
+# loader: progress bar on terminals, silent in pipes
+[ -t 2 ] && bar="-#" || bar="-sS"
+if ! curl $bar -fL -o "$bin_dir/kyfram" "$url"; then
   rm -f "$bin_dir/kyfram"
-  printf 'download failed — tag "v0.3.0" not published with binaries yet?\n' >&2
+  printf 'download failed — release %s has no prebuilt binaries yet (they are published on new tags).\n' "$TAG" >&2
+  printf 'try again after the next release, or build from source:\n' >&2
+  printf '  go install gitlab.com/codetesla51/kyfram/cmd/kyfram@%s\n' "$TAG" >&2
   exit 1
 fi
 chmod +x "$bin_dir/kyfram"
