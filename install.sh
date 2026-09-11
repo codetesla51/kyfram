@@ -3,8 +3,8 @@ set -e
 # kyfram installer — checks ffmpeg, downloads the prebuilt binary.
 # Nothing is auto-installed; missing ffmpeg is reported with a hint.
 # usage:
-#   curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh
-#   curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh -s -- v0.3.0
+#   curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh
+#   curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh -s -- v0.3.0
 #   VERSION=v0.3.0 sh install.sh
 REPO="codetesla51/kyfram"
 VERSION="${VERSION:-${1:-latest}}"
@@ -36,7 +36,7 @@ else
   printf '  [no]  %-9s %s\n' ffmpeg "not found — $(pminstall ffmpeg)"
   printf '\nkyfram needs ffmpeg to encode mp4.\n'
   printf 'Install it (hint above), then re-run:\n'
-  printf '  curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh\n'
+  printf '  curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh\n'
   exit 1
 fi
 

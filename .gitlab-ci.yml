@@ -54,7 +54,7 @@ release:
   release:
     tag_name: $CI_COMMIT_TAG
     name: $CI_COMMIT_TAG
-    description: "Install: curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh -s -- $CI_COMMIT_TAG"
+    description: "Install: curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh -s -- $CI_COMMIT_TAG"
     assets:
       links:
         - name: kyfram-linux-amd64

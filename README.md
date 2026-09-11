@@ -39,13 +39,13 @@ See docs for the full scripting reference.
 ## Install
 
 ```sh
-curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh
+curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh
 ```
 
 Specific version or update:
 
 ```sh
-curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh -s -- v0.2.0
+curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh -s -- v0.2.0
 # or
 VERSION=v0.2.0 sh install.sh
 ```
