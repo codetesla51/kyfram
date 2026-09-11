@@ -1,61 +1,113 @@
-scene(6, 30)
+// solar — five planets, each on its own tilted elliptical orbit.
+// All motion is computed: keyframes built in loops, positions derived
+// from trig, orbit rings drawn as closed paths. One loop at 8s.
+scene(8, 30)
 
-shape("sun", "circle", table{
-    "0": table{x: 320, y: 180, r: 30, color: "#e6a23c"},
+let tq = fn(t) { return format("%.3f", t) }
+
+// deep-space background — oversized so the camera push-in never shows the clear color
+shape("bg", "rect", table{
+  "0": table{x: -300, y: -300, w: 1240, h: 960, color: "#0d0d0c", layer: 0},
+  "8": table{x: -300, y: -300, w: 1240, h: 960, color: "#0d0d0c", layer: 0},
 })
 
-// mercury
-let mercury = table{}
-for i in range(0, 120) {
-    let t = 0.05 * i
-    let a = 3.0 * t
-    mercury[toStr(t)] = table{x: 320 + 55*cos(a), y: 180 + 14*sin(a), r: 4, color: "#8a8a80"}
+// starfield — deterministic scatter, each star breathing on its own phase
+for i in range(0, 26) {
+  let x = 14 + ((i * 47) % 612)
+  let y = 14 + ((i * 89) % 332)
+  let tw = table{}
+  for k in range(0, 81) {
+    let t = k * 1.0 / 10
+    let p = 0.5 - 0.5 * cos(6.28318 * (t / 4.0) + 2.1 * i)
+    tw[tq(t)] = table{alpha: 0.22 + 0.5 * p}
+  }
+  shape("star" + toStr(i), "circle",
+    stamp(tw, table{x: x, y: y, r: 1 + (i % 3) * 0.5, color: "#f5f5f4", layer: 0.5}))
 }
-shape("mercury", "circle", mercury)
 
-// venus
-let venus = table{}
-for i in range(0, 120) {
-    let t = 0.05 * i
-    let a = 2.2 * t
-    venus[toStr(t)] = table{x: 320 + 80*cos(a), y: 180 + 20*sin(a), r: 6, color: "#e0a96d"}
+// sun — warm gradient, breathing softly
+let sun = table{}
+for i in range(0, 240) {
+  let t = i * 1.0 / 30
+  let b = 0.5 - 0.5 * cos(6.28318 * t / 8)
+  sun[tq(t)] = table{x: 320, y: 180, r: 24 + 1.5 * b,
+    gradFrom: "#f2eee4", gradTo: "#e6a23c", gradAngle: 90, layer: 3}
 }
-shape("venus", "circle", venus)
+shape("sun", "circle", sun)
 
-// earth
-let earth = table{}
-for i in range(0, 120) {
-    let t = 0.05 * i
-    let a = 1.7 * t
-    earth[toStr(t)] = table{x: 320 + 110*cos(a), y: 180 + 28*sin(a), r: 7, color: "#4c8be6"}
+// orbit rings — static closed ellipses matching the tilts below
+let ORB_R   = [62, 96, 130, 165, 200]
+let ORB_RY  = [36, 56, 76, 96, 118]
+let ORB_TLT = [ 0.45, -0.35, 0.20, -0.50, 0.15 ]
+for j in range(0, 5) {
+  let pts = []
+  for i in range(0, 48) {
+    let a = 6.28318 * i / 48
+    let ex = cos(a) * ORB_R[j]
+    let ey = sin(a) * ORB_RY[j]
+    push(pts, 320 + ex * cos(ORB_TLT[j]) - ey * sin(ORB_TLT[j]))
+    push(pts, 180 + ex * sin(ORB_TLT[j]) + ey * cos(ORB_TLT[j]))
+  }
+  shape("orb" + toStr(j), "path", table{
+    "0": table{points: pts, closed: true, filled: false, width: 1,
+      color: "#434439", alpha: 1, layer: 1},
+  })
 }
-shape("earth", "circle", earth)
 
-// mars
-let mars = table{}
-for i in range(0, 120) {
-    let t = 0.05 * i
-    let a = 1.3 * t
-    mars[toStr(t)] = table{x: 320 + 140*cos(a), y: 180 + 36*sin(a), r: 5, color: "#c1440e"}
-}
-shape("mars", "circle", mars)
+// per-planet keyframe tables, built by addOrbit()
 
-// jupiter
-let jupiter = table{}
-for i in range(0, 120) {
-    let t = 0.05 * i
-    let a = 0.8 * t
-    jupiter[toStr(t)] = table{x: 320 + 190*cos(a), y: 180 + 48*sin(a), r: 14, color: "#c9a06a"}
+// build one orbit: tilted ellipse around (320, 180), one key per rendered frame
+let addOrbit = fn(period, phase, r, ry, tilt) {
+  let K = table{}
+  for i in range(0, 240) {
+    let t = i * 1.0 / 30
+    let a = 6.28318 * (t / period) + phase
+    let ex = cos(a) * r
+    let ey = sin(a) * ry
+    let x = 320 + ex * cos(tilt) - ey * sin(tilt)
+    let y = 180 + ex * sin(tilt) + ey * cos(tilt)
+    K[tq(t)] = table{x: x, y: y, layer: 2}
+  }
+  return K
 }
-shape("jupiter", "circle", jupiter)
 
-// earth's orbit ring — hand-computed ellipse points, matches earth's rx/ry exactly
-let ring_pts = []
-for i in range(0, 48) {
-    let ang = (2.0 * pi() / 48) * i
-    push(ring_pts, 320 + 110*cos(ang))
-    push(ring_pts, 180 + 28*sin(ang))
+let kMer = addOrbit(2.2, 0.4, 62, 36, 0.45)
+let kVen = addOrbit(3.4, 1.7, 96, 56, -0.35)
+let kEar = addOrbit(5.0, 2.6, 130, 76, 0.20)
+let kMar = addOrbit(6.8, 0.9, 165, 96, -0.50)
+let kJup = addOrbit(8.0, 3.1, 200, 118, 0.15)
+let kRing = addOrbit(8.0, 3.1, 200, 118, 0.15) // ring rides jupiter's orbit
+
+// moon — earth's offset this frame + its own tiny orbit
+let kMoon = table{}
+for i in range(0, 240) {
+  let t = i * 1.0 / 30
+  let ae = 6.28318 * (t / 5.0) + 2.6
+  let eex = cos(ae) * 130
+  let eey = sin(ae) * 76
+  let exx = 320 + eex * cos(0.20) - eey * sin(0.20)
+  let eyy = 180 + eex * sin(0.20) + eey * cos(0.20)
+  let am = 6.28318 * (t / 1.1)
+  kMoon[tq(t)] = table{x: exx + 16 * cos(am), y: eyy + 9 * sin(am), layer: 2}
 }
-shape("ring_earth", "path", table{
-    "0": table{points: ring_pts, closed: true, filled: false, width: 1, color: "#343531"},
+
+shape("pl0", "circle", stamp(kMer, table{r: 4, color: "#9a9a94"}))
+shape("pl1", "circle", stamp(kVen, table{r: 5, color: "#e8c39a"}))
+shape("pl2", "circle", stamp(kEar, table{r: 7, color: "#5aa0e8"}))
+shape("pl3", "circle", stamp(kMar, table{r: 6, color: "#d4543a"}))
+shape("pl4", "circle", stamp(kJup, table{r: 12, color: "#d9b38a"}))
+shape("moon", "circle", stamp(kMoon, table{r: 2.5, color: "#8f8f86"}))
+shape("ring", "arc", stamp(kRing, table{r: 28, start: 0, end: 360, width: 8, color: "#9a9a94"}))
+
+// camera: slow push-in, then hold
+camera(table{
+  "0":   table{zoom: 0.93, x: 320, y: 180},
+  "2.5": table{zoom: 1.0,  x: 320, y: 180, ease: "cubicOut"},
+})
+
+// caption
+text("cap", table{
+  "0":   table{content: "SOLAR", x: 24, y: 332, size: 13, color: "#8f8f86", alpha: 0, layer: 10},
+  "1.2": table{content: "SOLAR", x: 24, y: 332, size: 13, color: "#8f8f86", alpha: 1, ease: "cubicOut", layer: 10},
+  "8":   table{content: "SOLAR", x: 24, y: 332, size: 13, color: "#8f8f86", alpha: 1, layer: 10},
 })
