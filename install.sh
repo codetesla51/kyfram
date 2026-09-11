@@ -45,7 +45,7 @@ case "$VERSION" in
   latest)
     api="https://gitlab.com/api/v4/projects/codetesla51%2Fkyfram/releases/permalink/latest"
     TAG=$(curl -fsSL "$api" 2>/dev/null | sed -n 's/.*"tag_name":"\([^"]*\)".*/\1/p' 2>/dev/null)
-    [ -z "$TAG" ] && TAG="v0.4.0" # ponytail: offline fallback pin, bump when a release lands
+    [ -z "$TAG" ] && TAG="v0.4.1" # ponytail: offline fallback pin, bump when a release lands
     ;;
   v*) TAG="$VERSION" ;;
   *)  TAG="v$VERSION" ;;
