@@ -48,7 +48,12 @@ Specific version or update:
 curl -fsSL https://codetesla51.gitlab.io/kyfram/install.sh | sh -s -- v0.2.0
 # or
 VERSION=v0.2.0 sh install.sh
-# or via Go
+```
+
+Prebuilt binaries for linux/darwin (amd64/arm64) are downloaded from the
+release assets; installing from source needs Go 1.25+:
+
+```sh
 # go install gitlab.com/codetesla51/kyfram/cmd/kyfram@latest
 ```
 
@@ -69,4 +74,4 @@ go run ./cmd/kyfram render --out out.mp4 examples/intro.lgv
 go run ./cmd/kyfram view examples/intro.lgv   # http://localhost:8080
 ```
 
-Requires Go 1.25+ and `ffmpeg` on `PATH`. See docs for install and CLI flags.
+Requires `ffmpeg` on `PATH` (mp4 encoding; png renders work without it).
