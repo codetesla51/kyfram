@@ -157,11 +157,11 @@ func printHelpView() {
 	fmt.Println("  kyfram view [options] <script.lgv>")
 	fmt.Println()
 	fmt.Println("OPTIONS:")
-	fmt.Println("  --port N       Preview port (default 8080)")
+	fmt.Println("  --port N       Preview port (default 7070)")
 	fmt.Println("  --font FILE    Default typeface")
 	fmt.Println("  -h, --help     Show this help")
 	fmt.Println()
-	fmt.Println("then open http://localhost:8080")
+	fmt.Println("then open http://localhost:7070")
 }
 
 func printHelpNew() {
@@ -253,7 +253,7 @@ func viewCommand() *cobra.Command {
 			runView(cmd, args)
 		},
 	}
-	cmd.Flags().Int("port", 8080, "preview server port")
+	cmd.Flags().Int("port", 7070, "preview server port")
 	cmd.Flags().String("font", "", "default typeface path")
 	return cmd
 }

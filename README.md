@@ -71,7 +71,7 @@ shape("ball", "circle", table{
 
 ```sh
 go run ./cmd/kyfram render --out out.mp4 examples/intro.lgv
-go run ./cmd/kyfram view examples/intro.lgv   # http://localhost:8080
+go run ./cmd/kyfram view examples/intro.lgv   # http://localhost:7070
 ```
 
 Requires `ffmpeg` on `PATH` (mp4 encoding; png renders work without it).
