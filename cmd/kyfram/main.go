@@ -35,11 +35,6 @@ func errf(format string, a ...any) {
 	fmt.Fprint(os.Stderr, paint(os.Stderr, "\x1b[31m", fmt.Sprintf(format, a...)))
 }
 
-// okln prints a green line to stdout.
-func okln(a ...any) {
-	fmt.Println(paint(os.Stdout, "\x1b[32m", fmt.Sprint(a...)))
-}
-
 // newVM creates the sandboxed Logos VM used by kyfram.
 func newVM() *interpreter.Interpreter {
 	return interpreter.NewInterpreter(kyfram.StdLib(), interpreter.SandboxConfig{
