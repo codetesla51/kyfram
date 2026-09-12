@@ -306,6 +306,33 @@ func TestRenderNamedColor(t *testing.T) {
 	}
 }
 
+// Text with no font prop uses the embedded bundle, so installs outside
+// the repo still draw titles (the repo-relative default path regressed
+// to silent no-text on installed binaries).
+func TestRenderTextDefaultFont(t *testing.T) {
+	tl := Timeline{Entities: []Entity{
+		{Name: "bg", Kind: "rect", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 0.0, "y": 0.0, "w": 640.0, "h": 360.0, "color": "#000000"}},
+		}},
+		{Name: "t", Kind: "text", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 320.0, "y": 180.0, "content": "HI", "size": 100.0, "color": "#ffffff"}},
+		}},
+	}}
+	img := RenderFrame(tl, 0).Image()
+	bright := 0
+	for y := 80; y < 280; y++ {
+		for x := 220; x < 420; x++ {
+			r, g, b, _ := img.At(x, y).RGBA()
+			if r>>8 > 200 && g>>8 > 200 && b>>8 > 200 {
+				bright++
+			}
+		}
+	}
+	if bright < 500 {
+		t.Fatalf("default-font text drew %d bright pixels, want >= 500", bright)
+	}
+}
+
 // Rotate 90 turns a horizontal bar vertical; scale 3 triples a radius.
 func TestRenderSpin(t *testing.T) {
 	bar := Timeline{Entities: []Entity{

@@ -261,7 +261,7 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 			dc.Fill()
 		})
 	case "text":
-		if err := dc.LoadFontFace(propStr(props, "font", face), propNum(props, "size", 28)); err != nil {
+		if !setFace(dc, propStr(props, "font", face), propNum(props, "size", 28)) {
 			return
 		}
 		spin(dc, cx, cy, props, func() {
