@@ -280,6 +280,32 @@ func TestRenderLayers(t *testing.T) {
 	}
 }
 
+// Named colors resolve at the default alpha too — paint() used to hand the
+// raw name to gg's hex parser on the alpha>=1 fast path, drawing invisible.
+func TestRenderNamedColor(t *testing.T) {
+	paint := func(color string) string {
+		tl := Timeline{Entities: []Entity{
+			{Name: "bg", Kind: "rect", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"x": 0.0, "y": 0.0, "w": 640.0, "h": 360.0, "color": "#000000"}},
+			}},
+			{Name: "fg", Kind: "circle", Keyframes: []Keyframe{
+				{Time: 0, Props: map[string]any{"x": 320.0, "y": 180.0, "r": 50.0, "color": color}},
+			}},
+		}}
+		r, g, b, _ := RenderFrame(tl, 0).Image().At(320, 180).RGBA()
+		return fmt.Sprintf("#%02x%02x%02x", r>>8, g>>8, b>>8)
+	}
+	if got := paint("white"); got != "#ffffff" {
+		t.Fatalf("named white = %s, want #ffffff", got)
+	}
+	if got := paint("coral"); got != "#e64c40" {
+		t.Fatalf("named coral = %s, want #e64c40", got)
+	}
+	if got := paint("#ffffff"); got != "#ffffff" {
+		t.Fatalf("hex white = %s, want #ffffff", got)
+	}
+}
+
 // Rotate 90 turns a horizontal bar vertical; scale 3 triples a radius.
 func TestRenderSpin(t *testing.T) {
 	bar := Timeline{Entities: []Entity{

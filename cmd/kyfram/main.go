@@ -14,7 +14,7 @@ import (
 )
 
 // version is the only copy — help text and --version both read it.
-const version = "v0.3.5"
+const version = "v0.4.1"
 
 // paint wraps s in an ANSI code on terminals only — pipes and NO_COLOR
 // stay plain. A little color on results, none anywhere else.

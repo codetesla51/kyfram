@@ -675,17 +675,18 @@ func rgbaBytes(img image.Image) []byte {
 func paint(dc *gg.Context, props map[string]any) {
 	col := propStr(props, "color", "#ffffff")
 	a := propNum(props, "alpha", 1)
-	if a >= 1 {
-		dc.SetHexColor(col)
-		return
+	if a > 1 {
+		a = 1
 	}
 	if a < 0 {
 		a = 0
 	}
+	// resolve names here, not just on the faded path: gg's SetHexColor
+	// only reads #rrggbb, so a raw "white" used to draw invisible/black
+	// at the default alpha. validate.go already guarantees parseable.
 	c, err := parseColor(col)
 	if err != nil {
-		dc.SetHexColor(col)
-		return
+		c = [3]float64{255, 255, 255}
 	}
 	dc.SetRGBA(c[0]/255, c[1]/255, c[2]/255, a)
 }
