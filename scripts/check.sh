@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+cd "$(dirname "$0")/.."
 # local CI gate — mirrors .gitlab-ci.yml (build, vet, test, lint if installed)
 go mod download
 go build ./...

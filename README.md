@@ -47,7 +47,7 @@ Specific version or update:
 ```sh
 curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh -s -- v0.2.0
 # or
-VERSION=v0.2.0 sh install.sh
+VERSION=v0.2.0 sh scripts/install.sh
 ```
 
 Prebuilt binaries for linux/darwin (amd64/arm64) are downloaded from the
