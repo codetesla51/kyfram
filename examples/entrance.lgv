@@ -1,0 +1,58 @@
+// Entrance helpers: fadeIn, slideIn, popIn.
+// Each returns a normal keyframe table, so the animation is one call.
+scene(3, 30)
+
+let bg = "#07070B"
+let white = "#F4F4F7"
+let muted = "#7A7A86"
+let cyan = "#4DE8FF"
+let magenta = "#FF2E8A"
+let display = "examples/assets/fonts/Geist-Bold.ttf"
+let body = "examples/assets/fonts/Geist-Regular.ttf"
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 640, h: 360, color: bg}
+})
+
+text("title", fadeIn(table{
+  content: "one-line entrances", x: 320, y: 52,
+  size: 24, color: white, font: display
+}, 0.05, 0.5))
+
+shape("fade", "circle", fadeIn(table{
+  x: 110, y: 190, r: 38, color: cyan
+}, 0.4, 0.6))
+
+shape("slide", "roundRect", slideIn(table{
+  x: 265, y: 152, w: 110, h: 76, radius: 18, color: magenta
+}, 0.8, 0.6, "left", 100))
+
+shape("pop", "circle", popIn(table{
+  x: 530, y: 190, r: 38, color: white
+}, 1.2, 0.5))
+
+text("fade-label", fadeIn(table{
+  content: "fadeIn", x: 110, y: 262,
+  size: 14, color: muted, font: body
+}, 0.5, 0.5))
+
+text("slide-label", fadeIn(table{
+  content: "slideIn", x: 320, y: 262,
+  size: 14, color: muted, font: body
+}, 0.9, 0.5))
+
+text("pop-label", fadeIn(table{
+  content: "popIn", x: 530, y: 262,
+  size: 14, color: muted, font: body
+}, 1.3, 0.5))
+
+text("footer", table{
+  "0": table{
+    content: "each call returns a keyframe table", x: 320, y: 316,
+    size: 12, color: "#55555F", font: body
+  },
+  "1": table{
+    content: "each call returns a keyframe table", x: 320, y: 316,
+    size: 12, color: "#55555F", font: body
+  }
+})

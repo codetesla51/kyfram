@@ -27,6 +27,7 @@ Think CSS `@keyframes` for video: retiming is editing a number, not re-directing
 
 - **Declarative keyframes** — times are quoted strings (`"0"`, `"1.5"`), engine lerps numbers/colors/arrays and snaps text.
 - **Easing per segment** — `linear`, `easeIn/Out/InOut`, `cubicIn/Out/InOut`, `sine`.
+- **One-line entrances** — `fadeIn()`, `slideIn()`, `popIn()` synthesize keyframe tables; pass a start time and duration when needed.
 - **Rich primitives** — `circle`, `rect`, `roundRect`, `polygon`, `star`, `ellipse`, `line`, `arc`, `wave`, `path`, `image`, `text`.
 - **Groups** — `group()` with local `x/y`, keyframed `x y scale rotate alpha layer`.
 - **Camera** — keyframed pan/zoom for the whole scene.
@@ -75,3 +76,13 @@ go run ./cmd/kyfram view examples/intro.lgv   # http://localhost:7070
 ```
 
 Requires `ffmpeg` on `PATH` (mp4 encoding; png renders work without it).
+
+Entrance helpers are built in:
+
+```js
+shape("ball", "circle", popIn(table{x: 100, y: 180, r: 40, color: "#e64c40"}))
+```
+
+`fadeIn()`, `slideIn()`, and `popIn()` return keyframe tables. Pass a start
+time and duration as optional second and third arguments. `slideIn()` also
+takes a direction (`left`, `right`, `up`, `down`) and distance.

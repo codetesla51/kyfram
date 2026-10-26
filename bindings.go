@@ -311,6 +311,8 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		}
 		return &interpreter.Table{Pairs: result}
 	})
+
+	bindAnimationHelpers(vm)
 }
 
 // scOffset returns the absolute time where the open scene starts
