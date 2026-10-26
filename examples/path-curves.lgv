@@ -1,0 +1,135 @@
+// PATH: points vs d — same cubic, two source styles.
+// Left: 25 sampled points. Right: one C command flattened by the renderer.
+let tq = fn(t) { return format("%.3f", t) }
+let still = fn(dur, p) {
+  let k = table{}
+  k["0"] = p
+  k[tq(dur)] = p
+  return k
+}
+
+let bg      = "#07070B"
+let card    = "#0C0C12"
+let edge    = "#1B1B24"
+let white   = "#F4F4F7"
+let muted   = "#7A7A86"
+let faint   = "#55555F"
+let cyan    = "#4DE8FF"
+
+let display = "examples/assets/fonts/ArchivoBlack-Regular.ttf"
+let body    = "examples/assets/fonts/Geist-Regular.ttf"
+let bold    = "examples/assets/fonts/Geist-Bold.ttf"
+
+scene(0.1, 30)
+
+shape("bg", "rect", still(0.1, table{x: 0, y: 0, w: 1280, h: 720, color: bg}))
+
+// Header.
+shape("kicker", "text", still(0.1, table{
+  content: "K Y F R A M   /   P A T H", x: 640, y: 42,
+  size: 11, font: bold, color: cyan, alpha: 0.7
+}))
+shape("title", "text", still(0.1, table{
+  content: "path()", x: 640, y: 86,
+  size: 46, font: display, color: white
+}))
+shape("subtitle", "text", still(0.1, table{
+  content: "the same cubic, written two ways", x: 640, y: 124,
+  size: 16, font: body, color: muted
+}))
+
+// Cards.
+shape("card-left", "roundRect", still(0.1, table{
+  x: 50, y: 156, w: 560, h: 456, radius: 20, color: card
+}))
+shape("card-right", "roundRect", still(0.1, table{
+  x: 670, y: 156, w: 560, h: 456, radius: 20, color: card
+}))
+shape("edge-left", "line", still(0.1, table{
+  x1: 78, y1: 180, x2: 582, y2: 180, width: 1, color: cyan, alpha: 0.18
+}))
+shape("edge-right", "line", still(0.1, table{
+  x1: 698, y1: 180, x2: 1202, y2: 180, width: 1, color: cyan, alpha: 0.18
+}))
+
+// Left label.
+shape("left-title", "text", still(0.1, table{
+  content: "points", x: 330, y: 218,
+  size: 32, font: bold, color: white
+}))
+shape("left-note", "text", still(0.1, table{
+  content: "25 sampled points, listed by hand", x: 330, y: 250,
+  size: 14, font: body, color: muted
+}))
+
+// Right label.
+shape("right-title", "text", still(0.1, table{
+  content: "d", x: 950, y: 218,
+  size: 32, font: bold, color: white
+}))
+shape("right-note", "text", still(0.1, table{
+  content: "one cubic command, flattened at render", x: 950, y: 250,
+  size: 14, font: body, color: muted
+}))
+
+// 25 samples of the cubic from (130,520) to (560,520).
+let px = [130, 146.5, 163.3, 180.5, 198, 215.7, 233.8, 252, 270.4, 288.9, 307.5, 326.3, 345, 363.7, 382.5, 401.1, 419.6, 438, 456.2, 474.3, 492, 509.5, 526.7, 543.5, 560]
+let py = [520, 493.6, 469.6, 447.8, 428.3, 411.1, 396.2, 383.6, 373.3, 365.3, 359.6, 356.1, 355, 356.1, 359.6, 365.3, 373.3, 383.6, 396.2, 411.1, 428.3, 447.8, 469.6, 493.6, 520]
+// Left: points. Glow, line, then a dot at every sample.
+shape("left-glow", "path", still(0.1, table{
+  points: [130, 520, 146.5, 493.6, 163.3, 469.6, 180.5, 447.8, 198, 428.3, 215.7, 411.1, 233.8, 396.2, 252, 383.6, 270.4, 373.3, 288.9, 365.3, 307.5, 359.6, 326.3, 356.1, 345, 355, 363.7, 356.1, 382.5, 359.6, 401.1, 365.3, 419.6, 373.3, 438, 383.6, 456.2, 396.2, 474.3, 411.1, 492, 428.3, 509.5, 447.8, 526.7, 469.6, 543.5, 493.6, 560, 520],
+  width: 24, cap: "round", join: "round", color: cyan, alpha: 0.06
+}))
+shape("left-line", "path", still(0.1, table{
+  points: [130, 520, 146.5, 493.6, 163.3, 469.6, 180.5, 447.8, 198, 428.3, 215.7, 411.1, 233.8, 396.2, 252, 383.6, 270.4, 373.3, 288.9, 365.3, 307.5, 359.6, 326.3, 356.1, 345, 355, 363.7, 356.1, 382.5, 359.6, 401.1, 365.3, 419.6, 373.3, 438, 383.6, 456.2, 396.2, 474.3, 411.1, 492, 428.3, 509.5, 447.8, 526.7, 469.6, 543.5, 493.6, 560, 520],
+  width: 6, cap: "round", join: "round", color: cyan
+}))
+for i in range(0, 25) {
+  shape("dot" + toStr(i), "circle", still(0.1, table{
+    x: px[i], y: py[i], r: 4, color: white, alpha: 0.92
+  }))
+}
+
+// Right: d. Same curve, offset 610px.
+let dstr = "M 740 520 C 870 300 1040 300 1170 520"
+shape("right-glow", "path", still(0.1, table{
+  d: dstr, width: 24, cap: "round", join: "round", color: cyan, alpha: 0.06
+}))
+shape("right-line", "path", still(0.1, table{
+  d: dstr, width: 6, cap: "round", join: "round", color: cyan
+}))
+
+// VS divider.
+shape("divider", "line", still(0.1, table{
+  x1: 640, y1: 190, x2: 640, y2: 574, width: 1, color: edge
+}))
+shape("vs-badge", "circle", still(0.1, table{
+  x: 640, y: 390, r: 22, color: "#16161E"
+}))
+shape("vs-text", "text", still(0.1, table{
+  content: "VS", x: 640, y: 390, size: 10, font: bold, color: muted
+}))
+
+// Source snippets.
+shape("left-code", "text", still(0.1, table{
+  content: "points: [130, 520, 146.5, 493.6, ...]", x: 330, y: 558,
+  size: 12.5, font: body, color: faint
+}))
+shape("left-count", "text", still(0.1, table{
+  content: "25 pairs", x: 330, y: 582,
+  size: 11, font: bold, color: cyan, alpha: 0.6
+}))
+shape("right-code", "text", still(0.1, table{
+  content: "d: \"M 740 520 C 870 300 1040 300 1170 520\"", x: 950, y: 558,
+  size: 12.5, font: body, color: faint
+}))
+shape("right-count", "text", still(0.1, table{
+  content: "2 commands", x: 950, y: 582,
+  size: 11, font: bold, color: cyan, alpha: 0.6
+}))
+
+// Footer.
+shape("footer", "text", still(0.1, table{
+  content: "same renderer / same pixels", x: 640, y: 670,
+  size: 12, font: body, color: faint
+}))

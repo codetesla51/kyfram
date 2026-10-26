@@ -17,7 +17,7 @@ var knownKinds = []string{
 // so Build rejects it with a suggestion.
 var knownProps = []string{
 	"alpha", "amplitude", "blend", "cap", "closed", "color", "content",
-	"end", "filled", "font", "frequency", "gradAngle", "gradFrom",
+	"d", "end", "filled", "font", "frequency", "gradAngle", "gradFrom",
 	"gradTo", "h", "inner", "join", "layer", "path", "phase", "points",
 	"r", "radius", "rotate", "rx", "ry", "scale", "size", "start",
 	"thickness", "w", "width", "wrap", "x", "x1", "x2", "y", "y1", "y2",
@@ -35,7 +35,7 @@ var numProps = []string{
 // strProps must hold strings. font/path get existence checks below;
 // color/gradFrom/gradTo must additionally parse as colors.
 var strProps = []string{
-	"blend", "cap", "color", "content", "font",
+	"blend", "cap", "color", "content", "d", "font",
 	"gradFrom", "gradTo", "join", "path",
 }
 
@@ -91,6 +91,20 @@ func (b *Builder) validate() error {
 				if err := checkValue(where, e, kf.Time, p, v); err != nil {
 					return err
 				}
+			}
+		}
+		if e.Kind == "path" {
+			hasD, hasPoints := false, false
+			for _, kf := range e.Keyframes {
+				if _, ok := kf.Props["d"]; ok {
+					hasD = true
+				}
+				if _, ok := kf.Props["points"]; ok {
+					hasPoints = true
+				}
+			}
+			if hasD && hasPoints {
+				return fmt.Errorf("%s entity %q: path cannot set both \"d\" and \"points\"", where, e.Name)
 			}
 		}
 		if e.Kind == "image" {
@@ -179,6 +193,11 @@ func checkValue(where string, e Entity, t float64, p string, v any) error {
 		if p == "font" {
 			if err := checkAsset(where, e.Name, t, "font", s); err != nil {
 				return err
+			}
+		}
+		if p == "d" {
+			if _, err := flattenPathD(s); err != nil {
+				return fmt.Errorf("%s entity %q: invalid d at t=%g: %w", where, e.Name, t, err)
 			}
 		}
 	}

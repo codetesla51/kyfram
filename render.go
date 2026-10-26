@@ -342,6 +342,12 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		}
 		spin(dc, pcx, pcy, props, func() {
 			paint(dc, props)
+			if d, ok := props["d"].(string); ok && d != "" {
+				if contours, err := flattenPathD(d); err == nil {
+					drawPathContours(dc, props, contours)
+				}
+				return
+			}
 			drawPath(dc, props)
 		})
 	case "polygon":
@@ -730,6 +736,17 @@ func drawPath(dc *gg.Context, props map[string]any) {
 		}
 		pts[i] = f
 	}
+	closed := propBool(props, "closed", propBool(props, "filled", false))
+	drawPathContours(dc, props, []pathContour{{points: pts, closed: closed}})
+}
+
+// drawPathContours draws one or more flattened subpaths with the same
+// fill/stroke settings. Each contour owns its own MoveTo/ClosePath, so
+// an SVG d string can contain multiple M...Z runs.
+func drawPathContours(dc *gg.Context, props map[string]any, contours []pathContour) {
+	if len(contours) == 0 {
+		return
+	}
 	if capStr, ok := props["cap"].(string); ok {
 		switch capStr {
 		case "round":
@@ -748,13 +765,18 @@ func drawPath(dc *gg.Context, props map[string]any) {
 			dc.SetLineJoin(gg.LineJoinBevel)
 		}
 	}
-	dc.MoveTo(pts[0], pts[1])
-	for i := 2; i < len(pts); i += 2 {
-		dc.LineTo(pts[i], pts[i+1])
-	}
-	closed := propBool(props, "closed", propBool(props, "filled", false))
-	if closed {
-		dc.ClosePath()
+	closeAll := propBool(props, "closed", propBool(props, "filled", false))
+	for _, c := range contours {
+		if len(c.points) < 4 {
+			continue
+		}
+		dc.MoveTo(c.points[0], c.points[1])
+		for i := 2; i+1 < len(c.points); i += 2 {
+			dc.LineTo(c.points[i], c.points[i+1])
+		}
+		if closeAll || c.closed {
+			dc.ClosePath()
+		}
 	}
 	if propBool(props, "filled", false) {
 		dc.Fill()
@@ -875,6 +897,14 @@ func pointsBBox(raw []any) (float64, float64, float64, float64, bool) {
 // pathCenter is the bbox middle of a point list for spin transforms;
 // invalid lists report false and callers fall back to canvas center.
 func pathCenter(props map[string]any) (float64, float64, bool) {
+	if d, ok := props["d"].(string); ok && d != "" {
+		if contours, err := flattenPathD(d); err == nil {
+			if minX, minY, maxX, maxY, ok := pathDBounds(contours); ok {
+				return (minX + maxX) / 2, (minY + maxY) / 2, true
+			}
+		}
+		return 0, 0, false
+	}
 	raw, ok := props["points"].([]any)
 	if !ok || len(raw) < 4 || len(raw)%2 != 0 {
 		return 0, 0, false
