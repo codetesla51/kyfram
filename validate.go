@@ -2,7 +2,6 @@ package kyfram
 
 import (
 	"fmt"
-	"os"
 	"sort"
 )
 
@@ -240,8 +239,7 @@ func checkValue(where string, e Entity, t float64, p string, v any) error {
 // missing. Paths resolve against the render working directory, same as
 // the renderer sees them.
 func checkAsset(where, name string, t float64, what, path string) error {
-	fi, err := os.Stat(path)
-	if err != nil || fi.IsDir() {
+	if err := statAsset(path); err != nil {
 		return fmt.Errorf("%s entity %q: %s file %q not found (t=%g)", where, name, what, path, t)
 	}
 	return nil
