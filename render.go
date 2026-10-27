@@ -118,16 +118,39 @@ func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group,
 	// stays put while entities travel.
 	frameCamera(dc, cam, w, h, t)
 
-	// Group transforms: map name -> interpolated props
+	// Group transforms and hierarchy. A group's keyframes may name a
+	// parent; the child's transform is applied inside the parent.
 	groupProps := make(map[string]map[string]any, len(groups))
 	groupLayer := make(map[string]float64, len(groups))
+	groupParent := make(map[string]string, len(groups))
 	for _, g := range groups {
 		props := Interpolate(g.Keyframes, t)
 		groupProps[g.Name] = props
 		groupLayer[g.Name] = propNum(props, "layer", 0)
+		// Parent is structural, not animated: keep the first declared
+		// parent even if later keyframes omit the prop.
+		groupParent[g.Name] = groupParentOf(g)
 	}
+	childGroups := make(map[string][]string, len(groups))
+	var rootGroups []string
+	for _, g := range groups {
+		parent := groupParent[g.Name]
+		if parent != "" && groupProps[parent] != nil {
+			childGroups[parent] = append(childGroups[parent], g.Name)
+		} else {
+			rootGroups = append(rootGroups, g.Name)
+		}
+	}
+	for parent := range childGroups {
+		sort.SliceStable(childGroups[parent], func(i, j int) bool {
+			return groupLayer[childGroups[parent][i]] < groupLayer[childGroups[parent][j]]
+		})
+	}
+	sort.SliceStable(rootGroups, func(i, j int) bool {
+		return groupLayer[rootGroups[i]] < groupLayer[rootGroups[j]]
+	})
 
-	// Partition entities into root and grouped
+	// Partition entities into root and grouped.
 	type framed struct {
 		kind  string
 		props map[string]any
@@ -144,96 +167,142 @@ func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group,
 				grouped[e.Group] = append(grouped[e.Group], f)
 				continue
 			}
-			// unknown group -> treat as root
 		}
 		root = append(root, f)
 	}
-	// Sort root by layer, groups by layer, and within each group by layer
 	sort.SliceStable(root, func(i, j int) bool { return root[i].layer < root[j].layer })
 	for g := range grouped {
 		sort.SliceStable(grouped[g], func(i, j int) bool { return grouped[g][i].layer < grouped[g][j].layer })
 	}
-	// Build draw order: interleave root entities and groups by layer
+
+	type groupXform struct {
+		x, y   float64
+		rotate float64
+		scale  float64
+	}
 	type drawItem struct {
 		isGroup bool
 		layer   float64
-		name    string // group name if isGroup
-		framed  framed // if !isGroup
+		name    string
+		framed  framed
 	}
+
+	drawFramed := func(f framed, chain []groupXform, alpha float64, inGroup bool) {
+		props := copyProps(f.props)
+		if alpha < 1 {
+			props["alpha"] = propNum(props, "alpha", 1) * alpha
+		}
+		if inGroup {
+			groupChildDefaults(f.kind, props)
+		}
+		if mode, ok := props["blend"].(string); ok && blendModes[mode] {
+			layer := gg.NewContext(w, h)
+			frameCamera(layer, cam, w, h, t)
+			layer.Push()
+			for _, xf := range chain {
+				layer.Translate(xf.x, xf.y)
+				layer.Rotate(gg.Radians(xf.rotate))
+				layer.Scale(xf.scale, xf.scale)
+			}
+			drawEntity(layer, w, h, f.kind, props, defaultFace(tl))
+			layer.Pop()
+			composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
+			return
+		}
+		drawEntity(dc, w, h, f.kind, props, defaultFace(tl))
+	}
+
+	var drawGroup func(name string, chain []groupXform, alpha float64)
+	drawGroup = func(name string, chain []groupXform, alpha float64) {
+		props := groupProps[name]
+		if props == nil || len(chain) > len(groups) {
+			return
+		}
+		root := len(chain) == 0
+		gx, gy := 0.0, 0.0
+		if root {
+			gx, gy = float64(w)/2, float64(h)/2
+		}
+		gx = propNum(props, "x", gx)
+		gy = propNum(props, "y", gy)
+		gRot := propNum(props, "rotate", 0)
+		gScale := propNum(props, "scale", 1)
+		gt := groupXform{x: gx, y: gy, rotate: gRot, scale: gScale}
+		next := append(append([]groupXform{}, chain...), gt)
+		cumAlpha := alpha * propNum(props, "alpha", 1)
+
+		dc.Push()
+		dc.Translate(gx, gy)
+		dc.Rotate(gg.Radians(gRot))
+		dc.Scale(gScale, gScale)
+
+		var items []drawItem
+		for _, f := range grouped[name] {
+			items = append(items, drawItem{layer: f.layer, framed: f})
+		}
+		for _, child := range childGroups[name] {
+			items = append(items, drawItem{isGroup: true, layer: groupLayer[child], name: child})
+		}
+		sort.SliceStable(items, func(i, j int) bool { return items[i].layer < items[j].layer })
+		for _, it := range items {
+			if it.isGroup {
+				drawGroup(it.name, next, cumAlpha)
+			} else {
+				drawFramed(it.framed, next, cumAlpha, true)
+			}
+		}
+		dc.Pop()
+	}
+
 	var order []drawItem
 	for _, f := range root {
-		order = append(order, drawItem{isGroup: false, layer: f.layer, framed: f})
+		order = append(order, drawItem{layer: f.layer, framed: f})
 	}
-	for _, g := range groups {
-		order = append(order, drawItem{isGroup: true, layer: groupLayer[g.Name], name: g.Name})
+	for _, name := range rootGroups {
+		order = append(order, drawItem{isGroup: true, layer: groupLayer[name], name: name})
 	}
 	sort.SliceStable(order, func(i, j int) bool { return order[i].layer < order[j].layer })
-
 	for _, it := range order {
 		if it.isGroup {
-			gProps := groupProps[it.name]
-			if gProps == nil {
-				continue
-			}
-			gAlpha := propNum(gProps, "alpha", 1)
-			gx := propNum(gProps, "x", float64(w)/2)
-			gy := propNum(gProps, "y", float64(h)/2)
-			gRot := propNum(gProps, "rotate", 0)
-			gScale := propNum(gProps, "scale", 1)
-			dc.Push()
-			dc.Translate(gx, gy)
-			dc.Rotate(gg.Radians(gRot))
-			dc.Scale(gScale, gScale)
-			for _, f := range grouped[it.name] {
-				props := copyProps(f.props)
-				if gAlpha < 1 {
-					props["alpha"] = propNum(props, "alpha", 1) * gAlpha
-				}
-				// For group children, default x/y to 0 local (not canvas center)
-				if f.kind == "circle" || f.kind == "star" || f.kind == "ellipse" || f.kind == "text" {
-					if _, ok := props["x"]; !ok {
-						props["x"] = 0.0
-					}
-					if _, ok := props["y"]; !ok {
-						props["y"] = 0.0
-					}
-				}
-				if f.kind == "rect" || f.kind == "roundRect" {
-					if _, ok := props["x"]; !ok {
-						props["x"] = -propNum(props, "w", 100) / 2
-					}
-					if _, ok := props["y"]; !ok {
-						props["y"] = -propNum(props, "h", 100) / 2
-					}
-				}
-				if mode, ok := props["blend"].(string); ok && blendModes[mode] {
-					layer := gg.NewContext(w, h)
-					frameCamera(layer, cam, w, h, t)
-					layer.Push()
-					layer.Translate(gx, gy)
-					layer.Rotate(gg.Radians(gRot))
-					layer.Scale(gScale, gScale)
-					drawEntity(layer, w, h, f.kind, props, defaultFace(tl))
-					layer.Pop()
-					composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
-					continue
-				}
-				drawEntity(dc, w, h, f.kind, props, defaultFace(tl))
-			}
-			dc.Pop()
+			drawGroup(it.name, nil, 1)
 		} else {
-			f := it.framed
-			if mode, ok := f.props["blend"].(string); ok && blendModes[mode] {
-				layer := gg.NewContext(w, h)
-				frameCamera(layer, cam, w, h, t)
-				drawEntity(layer, w, h, f.kind, f.props, defaultFace(tl))
-				composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
-				continue
-			}
-			drawEntity(dc, w, h, f.kind, f.props, defaultFace(tl))
+			drawFramed(it.framed, nil, 1, false)
 		}
 	}
 	dc.Pop()
+}
+
+// groupParentOf reads the structural parent from the group's keyframes.
+// Parent is not a tweened property, so a later keyframe that omits it
+// must not re-root the subtree.
+func groupParentOf(g Group) string {
+	for _, kf := range g.Keyframes {
+		if s, ok := kf.Props["parent"].(string); ok && s != "" {
+			return s
+		}
+	}
+	return ""
+}
+
+// groupChildDefaults gives group children local coordinates instead of
+// the canvas-center defaults used by root entities.
+func groupChildDefaults(kind string, props map[string]any) {
+	switch kind {
+	case "circle", "star", "ellipse", "text":
+		if _, ok := props["x"]; !ok {
+			props["x"] = 0.0
+		}
+		if _, ok := props["y"]; !ok {
+			props["y"] = 0.0
+		}
+	case "rect", "roundRect":
+		if _, ok := props["x"]; !ok {
+			props["x"] = -propNum(props, "w", 100) / 2
+		}
+		if _, ok := props["y"]; !ok {
+			props["y"] = -propNum(props, "h", 100) / 2
+		}
+	}
 }
 
 // defaultFace resolves the fallback typeface: explicit Timeline font
@@ -280,6 +349,7 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		})
 	case "rect":
 		// x,y is the top-left corner; w,h default to a 100px square.
+		// rotate pivots at the rect center, not at x,y.
 		rx, ry := propNum(props, "x", float64(w)/2-50), propNum(props, "y", float64(h)/2-50)
 		rw, rh := propNum(props, "w", 100), propNum(props, "h", 100)
 		spin(dc, rx+rw/2, ry+rh/2, props, func() {
@@ -295,7 +365,12 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		spin(dc, (x1+x2)/2, (y1+y2)/2, props, func() {
 			paint(dc, props)
 			dc.SetLineWidth(propNum(props, "width", 2))
-			dc.DrawLine(x1, y1, x2, y2)
+			from, to := trimWindow(props)
+			if to > from {
+				ax, ay := lerpPoint(x1, y1, x2, y2, from)
+				bx, by := lerpPoint(x1, y1, x2, y2, to)
+				dc.DrawLine(ax, ay, bx, by)
+			}
 			dc.Stroke()
 		})
 	case "arc":
@@ -369,6 +444,7 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 			drawPolygon(dc, props)
 		})
 	case "roundRect":
+		// x,y is the top-left corner; rotate pivots at the rect center.
 		rx, ry := propNum(props, "x", float64(w)/2-50), propNum(props, "y", float64(h)/2-50)
 		rw, rh := propNum(props, "w", 100), propNum(props, "h", 100)
 		radius := propNum(props, "radius", 10)
@@ -766,6 +842,24 @@ func drawPathContours(dc *gg.Context, props map[string]any, contours []pathConto
 		}
 	}
 	closeAll := propBool(props, "closed", propBool(props, "filled", false))
+	if propBool(props, "filled", false) {
+		traceContours(dc, contours, closeAll)
+		dc.Fill()
+		return
+	}
+	from, to := trimWindow(props)
+	if from <= 0 && to >= 1 {
+		traceContours(dc, contours, closeAll)
+	} else {
+		drawTrimmedContours(dc, contours, closeAll, from, to)
+	}
+	dc.SetLineWidth(propNum(props, "width", 3))
+	dc.Stroke()
+}
+
+// traceContours feeds every subpath to the context without changing
+// fill/stroke settings.
+func traceContours(dc *gg.Context, contours []pathContour, closeAll bool) {
 	for _, c := range contours {
 		if len(c.points) < 4 {
 			continue
@@ -778,12 +872,108 @@ func drawPathContours(dc *gg.Context, props map[string]any, contours []pathConto
 			dc.ClosePath()
 		}
 	}
-	if propBool(props, "filled", false) {
-		dc.Fill()
+}
+
+// trimWindow reads the normalized visible range. trim=1 and trimStart=0
+// (the defaults) draw the full path.
+func trimWindow(props map[string]any) (float64, float64) {
+	from := clamp01(propNum(props, "trimStart", 0))
+	to := clamp01(propNum(props, "trim", 1))
+	if to < from {
+		return 0, 0
+	}
+	return from, to
+}
+
+func clamp01(v float64) float64 {
+	if v < 0 {
+		return 0
+	}
+	if v > 1 {
+		return 1
+	}
+	return v
+}
+
+func lerpPoint(x0, y0, x1, y1, f float64) (float64, float64) {
+	return x0 + (x1-x0)*f, y0 + (y1-y0)*f
+}
+
+// drawTrimmedContours strokes the arc-length slice [from,to] of every
+// subpath. It walks the already-flattened contours, so d strings and
+// point paths share the same draw-on behavior.
+func drawTrimmedContours(dc *gg.Context, contours []pathContour, closeAll bool, from, to float64) {
+	total := 0.0
+	for _, c := range contours {
+		total += contourLength(c, closeAll || c.closed)
+	}
+	if total <= 0 {
 		return
 	}
-	dc.SetLineWidth(propNum(props, "width", 3))
-	dc.Stroke()
+	startDist, endDist := from*total, to*total
+	if endDist <= startDist {
+		return
+	}
+	dist := 0.0
+	for _, c := range contours {
+		n := len(c.points) / 2
+		if n < 2 {
+			continue
+		}
+		closed := closeAll || c.closed
+		segs := n - 1
+		if closed {
+			segs++
+		}
+		drawing := false
+		for i := 0; i < segs; i++ {
+			x0, y0 := c.points[i*2], c.points[i*2+1]
+			j := (i + 1) % n
+			x1, y1 := c.points[j*2], c.points[j*2+1]
+			segLen := math.Hypot(x1-x0, y1-y0)
+			if segLen <= 1e-9 {
+				continue
+			}
+			segStart, segEnd := dist, dist+segLen
+			if segEnd > startDist && segStart < endDist {
+				a := math.Max(startDist, segStart)
+				b := math.Min(endDist, segEnd)
+				ax, ay := lerpPoint(x0, y0, x1, y1, (a-segStart)/segLen)
+				bx, by := lerpPoint(x0, y0, x1, y1, (b-segStart)/segLen)
+				if !drawing {
+					dc.MoveTo(ax, ay)
+					drawing = true
+				} else {
+					dc.LineTo(ax, ay)
+				}
+				dc.LineTo(bx, by)
+				if b < segEnd {
+					return
+				}
+			}
+			dist = segEnd
+			if dist >= endDist {
+				return
+			}
+		}
+	}
+}
+
+func contourLength(c pathContour, closed bool) float64 {
+	n := len(c.points) / 2
+	if n < 2 {
+		return 0
+	}
+	total := 0.0
+	segs := n - 1
+	if closed {
+		segs++
+	}
+	for i := 0; i < segs; i++ {
+		j := (i + 1) % n
+		total += math.Hypot(c.points[j*2]-c.points[i*2], c.points[j*2+1]-c.points[i*2+1])
+	}
+	return total
 }
 
 // drawPolygon fills or strokes a closed polygon from points. Same morph as path.

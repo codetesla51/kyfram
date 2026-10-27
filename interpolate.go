@@ -63,6 +63,7 @@ func spanFrac(t0, t1, t float64) float64 {
 var easeNames = []string{
 	"linear", "easeIn", "easeOut", "easeInOut",
 	"cubicIn", "cubicOut", "cubicInOut", "sine",
+	"spring", "bounce", "bounceIn", "bounceOut", "bounceInOut",
 }
 
 // validEase reports whether name is a known curve or a cubic-bezier(...).
@@ -103,11 +104,44 @@ func applyEase(name string, f float64) float64 {
 		return 1 - 4*(1-f)*(1-f)*(1-f)
 	case "sine":
 		return 0.5 - 0.5*math.Cos(math.Pi*f)
+	case "spring":
+		// Damped overshoot, normalized so f=1 lands exactly on 1.
+		decay := math.Exp(-6 * f)
+		osc := math.Cos(12 * f)
+		end := 1 - math.Exp(-6)*math.Cos(12)
+		return (1 - decay*osc) / end
+	case "bounce", "bounceOut":
+		return bounceOut(f)
+	case "bounceIn":
+		return 1 - bounceOut(1-f)
+	case "bounceInOut":
+		if f < 0.5 {
+			return (1 - bounceOut(1-2*f)) / 2
+		}
+		return (1 + bounceOut(2*f-1)) / 2
 	}
 	if pts, ok := parseBezier(name); ok {
 		return bezierEval(pts, f)
 	}
 	return f
+}
+
+// bounceOut is the standard four-landing bounce curve.
+func bounceOut(t float64) float64 {
+	const n, d = 7.5625, 2.75
+	switch {
+	case t < 1/d:
+		return n * t * t
+	case t < 2/d:
+		t -= 1.5 / d
+		return n*t*t + 0.75
+	case t < 2.5/d:
+		t -= 2.25 / d
+		return n*t*t + 0.9375
+	default:
+		t -= 2.625 / d
+		return n*t*t + 0.984375
+	}
 }
 
 // blend picks per-type combination: numbers and colors lerp, the rest

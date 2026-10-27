@@ -20,7 +20,8 @@ var knownProps = []string{
 	"d", "end", "filled", "font", "frequency", "gradAngle", "gradFrom",
 	"gradTo", "h", "inner", "join", "layer", "path", "phase", "points",
 	"r", "radius", "rotate", "rx", "ry", "scale", "size", "start",
-	"thickness", "w", "width", "wrap", "x", "x1", "x2", "y", "y1", "y2",
+	"thickness", "trim", "trimStart", "w", "width", "wrap",
+	"x", "x1", "x2", "y", "y1", "y2",
 }
 
 // numProps must hold numbers; a wrong-typed value would silently fall
@@ -28,8 +29,8 @@ var knownProps = []string{
 var numProps = []string{
 	"alpha", "amplitude", "end", "frequency", "gradAngle", "h",
 	"inner", "layer", "phase", "r", "radius", "rotate", "rx", "ry",
-	"scale", "size", "start", "thickness", "w", "width", "wrap",
-	"x", "x1", "x2", "y", "y1", "y2",
+	"scale", "size", "start", "thickness", "trim", "trimStart",
+	"w", "width", "wrap", "x", "x1", "x2", "y", "y1", "y2",
 }
 
 // strProps must hold strings. font/path get existence checks below;
@@ -64,13 +65,44 @@ func colorNameList() []string {
 // validate runs fail-fast checks over the declared timeline so a script
 // mistake surfaces at build time, not mid-encode on frame 300.
 func (b *Builder) validate() error {
-	groups := make(map[string]bool, len(b.tl.Groups))
-	for _, g := range b.tl.Groups {
+	var allGroups []Group
+	allGroups = append(allGroups, b.tl.Groups...)
+	for _, sc := range b.tl.Scenes {
+		allGroups = append(allGroups, sc.Groups...)
+	}
+	groups := make(map[string]bool, len(allGroups))
+	for _, g := range allGroups {
 		groups[g.Name] = true
 	}
-	for _, sc := range b.tl.Scenes {
-		for _, g := range sc.Groups {
-			groups[g.Name] = true
+	groupParent := make(map[string]string, len(allGroups))
+	for _, g := range allGroups {
+		parent := ""
+		for _, kf := range g.Keyframes {
+			v, ok := kf.Props["parent"]
+			if !ok {
+				continue
+			}
+			s, ok := v.(string)
+			if !ok {
+				return fmt.Errorf("group %q: parent at t=%g must be a string", g.Name, kf.Time)
+			}
+			if parent != "" && parent != s {
+				return fmt.Errorf("group %q: parent must stay constant (got %q and %q)", g.Name, parent, s)
+			}
+			parent = s
+		}
+		if parent != "" && !groups[parent] {
+			return fmt.Errorf("group %q: parent %q does not exist", g.Name, parent)
+		}
+		groupParent[g.Name] = parent
+	}
+	for name := range groupParent {
+		seen := map[string]bool{name: true}
+		for p := groupParent[name]; p != ""; p = groupParent[p] {
+			if seen[p] {
+				return fmt.Errorf("group %q: nested group cycle", name)
+			}
+			seen[p] = true
 		}
 	}
 	check := func(where string, e Entity) error {

@@ -1,0 +1,66 @@
+// motion-kit.lgv — the motion-graphics toolkit in one short loop:
+// per-letter text, stroke draw-on, spring/bounce easing, nested groups,
+// and center-pivot rect rotation.
+let still = fn(dur, p) {
+  let k = table{}
+  k["0"] = p
+  k[str(dur)] = p
+  return k
+}
+
+scene(4, 30)
+
+shape("bg", "rect", still(4, table{x: 0, y: 0, w: 1280, h: 720, color: "#0B0B0F"}))
+
+letters("title", "MOTION", table{
+  "0": table{x: 640, y: 250, size: 104, color: "#F6F1E7", alpha: 0, scale: 0.88, ease: "spring"},
+  "0.46": table{x: 640, y: 250, size: 104, color: "#F6F1E7", alpha: 1, scale: 1}
+}, 0.06)
+
+shape("rule", "line", table{
+  "0": table{x1: 300, y1: 310, x2: 980, y2: 310, width: 3, color: "#F4B942", trim: 0},
+  "1.2": table{x1: 300, y1: 310, x2: 980, y2: 310, width: 3, color: "#F4B942", trim: 1}
+})
+
+text("kicker", still(4, table{
+  content: "letters  /  trim  /  spring  /  nested groups",
+  x: 640, y: 366, size: 19, color: "#8C8C96", alpha: 0.9
+}))
+
+// bounceOut drops the coral ball and lets it settle at y=540.
+shape("ball", "circle", table{
+  "0": table{x: 215, y: 120, r: 28, color: "#FF6B4A", ease: "bounceOut"},
+  "1.15": table{x: 215, y: 540, r: 28, color: "#FF6B4A"}
+})
+text("ball-label", still(4, table{
+  content: "bounce", x: 215, y: 608, size: 16, color: "#8C8C96"
+}))
+
+// The gold rect rotates around its own center while x/y stay its top-left.
+shape("pivot", "rect", table{
+  "0": table{x: 520, y: 452, w: 180, h: 100, color: "#F4B942", rotate: -12},
+  "2": table{x: 520, y: 452, w: 180, h: 100, color: "#F4B942", rotate: 48},
+  "4": table{x: 520, y: 452, w: 180, h: 100, color: "#F4B942", rotate: -12}
+})
+text("pivot-label", still(4, table{
+  content: "center pivot", x: 610, y: 608, size: 16, color: "#8C8C96"
+}))
+
+// A nested rig: the child arm picks up the parent's rotation, then adds
+// its own. The teal chip stays local to the arm.
+group("rig", table{
+  "0": table{x: 1030, y: 505, rotate: -10, scale: 1, alpha: 1, layer: 5},
+  "2": table{x: 1030, y: 505, rotate: 10, scale: 1, alpha: 1, layer: 5},
+  "4": table{x: 1030, y: 505, rotate: -10, scale: 1, alpha: 1, layer: 5}
+})
+group("arm", table{
+  "0": table{x: 0, y: 0, rotate: 24, scale: 1, alpha: 1, parent: "rig"},
+  "2": table{x: 0, y: 0, rotate: -24, scale: 1, alpha: 1, parent: "rig"},
+  "4": table{x: 0, y: 0, rotate: 24, scale: 1, alpha: 1, parent: "rig"}
+})
+shape("chip", "rect", still(4, table{
+  x: -52, y: -52, w: 104, h: 104, color: "#5FD0C4"
+}), "arm")
+text("rig-label", still(4, table{
+  content: "nested", x: 1030, y: 608, size: 16, color: "#8C8C96"
+}))

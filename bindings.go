@@ -8,8 +8,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/codetesla51/logos/interpreter"
+	"github.com/fogleman/gg"
 )
 
 // Builder collects scene()/shape()/text() declarations out of a script.
@@ -111,6 +113,41 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 			}
 		}
 		b.addEntity(name, "text", kfs, group)
+		return interpreter.NULL
+	})
+	vm.Register("letters", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) < 3 || len(args) > 5 {
+			return &interpreter.Error{Message: fmt.Sprintf("letters() takes name, content, keyframes, optional stagger, optional group; got %d arguments", len(args))}
+		}
+		name, err := strArg(args[0], "name")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		content, err := strArg(args[1], "content")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		kfs, err := keyframesArg(args[2])
+		if err != nil {
+			return &interpreter.Error{Message: fmt.Sprintf("letters %q: %v", name, err)}
+		}
+		stagger := 0.06
+		if len(args) >= 4 {
+			stagger, err = numArg(args[3], "stagger")
+			if err != nil {
+				return &interpreter.Error{Message: "letters: " + err.Error()}
+			}
+		}
+		group := ""
+		if len(args) == 5 {
+			group, err = strArg(args[4], "group")
+			if err != nil {
+				return &interpreter.Error{Message: fmt.Sprintf("letters %q: %v", name, err)}
+			}
+		}
+		if err := b.addLetters(name, content, kfs, stagger, group); err != nil {
+			return &interpreter.Error{Message: fmt.Sprintf("letters %q: %v", name, err)}
+		}
 		return interpreter.NULL
 	})
 	vm.Register("group", func(args ...interpreter.Object) interpreter.Object {
@@ -338,6 +375,92 @@ func (b *Builder) addEntity(name, kind string, kfs []Keyframe, group string) {
 		return
 	}
 	b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs, Group: group})
+}
+
+// addLetters expands a line into one text entity per non-space glyph.
+// Advances are measured from the first keyframe's font/size, so the
+// caller should keep those constant when animating a line of letters.
+func (b *Builder) addLetters(name, content string, kfs []Keyframe, stagger float64, group string) error {
+	if content == "" {
+		return fmt.Errorf("content must not be empty")
+	}
+	if stagger < 0 {
+		return fmt.Errorf("stagger must not be negative")
+	}
+	if strings.ContainsAny(content, "\r\n") {
+		return fmt.Errorf("multi-line content is not supported")
+	}
+	for _, kf := range kfs {
+		if _, ok := kf.Props["points"]; ok {
+			return fmt.Errorf("points is not supported (per-letter text is a flat line)")
+		}
+		if propNum(kf.Props, "wrap", 0) > 0 {
+			return fmt.Errorf("wrap is not supported (per-letter text is a flat line)")
+		}
+	}
+	fontPath := b.tl.Font
+	if fontPath == "" {
+		fontPath = defaultFont
+	}
+	size := 28.0
+	if len(kfs) > 0 {
+		fontPath = propStr(kfs[0].Props, "font", fontPath)
+		size = propNum(kfs[0].Props, "size", size)
+	}
+	measure := gg.NewContext(1, 1)
+	if !setFace(measure, fontPath, size) {
+		return fmt.Errorf("cannot load font %q", fontPath)
+	}
+	lineWidth, _ := measure.MeasureString(content)
+	if lineWidth <= 0 {
+		return fmt.Errorf("content has no measurable glyphs")
+	}
+
+	type glyph struct {
+		text   string
+		offset float64
+	}
+	var glyphs []glyph
+	cursor := 0.0
+	for _, r := range content {
+		ch := string(r)
+		adv, _ := measure.MeasureString(ch)
+		if !unicode.IsSpace(r) {
+			glyphs = append(glyphs, glyph{text: ch, offset: cursor + adv/2 - lineWidth/2})
+		}
+		cursor += adv
+	}
+	if len(glyphs) == 0 {
+		return fmt.Errorf("content has no non-space glyphs")
+	}
+
+	w, h := b.tl.size()
+	for gi, g := range glyphs {
+		letterKFs := make([]Keyframe, len(kfs))
+		for ki, kf := range kfs {
+			props := copyProps(kf.Props)
+			props["content"] = g.text
+			if group != "" {
+				baseX := propNum(kf.Props, "x", 0)
+				props["x"] = baseX + g.offset
+				if _, ok := props["y"]; !ok {
+					props["y"] = 0.0
+				}
+			} else {
+				props["x"] = propNum(kf.Props, "x", float64(w)/2) + g.offset
+				if _, ok := props["y"]; !ok {
+					props["y"] = float64(h) / 2
+				}
+			}
+			letterKFs[ki] = Keyframe{
+				Time:  kf.Time + stagger*float64(gi),
+				Props: props,
+				Ease:  kf.Ease,
+			}
+		}
+		b.addEntity(fmt.Sprintf("%s-%d", name, gi), "text", letterKFs, group)
+	}
+	return nil
 }
 
 func (b *Builder) addGroup(name string, kfs []Keyframe) {

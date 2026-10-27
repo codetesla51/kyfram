@@ -59,9 +59,10 @@ type Entity struct {
 }
 
 // Group is a transform container for children. Its keyframes hold
-// x, y, scale, rotate, alpha, layer. Children are entities whose
-// Group == Name; they keep local x/y and animate independently.
-// World transform = group * child. Nested groups are future: flat for now.
+// x, y, scale, rotate, alpha, layer, and optional parent. Children are
+// entities whose Group == Name; they keep local x/y and animate
+// independently. A group with parent set nests inside that group, so
+// world transform = parent * group * child.
 type Group struct {
 	Name      string
 	Keyframes []Keyframe
@@ -70,8 +71,8 @@ type Group struct {
 // Keyframe fixes an entity's properties at one moment in seconds.
 // Props holds numbers (float64), colors (hex string), or discrete
 // values (string) — interpretation lives in the interpolator.
-// Ease names the curve of the segment starting here
-// (linear, easeIn, easeOut, easeInOut); empty means linear.
+// Ease names the curve of the segment starting here (see easeNames);
+// empty means linear.
 type Keyframe struct {
 	Time  float64
 	Props map[string]any
