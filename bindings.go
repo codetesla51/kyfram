@@ -21,6 +21,7 @@ type Builder struct {
 	tl       Timeline
 	sceneSet bool
 	curScene int // index into tl.Scenes, -1 while declarations are global
+	expects  []expectation
 }
 
 // Bind registers the declaration builtins on vm. Call before Run, then
@@ -203,6 +204,29 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		b.addCamera(kfs)
 		return interpreter.NULL
 	})
+	vm.Register("expect", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) < 2 || len(args) > 3 {
+			return &interpreter.Error{Message: fmt.Sprintf("expect() takes 1 or 2 entity names plus a checks table, got %d arguments", len(args))}
+		}
+		names := make([]string, 0, len(args)-1)
+		for i := 0; i < len(args)-1; i++ {
+			name, err := strArg(args[i], "entity name")
+			if err != nil {
+				return &interpreter.Error{Message: fmt.Sprintf("expect: %v", err)}
+			}
+			names = append(names, name)
+		}
+		raw, ok := interpreter.ObjectToGo(args[len(args)-1]).(map[string]interface{})
+		if !ok {
+			return &interpreter.Error{Message: "expect: checks must be a table"}
+		}
+		exp, err := parseExpectation(names, raw, b.scOffset(), b.curScene)
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		b.expects = append(b.expects, exp)
+		return interpreter.NULL
+	})
 	vm.Register("transparent", func(args ...interpreter.Object) interpreter.Object {
 		if len(args) != 1 {
 			return &interpreter.Error{Message: fmt.Sprintf("transparent() takes 1 argument, got %d", len(args))}
@@ -350,6 +374,15 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 	})
 
 	bindAnimationHelpers(vm)
+}
+
+// SetCanvas sets the canvas dimensions used by build-time geometry
+// checks. Rendering still reads Timeline.Width/Height; CLI width/height
+// overrides call this before Build so a 1080x1350 script is checked
+// against its real frame rather than the 640x360 default.
+func (b *Builder) SetCanvas(w, h int) {
+	b.tl.Width = w
+	b.tl.Height = h
 }
 
 // scOffset returns the absolute time where the open scene starts
@@ -508,6 +541,16 @@ func (b *Builder) Build() (Timeline, error) {
 	}
 	if err := b.validate(); err != nil {
 		return Timeline{}, err
+	}
+	if err := checkExpectations(b.tl, b.expects); err != nil {
+		return Timeline{}, err
+	}
+	warnings, err := checkCanvas(b.tl)
+	if err != nil {
+		return Timeline{}, err
+	}
+	for _, w := range warnings {
+		fmt.Fprintf(os.Stderr, "warning: %s\n", w)
 	}
 	return b.tl, nil
 }

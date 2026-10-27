@@ -69,12 +69,14 @@ func main() {
 			printHelpView()
 		case "new":
 			printHelpNew()
+		case "inspect":
+			printHelpInspect()
 		default:
 			printHelp()
 		}
 	})
 	root.SetHelpCommand(helpCommand())
-	root.AddCommand(renderCommand(), viewCommand(), newCommand())
+	root.AddCommand(renderCommand(), viewCommand(), inspectCommand(), newCommand())
 	if err := root.Execute(); err != nil {
 		errf("kyfram: %v\n\n", err)
 		printHelp()
@@ -82,7 +84,7 @@ func main() {
 	}
 }
 
-// helpCommand reproduces "kyfram help [render|view|new]".
+// helpCommand reproduces "kyfram help [render|view|inspect|new]".
 func helpCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "help [command]",
@@ -98,6 +100,9 @@ func helpCommand() *cobra.Command {
 					return
 				case "new":
 					printHelpNew()
+					return
+				case "inspect":
+					printHelpInspect()
 					return
 				}
 			}
@@ -116,6 +121,7 @@ func printHelp() {
 	fmt.Println("COMMANDS:")
 	fmt.Println("  render    Render a .lgv script to video or image")
 	fmt.Println("  view      Live preview with scrub + hot reload")
+	fmt.Println("  inspect   Print sampled positions and box overlaps")
 	fmt.Println("  new       Scaffold a starter project")
 	fmt.Println("  help      Show help (try \"help render\")")
 	fmt.Println()
@@ -148,6 +154,24 @@ func printHelpRender() {
 	fmt.Println("  kyfram render --out out.mp4 examples/intro.lgv")
 	fmt.Println("  kyfram render --crf 18 --preset slow examples/intro.lgv")
 	fmt.Println("  kyfram render --format png --out frame.png examples/intro.lgv")
+	fmt.Println("  kyfram render --format png --at 1.5 --out frame.png examples/intro.lgv")
+}
+
+func printHelpInspect() {
+	fmt.Println("kyfram inspect — print sampled entity state")
+	fmt.Println()
+	fmt.Println("USAGE:")
+	fmt.Println("  kyfram inspect [options] <script.lgv>")
+	fmt.Println()
+	fmt.Println("OPTIONS:")
+	fmt.Println("  --step S       Sample gap in seconds (default 0.5)")
+	fmt.Println("  --width N      Override canvas width")
+	fmt.Println("  --height N     Override canvas height")
+	fmt.Println("  -h, --help     Show this help")
+	fmt.Println()
+	fmt.Println("Prints one block per sample with position, size, color, alpha,")
+	fmt.Println("group, plus OVERLAP lines for intersecting bounding boxes.")
+	fmt.Println("No rendering and no ffmpeg needed.")
 }
 
 func printHelpView() {
@@ -239,8 +263,25 @@ func renderCommand() *cobra.Command {
 	cmd.Flags().String("font", "", "default typeface path")
 	cmd.Flags().Int("crf", 23, "x264 CRF quality 0-51, lower is better (18 high, 28 small)")
 	cmd.Flags().String("preset", "medium", "x264 preset: ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow")
-	cmd.Flags().String("format", "mp4", "output format: mp4 or png (single frame at t=0)")
+	cmd.Flags().Int("workers", 0, "number of render workers (0 = NumCPU)")
+	cmd.Flags().String("format", "mp4", "output format: mp4 or png (single frame)")
+	cmd.Flags().Float64("at", 0, "png time in seconds")
 	cmd.Flags().StringArray("var", nil, "template variable as key=value (repeatable)")
+	return cmd
+}
+
+// inspectCommand builds "kyfram inspect [options] <script.lgv>".
+func inspectCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "inspect [options] <script.lgv>",
+		Short: "Print sampled entity positions and overlaps",
+		Run: func(cmd *cobra.Command, args []string) {
+			runInspect(cmd, args)
+		},
+	}
+	cmd.Flags().Float64("step", 0.5, "sample gap in seconds")
+	cmd.Flags().Int("width", 0, "override canvas width")
+	cmd.Flags().Int("height", 0, "override canvas height")
 	return cmd
 }
 
@@ -311,9 +352,10 @@ func runRender(cmd *cobra.Command, args []string) {
 	crf, _ := flags.GetInt("crf")
 	preset, _ := flags.GetString("preset")
 	format, _ := flags.GetString("format")
+	at, _ := flags.GetFloat64("at")
 	vars, _ := flags.GetStringArray("var")
 	if len(args) != 1 {
-		errln("usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--var k=v ...] <script.lgv>")
+		errln("usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--at t] [--var k=v ...] <script.lgv>")
 		os.Exit(1)
 	}
 	for _, v := range []int{fps, width, height} {
@@ -335,6 +377,14 @@ func runRender(cmd *cobra.Command, args []string) {
 		errln("format must be mp4 or png")
 		os.Exit(1)
 	}
+	if at < 0 {
+		errln("at must be >= 0")
+		os.Exit(1)
+	}
+	if format != "png" && flags.Changed("at") {
+		errln("--at only applies to --format png")
+		os.Exit(1)
+	}
 	source, err := kyfram.LoadScript(args[0])
 	if err != nil {
 		errln("load:", err)
@@ -343,6 +393,7 @@ func runRender(cmd *cobra.Command, args []string) {
 	vm := newVM()
 	var b kyfram.Builder
 	b.Bind(vm)
+	b.SetCanvas(width, height)
 	for _, v := range vars {
 		key, val, ok := splitVar(v)
 		if !ok {
@@ -389,8 +440,8 @@ func runRender(cmd *cobra.Command, args []string) {
 		dh = 360
 	}
 	if format == "png" {
-		fmt.Fprintf(os.Stderr, "rendering 1 frame (%dx%d) → %s\n", dw, dh, out)
-		if err := kyfram.RenderFrame(tl, 0).SavePNG(out); err != nil {
+		fmt.Fprintf(os.Stderr, "rendering 1 frame at t=%gs (%dx%d) → %s\n", at, dw, dh, out)
+		if err := kyfram.RenderFrame(tl, at).SavePNG(out); err != nil {
 			errln("png:", err)
 			os.Exit(1)
 		}
@@ -423,4 +474,46 @@ func runRender(cmd *cobra.Command, args []string) {
 	}
 	fmt.Println(paint(os.Stdout, "\x1b[32m", fmt.Sprintf("ok: %s — %.1fs, %dx%d @%dfps, %d frames, %s",
 		out, tl.Duration, dw, dh, tl.FPS, frames, fileSize(out))))
+}
+
+// runInspect prints sampled state without touching the renderer.
+func runInspect(cmd *cobra.Command, args []string) {
+	flags := cmd.Flags()
+	step, _ := flags.GetFloat64("step")
+	width, _ := flags.GetInt("width")
+	height, _ := flags.GetInt("height")
+	if len(args) != 1 {
+		errln("usage: kyfram inspect [--step n] [--width n] [--height n] <script.lgv>")
+		os.Exit(1)
+	}
+	if step <= 0 {
+		errln("step must be positive")
+		os.Exit(1)
+	}
+	if width < 0 || height < 0 {
+		errln("width and height must be positive")
+		os.Exit(1)
+	}
+	source, err := kyfram.LoadScript(args[0])
+	if err != nil {
+		errln("load:", err)
+		os.Exit(1)
+	}
+	vm := newVM()
+	var b kyfram.Builder
+	b.Bind(vm)
+	b.SetCanvas(width, height)
+	if err := vm.Run(string(source)); err != nil {
+		errln("run:", err)
+		os.Exit(1)
+	}
+	tl, err := b.Build()
+	if err != nil {
+		errln("build:", err)
+		os.Exit(1)
+	}
+	if err := kyfram.Inspect(tl, step, os.Stdout); err != nil {
+		errln("inspect:", err)
+		os.Exit(1)
+	}
 }
