@@ -146,7 +146,9 @@ func printHelpRender() {
 	fmt.Println("  --font FILE    Default typeface")
 	fmt.Println("  --crf N        x264 quality 0-51 (18 high, 23 default)")
 	fmt.Println("  --preset S     x264 preset (ultrafast..veryslow)")
+	fmt.Println("  --workers N    Render workers (0 = NumCPU)")
 	fmt.Println("  --format FMT   Output format (mp4|png)")
+	fmt.Println("  --at T         PNG time in seconds (default 0)")
 	fmt.Println("  --var K=V      Template var (repeatable)")
 	fmt.Println("  -h, --help     Show this help")
 	fmt.Println()
@@ -351,11 +353,12 @@ func runRender(cmd *cobra.Command, args []string) {
 	font, _ := flags.GetString("font")
 	crf, _ := flags.GetInt("crf")
 	preset, _ := flags.GetString("preset")
+	workers, _ := flags.GetInt("workers")
 	format, _ := flags.GetString("format")
 	at, _ := flags.GetFloat64("at")
 	vars, _ := flags.GetStringArray("var")
 	if len(args) != 1 {
-		errln("usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--format mp4|png] [--at t] [--var k=v ...] <script.lgv>")
+		errln("usage: kyfram render [--out f] [--fps n] [--width n] [--height n] [--font f] [--crf n] [--preset s] [--workers n] [--format mp4|png] [--at t] [--var k=v ...] <script.lgv>")
 		os.Exit(1)
 	}
 	for _, v := range []int{fps, width, height} {
@@ -363,6 +366,10 @@ func runRender(cmd *cobra.Command, args []string) {
 			errln("flags: sizes must be positive")
 			os.Exit(1)
 		}
+	}
+	if workers < 0 {
+		errln("workers must be >= 0")
+		os.Exit(1)
 	}
 	if crf < 0 || crf > 51 {
 		errln("crf must be 0-51")
@@ -458,7 +465,7 @@ func runRender(cmd *cobra.Command, args []string) {
 		fmt.Fprintf(os.Stderr, "rendering %d frames (%dx%d @ %dfps, %.1fs) → %s\n",
 			frames, dw, dh, tl.FPS, tl.Duration, out)
 	}
-	err = kyfram.EncodeWithOpts(tl, out, kyfram.EncodeOpts{CRF: crf, Preset: preset,
+	err = kyfram.EncodeWithOpts(tl, out, kyfram.EncodeOpts{CRF: crf, Preset: preset, Workers: workers,
 		Progress: func(done, total int) {
 			if spin != nil {
 				// Rewritten 1/frame; a torn read garbles one tick max.

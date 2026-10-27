@@ -1,6 +1,8 @@
 package kyfram
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"image"
 	"os"
@@ -165,6 +167,157 @@ func TestEncode(t *testing.T) {
 	}
 	if fi.Size() == 0 {
 		t.Fatal("out.mp4 is empty")
+	}
+}
+
+// Parallel workers must paint exactly the same pixels as a fresh
+// single-frame render, and workers=4 must agree with workers=1. The
+// scene deliberately mixes reused-canvas hazards: a scene transition,
+// blend layers, a group transform, a camera, gradients, text, and an
+// image shared through the asset cache.
+func TestEncodeWorkersMatchSingleFrame(t *testing.T) {
+	dir := t.TempDir()
+	asset := filepath.Join(dir, "sprite.png")
+	dot := gg.NewContext(8, 8)
+	dot.SetRGB(1, 0.55, 0.1)
+	dot.DrawCircle(4, 4, 4)
+	dot.Fill()
+	if err := dot.SavePNG(asset); err != nil {
+		t.Fatalf("save sprite: %v", err)
+	}
+
+	grp := []Group{{Name: "badge", Keyframes: []Keyframe{
+		{Time: 0, Props: map[string]any{"x": 80.0, "y": 45.0, "alpha": 0.75}},
+		{Time: 0.5, Props: map[string]any{"x": 80.0, "y": 45.0, "alpha": 0.75, "rotate": 20.0}},
+	}}}
+	cam := []Keyframe{
+		{Time: 0, Props: map[string]any{"zoom": 1.0, "x": 80.0, "y": 45.0}},
+		{Time: 0.5, Props: map[string]any{"zoom": 1.15, "x": 84.0, "y": 45.0}},
+	}
+	tl := Timeline{
+		FPS:    30,
+		Width:  160,
+		Height: 90,
+		Scenes: []Scene{
+			{
+				Duration: 0.5,
+				Camera:   cam,
+				Groups:   grp,
+				Entities: []Entity{
+					{Name: "bg", Kind: "rect", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 0.0, "y": 0.0, "w": 160.0, "h": 90.0, "color": "#101018"}},
+					}},
+					{Name: "ball", Kind: "circle", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 30.0, "y": 45.0, "r": 10.0, "color": "#ff4040", "rotate": 0.0, "scale": 1.0}},
+						{Time: 0.5, Props: map[string]any{"x": 120.0, "y": 45.0, "r": 10.0, "color": "#40a3e6", "rotate": 180.0, "scale": 1.3}},
+					}},
+					{Name: "label", Kind: "text", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 80.0, "y": 18.0, "content": "parallel", "size": 12.0, "color": "#ffffff"}},
+					}},
+					{Name: "glow", Kind: "circle", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 80.0, "y": 45.0, "r": 22.0, "color": "#4080ff", "blend": "screen"}},
+					}},
+					{Name: "grad", Kind: "rect", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 8.0, "y": 62.0, "w": 30.0, "h": 20.0, "gradFrom": "#ff0000", "gradTo": "#0000ff", "gradAngle": 20.0}},
+					}},
+					{Name: "sprite", Kind: "image", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"path": asset, "x": 140.0, "y": 70.0, "rotate": 0.0, "scale": 1.0}},
+						{Time: 0.5, Props: map[string]any{"path": asset, "x": 140.0, "y": 70.0, "rotate": 90.0, "scale": 2.0}},
+					}},
+					{Name: "badge-dot", Kind: "circle", Group: "badge", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 0.0, "y": 0.0, "r": 5.0, "color": "#ffffff"}},
+					}},
+				},
+			},
+			{
+				Duration:      0.5,
+				Camera:        cam,
+				Groups:        grp,
+				Transition:    "fade",
+				TransitionDur: 0.2,
+				Entities: []Entity{
+					{Name: "bg", Kind: "rect", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 0.0, "y": 0.0, "w": 160.0, "h": 90.0, "color": "#201018"}},
+					}},
+					{Name: "ball", Kind: "circle", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 40.0, "y": 30.0, "r": 14.0, "color": "#e6b340", "rotate": 0.0, "scale": 1.0}},
+						{Time: 0.5, Props: map[string]any{"x": 90.0, "y": 60.0, "r": 14.0, "color": "#40e68a", "rotate": -90.0, "scale": 0.8}},
+					}},
+					{Name: "label", Kind: "text", Keyframes: []Keyframe{
+						{Time: 0, Props: map[string]any{"x": 80.0, "y": 75.0, "content": "frames", "size": 11.0, "color": "#ffffff"}},
+					}},
+				},
+			},
+		},
+	}
+
+	got4 := collectEncodedFrames(t, tl, 4)
+	got1 := collectEncodedFrames(t, tl, 1)
+	want := freshFrames(tl)
+
+	if len(got1) != len(want) || len(got4) != len(want) {
+		t.Fatalf("frame counts: workers1=%d workers4=%d want=%d", len(got1), len(got4), len(want))
+	}
+	for i := range want {
+		if !bytes.Equal(got1[i], want[i]) {
+			t.Fatalf("workers=1 frame %d differs from RenderFrame", i)
+		}
+		if !bytes.Equal(got4[i], want[i]) {
+			t.Fatalf("workers=4 frame %d differs from RenderFrame", i)
+		}
+		if !bytes.Equal(got1[i], got4[i]) {
+			t.Fatalf("workers=1 frame %d differs from workers=4", i)
+		}
+	}
+}
+
+// collectEncodedFrames drives the same pipeline as EncodeWithOpts, but
+// captures raw pixels instead of paying for an mp4 round trip.
+func collectEncodedFrames(t *testing.T, tl Timeline, workers int) [][]byte {
+	t.Helper()
+	var frames [][]byte
+	err := encodeFrames(tl, workers, func(i int, buf []byte) error {
+		if i != len(frames) {
+			return fmt.Errorf("out of order: got frame %d, want %d", i, len(frames))
+		}
+		frames = append(frames, append([]byte(nil), buf...))
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("encodeFrames workers=%d: %v", workers, err)
+	}
+	return frames
+}
+
+func freshFrames(tl Timeline) [][]byte {
+	n := frameCount(tl)
+	frames := make([][]byte, n)
+	for i := range frames {
+		frames[i] = copyFramePixels(RenderFrame(tl, float64(i)/float64(tl.FPS)).Image())
+	}
+	return frames
+}
+
+// A failing sink must stop the workers and return promptly instead of
+// leaving goroutines blocked on full slots or ffmpeg writes.
+func TestEncodeFramesWriterError(t *testing.T) {
+	tl := Timeline{
+		Duration: 0.4,
+		FPS:      30,
+		Width:    32,
+		Height:   18,
+		Entities: []Entity{{Name: "dot", Kind: "circle", Keyframes: []Keyframe{
+			{Time: 0, Props: map[string]any{"x": 16.0, "y": 9.0, "r": 4.0}},
+		}}},
+	}
+	err := encodeFrames(tl, 4, func(i int, _ []byte) error {
+		if i == 2 {
+			return errors.New("broken sink")
+		}
+		return nil
+	})
+	if err == nil || !strings.Contains(err.Error(), "broken sink") {
+		t.Fatalf("writer error = %v, want broken sink", err)
 	}
 }
 

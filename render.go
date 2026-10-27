@@ -2,6 +2,7 @@ package kyfram
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"image"
 	"image/color"
@@ -10,12 +11,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/fogleman/gg"
+	"golang.org/x/image/font/basicfont"
 )
 
 const (
@@ -35,21 +38,24 @@ const (
 func RenderFrame(tl Timeline, t float64) *gg.Context {
 	w, h := tl.size()
 	dc := gg.NewContext(w, h)
-	if tl.Transparent {
-		dc.SetRGBA(0, 0, 0, 0)
-		dc.Clear()
-	} else {
-		dc.SetRGB(0.1, 0.1, 0.12)
-		dc.Clear()
-	}
+	drawFrame(dc, tl, t)
+	return dc
+}
+
+// drawFrame paints one frame into dc. It resets first so a render worker
+// can reuse the same canvas for every frame: stale transforms, clip
+// masks, dash settings, and paths must not leak from frame to frame.
+func drawFrame(dc *gg.Context, tl Timeline, t float64) {
+	w, h := tl.size()
+	resetFrame(dc, tl)
 	if len(tl.Scenes) == 0 {
 		// single implicit scene: everything declared, its own camera
 		renderScene(dc, tl, tl.Entities, tl.Groups, tl.Camera, t)
-		return dc
+		return
 	}
 	idx, start := sceneAt(tl, t)
 	if idx < 0 {
-		return dc
+		return
 	}
 	sc := &tl.Scenes[idx]
 	// transition window: previous scene frozen at its end, this scene
@@ -63,11 +69,32 @@ func RenderFrame(tl Timeline, t float64) *gg.Context {
 			layer := gg.NewContext(w, h)
 			renderScene(layer, tl, sceneLists(tl, sc), sceneGroups(tl, sc), sc.Camera, t)
 			applyTransition(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), sc.Transition, (t-start)/trDur, w, h)
-			return dc
+			return
 		}
 	}
 	renderScene(dc, tl, sceneLists(tl, sc), sceneGroups(tl, sc), sc.Camera, t)
-	return dc
+}
+
+// resetFrame restores the gg state drawEntity assumes it starts with.
+// Colors and line settings are reset because a reused canvas otherwise
+// inherits the previous frame's last entity.
+func resetFrame(dc *gg.Context, tl Timeline) {
+	dc.Identity()
+	dc.ResetClip()
+	dc.ClearPath()
+	dc.SetDash()
+	dc.SetDashOffset(0)
+	dc.SetLineWidth(1)
+	dc.SetLineCap(gg.LineCapRound)
+	dc.SetLineJoin(gg.LineJoinRound)
+	dc.SetFillRule(gg.FillRuleWinding)
+	dc.SetFontFace(basicfont.Face7x13)
+	if tl.Transparent {
+		dc.SetRGBA(0, 0, 0, 0)
+	} else {
+		dc.SetRGB(0.1, 0.1, 0.12)
+	}
+	dc.Clear()
 }
 
 // sceneLists merges global (pre-scene) declarations with a scene's own
@@ -620,9 +647,12 @@ func totalDuration(tl Timeline) float64 {
 type EncodeOpts struct {
 	CRF    int
 	Preset string
-	// Progress reports piped frames as (done, total), same goroutine as
-	// the encode loop. done counts frames handed to ffmpeg, so the final
-	// call is always (total, total) — percent is done*100/total.
+	// Workers is the number of goroutines painting frames. Zero or
+	// negative means runtime.NumCPU(). Each worker owns one canvas.
+	Workers int
+	// Progress reports piped frames as (done, total), from the writer
+	// goroutine. done counts frames handed to ffmpeg in order, so the
+	// final call is always (total, total) — percent is done*100/total.
 	Progress func(done, total int)
 }
 
@@ -634,7 +664,8 @@ func Encode(tl Timeline, outPath string) error {
 	return EncodeWithOpts(tl, outPath, EncodeOpts{CRF: 23, Preset: "medium"})
 }
 
-// EncodeWithOpts is Encode with explicit CRF/preset. CRF 0-51, Preset as above.
+// EncodeWithOpts is Encode with explicit CRF/preset. Frames are painted
+// by opts.Workers goroutines, then written to ffmpeg in frame order.
 func EncodeWithOpts(tl Timeline, outPath string, opts EncodeOpts) error {
 	if tl.FPS <= 0 {
 		return fmt.Errorf("fps %d: must be positive", tl.FPS)
@@ -695,19 +726,172 @@ func EncodeWithOpts(tl Timeline, outPath string, opts EncodeOpts) error {
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("ffmpeg start (%s): %w", cmd.String(), err)
 	}
-	for i, n := 0, frameCount(tl); i < n; i++ {
-		if _, err := stdin.Write(rgbaBytes(RenderFrame(tl, float64(i)/float64(tl.FPS)).Image())); err != nil {
-			stdin.Close()
-			waitErr := cmd.Wait()
-			return fmt.Errorf("frame %d: %w (ffmpeg: %v\n%s)", i, err, waitErr, stderr.String())
+	n := frameCount(tl)
+	err = encodeFrames(tl, opts.Workers, func(i int, buf []byte) error {
+		if _, err := stdin.Write(buf); err != nil {
+			return err
 		}
 		if opts.Progress != nil {
 			opts.Progress(i+1, n)
 		}
-	}
+		return nil
+	})
+	// ffmpeg only finishes after stdin closes, on both success and
+	// failure. Waiting here also lets us attach its stderr to our error.
 	stdin.Close()
-	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("ffmpeg (%s): %w\n%s", cmd.String(), err, stderr.String())
+	waitErr := cmd.Wait()
+	if err != nil {
+		if waitErr != nil {
+			return fmt.Errorf("%w (ffmpeg: %v\n%s)", err, waitErr, stderr.String())
+		}
+		return fmt.Errorf("%w\n%s", err, stderr.String())
+	}
+	if waitErr != nil {
+		return fmt.Errorf("ffmpeg (%s): %w\n%s", cmd.String(), waitErr, stderr.String())
+	}
+	return nil
+}
+
+// frameResult is one painted frame waiting to be written. Buffers are
+// owned by the writer once received.
+type frameResult struct {
+	index int
+	buf   []byte
+}
+
+// encodeFrames paints every frame with workers goroutines and calls write
+// in strict frame order. write must not retain buf past its return.
+// Unwritten frames are capped at twice the worker count, so a slow ffmpeg
+// cannot make fast painters pile up memory.
+func encodeFrames(tl Timeline, workers int, write func(int, []byte) error) error {
+	n := frameCount(tl)
+	if workers <= 0 {
+		workers = runtime.NumCPU()
+	}
+	if workers > n {
+		workers = n
+	}
+	if workers < 1 {
+		workers = 1
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var (
+		errMu    sync.Mutex
+		firstErr error
+	)
+	fail := func(err error) {
+		if err == nil {
+			return
+		}
+		errMu.Lock()
+		if firstErr == nil {
+			firstErr = err
+		}
+		errMu.Unlock()
+		cancel()
+	}
+
+	jobs := make(chan int)
+	results := make(chan frameResult, workers)
+	slots := make(chan struct{}, workers*2)
+
+	var wg sync.WaitGroup
+	wg.Add(workers)
+	for i := 0; i < workers; i++ {
+		go func() {
+			defer wg.Done()
+			if err := frameWorker(ctx, tl, jobs, results, slots); err != nil {
+				fail(err)
+			}
+		}()
+	}
+
+	writerDone := make(chan struct{})
+	go func() {
+		defer close(writerDone)
+		if err := writeFramesInOrder(ctx, n, results, slots, write); err != nil {
+			fail(err)
+		}
+	}()
+
+feed:
+	for i := 0; i < n; i++ {
+		select {
+		case jobs <- i:
+		case <-ctx.Done():
+			break feed
+		}
+	}
+	close(jobs)
+
+	wg.Wait()
+	<-writerDone
+
+	errMu.Lock()
+	err := firstErr
+	errMu.Unlock()
+	return err
+}
+
+// frameWorker paints jobs forever with one canvas. Draw state is reset at
+// the start of each frame by drawFrame, and the completed pixels are
+// copied because the canvas is cleared for the next frame.
+func frameWorker(ctx context.Context, tl Timeline, jobs <-chan int, results chan<- frameResult, slots chan struct{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("render frame: %v", r)
+		}
+	}()
+	dc := gg.NewContext(tl.size())
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case idx, ok := <-jobs:
+			if !ok {
+				return nil
+			}
+			// Hold a slot while the frame is in flight, not just while
+			// queued, so memory stays bounded when ffmpeg falls behind.
+			select {
+			case slots <- struct{}{}:
+			case <-ctx.Done():
+				return nil
+			}
+			drawFrame(dc, tl, float64(idx)/float64(tl.FPS))
+			buf := copyFramePixels(dc.Image())
+			select {
+			case results <- frameResult{index: idx, buf: buf}:
+			case <-ctx.Done():
+				return nil
+			}
+		}
+	}
+}
+
+// writeFramesInOrder holds early arrivals in a map until their turn, then
+// writes 0, 1, 2... and releases each frame's memory slot.
+func writeFramesInOrder(ctx context.Context, n int, results <-chan frameResult, slots chan struct{}, write func(int, []byte) error) error {
+	pending := make(map[int][]byte)
+	for next := 0; next < n; next++ {
+		for {
+			if buf, ok := pending[next]; ok {
+				delete(pending, next)
+				if err := write(next, buf); err != nil {
+					return fmt.Errorf("frame %d: %w", next, err)
+				}
+				<-slots
+				break
+			}
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case res := <-results:
+				pending[res.index] = res.buf
+			}
+		}
 	}
 	return nil
 }
@@ -739,16 +923,32 @@ func loadImage(path string) (image.Image, error) {
 	return im, nil
 }
 
-// rgbaBytes exposes the canvas pixels for the ffmpeg pipe. gg canvases
-// are *image.RGBA already; anything else gets converted rather than
-// misread as raw bytes with the wrong stride.
-func rgbaBytes(img image.Image) []byte {
-	if rgba, ok := img.(*image.RGBA); ok {
-		return rgba.Pix
+// copyFramePixels returns a fresh RGBA buffer for the ffmpeg pipe. The
+// copy is mandatory: the worker reuses and clears its canvas for the next
+// frame, so handing out dc.Image().(*image.RGBA).Pix would be overwritten.
+func copyFramePixels(img image.Image) []byte {
+	rgba, ok := img.(*image.RGBA)
+	if !ok {
+		b := img.Bounds()
+		dst := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+		draw.Draw(dst, dst.Bounds(), img, b.Min, draw.Src)
+		return dst.Pix
 	}
-	dst := image.NewRGBA(img.Bounds())
-	draw.Draw(dst, img.Bounds(), img, image.Point{}, draw.Src)
-	return dst.Pix
+	b := rgba.Bounds()
+	w := b.Dx()
+	row := w * 4
+	if rgba.Stride == row {
+		start := rgba.PixOffset(b.Min.X, b.Min.Y)
+		out := make([]byte, row*b.Dy())
+		copy(out, rgba.Pix[start:start+row*b.Dy()])
+		return out
+	}
+	out := make([]byte, 0, row*b.Dy())
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		start := rgba.PixOffset(b.Min.X, y)
+		out = append(out, rgba.Pix[start:start+row]...)
+	}
+	return out
 }
 
 // paint sets the entity color with the alpha prop applied, so fades are
