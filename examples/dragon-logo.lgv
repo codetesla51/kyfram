@@ -1,0 +1,342 @@
+// CYBER DRAGON — static logo study.
+// Square mark: segmented rings, sharp dragon head, dark grid.
+let tq = fn(t) { return format("%.3f", t) }
+let still = fn(dur, p) {
+  let k = table{}
+  k["0"] = p
+  k[tq(dur)] = p
+  return k
+}
+
+let bg = "#05070C"
+let panel = "#08121E"
+let panel2 = "#0B1725"
+let steel = "#0E1C2C"
+let steelLight = "#14263A"
+let cyan = "#4DE8FF"
+let cyanSoft = "#2A8FA3"
+let white = "#E9FDFF"
+let magenta = "#FF2E8A"
+let dim = "#1490A8"
+
+let display = "examples/assets/fonts/ArchivoBlack-Regular.ttf"
+let body = "examples/assets/fonts/Geist-Bold.ttf"
+let techno = "examples/assets/fonts/Iceland-Regular.ttf"
+
+// ---------------------------------------------------------------
+// Background
+// ---------------------------------------------------------------
+scene(1.0, 30)
+
+shape("bg", "rect", still(1.0, table{x: 0, y: 0, w: 1280, h: 1280, color: bg}))
+shape("vignette-top", "circle", still(1.0, table{x: 640, y: 470, r: 610, color: "#0A1220", alpha: 0.55}))
+shape("vignette-inner", "circle", still(1.0, table{x: 640, y: 520, r: 460, color: "#0B1725", alpha: 0.55}))
+
+for i in range(0, 17) {
+  shape("grid-v" + toStr(i), "line", still(1.0, table{
+    x1: i * 80, y1: 0, x2: i * 80, y2: 1280,
+    width: 1, color: cyan, alpha: 0.025
+  }))
+  shape("grid-h" + toStr(i), "line", still(1.0, table{
+    x1: 0, y1: i * 80, x2: 1280, y2: i * 80,
+    width: 1, color: cyan, alpha: 0.025
+  }))
+}
+
+// Four faint corner brackets, like a scanner frame.
+let corner = 34
+shape("corner-tl-h", "line", still(1.0, table{x1: 54, y1: 54, x2: 54 + corner, y2: 54, width: 2, color: cyan, alpha: 0.22}))
+shape("corner-tl-v", "line", still(1.0, table{x1: 54, y1: 54, x2: 54, y2: 54 + corner, width: 2, color: cyan, alpha: 0.22}))
+shape("corner-tr-h", "line", still(1.0, table{x1: 1226 - corner, y1: 54, x2: 1226, y2: 54, width: 2, color: cyan, alpha: 0.22}))
+shape("corner-tr-v", "line", still(1.0, table{x1: 1226, y1: 54, x2: 1226, y2: 54 + corner, width: 2, color: cyan, alpha: 0.22}))
+shape("corner-bl-h", "line", still(1.0, table{x1: 54, y1: 1226, x2: 54 + corner, y2: 1226, width: 2, color: cyan, alpha: 0.22}))
+shape("corner-bl-v", "line", still(1.0, table{x1: 54, y1: 1226 - corner, x2: 54, y2: 1226, width: 2, color: cyan, alpha: 0.22}))
+shape("corner-br-h", "line", still(1.0, table{x1: 1226 - corner, y1: 1226, x2: 1226, y2: 1226, width: 2, color: cyan, alpha: 0.22}))
+shape("corner-br-v", "line", still(1.0, table{x1: 1226, y1: 1226 - corner, x2: 1226, y2: 1226, width: 2, color: cyan, alpha: 0.22}))
+
+// ---------------------------------------------------------------
+// Emblem
+// ---------------------------------------------------------------
+group("emblem", still(1.0, table{x: 640, y: 540, scale: 1, rotate: 0, alpha: 1, layer: 2}))
+
+// Soft halo, built from flat translucent circles.
+shape("glow-1", "circle", still(1.0, table{x: 0, y: 0, r: 470, color: cyan, alpha: 0.018}), "emblem")
+shape("glow-2", "circle", still(1.0, table{x: 0, y: 0, r: 380, color: cyan, alpha: 0.022}), "emblem")
+shape("glow-3", "circle", still(1.0, table{x: 0, y: 0, r: 300, color: panel, alpha: 0.55}), "emblem")
+
+// Inner disc and concentric structure.
+shape("disc", "circle", still(1.0, table{x: 0, y: 0, r: 312, color: panel, alpha: 1}), "emblem")
+shape("disc-inner", "circle", still(1.0, table{x: 0, y: 0, r: 286, color: "#08131F"}), "emblem")
+shape("inner-ring", "arc", still(1.0, table{x: 0, y: 0, r: 286, start: 0, end: 360, width: 1.2, color: cyan, alpha: 0.16}), "emblem")
+shape("outer-ring", "arc", still(1.0, table{x: 0, y: 0, r: 360, start: 0, end: 360, width: 1.5, color: cyan, alpha: 0.33}), "emblem")
+
+// Segmented ring: four long arcs, four deliberate gaps.
+for i in range(0, 4) {
+  let start = 18 + i * 90
+  shape("ring-seg" + toStr(i), "arc", still(1.0, table{
+    x: 0, y: 0, r: 330, start: start, end: start + 54,
+    width: 5, color: cyan, alpha: 0.58
+  }), "emblem")
+}
+
+// One hot arc at the top.
+shape("ring-hot", "arc", still(1.0, table{x: 0, y: 0, r: 330, start: -108, end: -72, width: 5, color: magenta, alpha: 0.95}), "emblem")
+
+// Fine ticks.
+for i in range(0, 36) {
+  let a = i * 10 * 0.0174532925
+  shape("tick" + toStr(i), "line", still(1.0, table{
+    x1: cos(a) * 348, y1: sin(a) * 348,
+    x2: cos(a) * 360, y2: sin(a) * 360,
+    width: 1, color: cyan, alpha: 0.2
+  }), "emblem")
+}
+
+// Major ticks.
+for i in range(0, 12) {
+  let a = i * 30 * 0.0174532925
+  shape("tick-major" + toStr(i), "line", still(1.0, table{
+    x1: cos(a) * 334, y1: sin(a) * 334,
+    x2: cos(a) * 360, y2: sin(a) * 360,
+    width: 3, color: cyan, alpha: 0.55
+  }), "emblem")
+}
+
+// Cardinal marker dots.
+for i in range(0, 4) {
+  let a = 45 + i * 90
+  shape("marker" + toStr(i), "circle", still(1.0, table{
+    x: cos(a * 0.0174532925) * 330,
+    y: sin(a * 0.0174532925) * 330,
+    r: 3.5, color: magenta, alpha: 0.9
+  }), "emblem")
+}
+
+// ---------------------------------------------------------------
+// Dragon head — spikes first, then the skull, jaw, eye.
+// ---------------------------------------------------------------
+
+// Back horns.
+shape("horn-main", "polygon", still(1.0, table{
+  points: [-18, -158, -88, -180, -232, -246, -108, -126],
+  filled: true, color: steel, layer: 2
+}), "emblem")
+shape("horn-main-edge", "path", still(1.0, table{
+  points: [-18, -158, -88, -180, -232, -246, -108, -126],
+  closed: true, width: 2, color: cyan, alpha: 0.8, layer: 2
+}), "emblem")
+
+shape("horn-small", "polygon", still(1.0, table{
+  points: [-92, -158, -150, -181, -206, -262, -130, -138],
+  filled: true, color: panel2, layer: 2
+}), "emblem")
+shape("horn-small-edge", "path", still(1.0, table{
+  points: [-92, -158, -150, -181, -206, -262, -130, -138],
+  closed: true, width: 1.5, color: cyan, alpha: 0.55, layer: 2
+}), "emblem")
+
+// Cheek and jaw spikes.
+shape("fin-cheek", "polygon", still(1.0, table{
+  points: [-142, -54, -270, -18, -248, 54, -132, 18],
+  filled: true, color: panel2, layer: 2
+}), "emblem")
+shape("fin-cheek-edge", "path", still(1.0, table{
+  points: [-142, -54, -270, -18, -248, 54, -132, 18],
+  closed: true, width: 1.8, color: cyan, alpha: 0.6, layer: 2
+}), "emblem")
+
+shape("fin-jaw", "polygon", still(1.0, table{
+  points: [-72, 38, -190, 128, -44, 92],
+  filled: true, color: steel, layer: 2
+}), "emblem")
+shape("fin-jaw-edge", "path", still(1.0, table{
+  points: [-72, 38, -190, 128, -44, 92],
+  closed: true, width: 1.8, color: magenta, alpha: 0.55, layer: 2
+}), "emblem")
+
+// Brow and chin blades.
+shape("spike-brow", "polygon", still(1.0, table{
+  points: [55, -128, 12, -214, 102, -148],
+  filled: true, color: steel, layer: 2
+}), "emblem")
+shape("spike-brow-edge", "path", still(1.0, table{
+  points: [55, -128, 12, -214, 102, -148],
+  closed: true, width: 1.8, color: cyan, alpha: 0.65, layer: 2
+}), "emblem")
+
+shape("spike-chin", "polygon", still(1.0, table{
+  points: [164, 50, 252, 122, 214, 30],
+  filled: true, color: panel2, layer: 2
+}), "emblem")
+shape("spike-chin-edge", "path", still(1.0, table{
+  points: [164, 50, 252, 122, 214, 30],
+  closed: true, width: 1.8, color: cyan, alpha: 0.5, layer: 2
+}), "emblem")
+
+// Two small crest teeth between the horns.
+shape("crest-1", "polygon", still(1.0, table{
+  points: [-44, -174, -66, -218, -90, -166],
+  filled: true, color: steel, layer: 2
+}), "emblem")
+shape("crest-2", "polygon", still(1.0, table{
+  points: [-102, -160, -128, -204, -150, -146],
+  filled: true, color: steel, layer: 2
+}), "emblem")
+
+// Skull and upper jaw.
+let headPts = [
+  -170, -45, -150, -100, -110, -140, -55, -170,
+  0, -185, 55, -175, 95, -145, 120, -108,
+  150, -72, 192, -42, 238, 12, 244, 28,
+  200, 22, 150, 18, 95, 22, 40, 24,
+  -20, 20, -80, 12, -130, -5, -158, -22
+]
+shape("head", "polygon", still(1.0, table{points: headPts, filled: true, color: steel, layer: 3}), "emblem")
+shape("head-edge", "path", still(1.0, table{points: headPts, closed: true, width: 2.6, color: cyan, alpha: 0.9, layer: 3}), "emblem")
+
+// Forehead facet.
+shape("facet-forehead", "polygon", still(1.0, table{
+  points: [55, -175, 0, -185, -55, -170, -18, -104, 42, -118],
+  filled: true, color: steelLight, alpha: 0.72, layer: 3
+}), "emblem")
+
+// Snout facet.
+shape("facet-snout", "polygon", still(1.0, table{
+  points: [238, 12, 192, -42, 150, -72, 132, -8, 190, 18],
+  filled: true, color: steelLight, alpha: 0.62, layer: 3
+}), "emblem")
+
+// Cheek facet.
+shape("facet-cheek", "polygon", still(1.0, table{
+  points: [-130, -5, -80, 12, -20, 20, -40, -58, -104, -70],
+  filled: true, color: steelLight, alpha: 0.55, layer: 3
+}), "emblem")
+
+// Thin interior wire lines.
+shape("wire-forehead", "path", still(1.0, table{
+  points: [55, -175, 0, -185, -55, -170, -18, -104, 42, -118],
+  closed: true, width: 1, color: cyan, alpha: 0.24, layer: 3
+}), "emblem")
+shape("wire-snout", "path", still(1.0, table{
+  points: [238, 12, 192, -42, 150, -72, 132, -8, 190, 18],
+  closed: true, width: 1, color: cyan, alpha: 0.24, layer: 3
+}), "emblem")
+shape("wire-cheek", "path", still(1.0, table{
+  points: [-130, -5, -80, 12, -20, 20, -40, -58, -104, -70],
+  closed: true, width: 1, color: cyan, alpha: 0.22, layer: 3
+}), "emblem")
+
+// Lower jaw, hinged at the back.
+shape("jaw-hinge", "polygon", still(1.0, table{
+  points: [-158, -22, -145, 10, -110, 20, -130, -5],
+  filled: true, color: steel, layer: 3
+}), "emblem")
+
+let jawPts = [
+  -145, 10, -95, 40, -30, 55, 40, 62,
+  110, 66, 180, 55, 226, 34, 238, 28,
+  190, 36, 130, 40, 70, 42, 0, 40,
+  -60, 34, -110, 20
+]
+shape("jaw", "polygon", still(1.0, table{points: jawPts, filled: true, color: steel, layer: 3}), "emblem")
+shape("jaw-edge", "path", still(1.0, table{points: jawPts, closed: true, width: 2.2, color: cyan, alpha: 0.72, layer: 3}), "emblem")
+
+shape("facet-jaw", "polygon", still(1.0, table{
+  points: [-95, 40, -30, 55, 40, 62, 20, 47, -68, 36],
+  filled: true, color: steelLight, alpha: 0.5, layer: 3
+}), "emblem")
+
+// Mouth cavity.
+shape("mouth", "polygon", still(1.0, table{
+  points: [
+    -108, 18, -40, 28, 30, 32, 100, 34,
+    170, 30, 220, 28, 210, 38, 170, 44,
+    110, 48, 40, 47, -20, 42, -70, 34
+  ],
+  filled: true, color: "#250713", layer: 4
+}), "emblem")
+
+// Teeth.
+let addTooth = fn(name, x, yTop, yTip, w) {
+  shape(name, "polygon", still(1.0, table{
+    points: [x, yTop, x + w, yTop, x + w / 2, yTip],
+    filled: true, color: white, alpha: 0.9, layer: 5
+  }), "emblem")
+}
+addTooth("tooth-u1", 162, 20, 36, 13)
+addTooth("tooth-u2", 108, 21, 37, 12)
+addTooth("tooth-u3", 52, 23, 39, 12)
+addTooth("tooth-u4", -4, 21, 37, 11)
+addTooth("tooth-u5", -58, 16, 31, 10)
+addTooth("tooth-l1", 134, 40, 27, 11)
+addTooth("tooth-l2", 77, 42, 29, 10)
+addTooth("tooth-l3", 18, 41, 28, 10)
+addTooth("tooth-l4", -34, 36, 24, 9)
+
+// Eye socket ring and eye.
+shape("eye-ring-a", "arc", still(1.0, table{x: 112, y: -62, r: 45, start: 24, end: 156, width: 1.2, color: cyan, alpha: 0.35, layer: 4}), "emblem")
+shape("eye-ring-b", "arc", still(1.0, table{x: 112, y: -62, r: 45, start: 204, end: 336, width: 1.2, color: cyan, alpha: 0.18, layer: 4}), "emblem")
+
+shape("eye", "polygon", still(1.0, table{
+  points: [78, -66, 112, -81, 145, -62, 112, -45],
+  filled: true, color: cyan, layer: 5
+}), "emblem")
+shape("pupil", "polygon", still(1.0, table{
+  points: [101, -64, 117, -71, 128, -61, 112, -55],
+  filled: true, color: bg, layer: 5
+}), "emblem")
+shape("eye-core", "circle", still(1.0, table{x: 120, y: -63, r: 2.2, color: magenta, alpha: 0.95, layer: 5}), "emblem")
+
+// Brow slash.
+shape("brow", "path", still(1.0, table{
+  points: [70, -84, 112, -98, 152, -80],
+  width: 3, cap: "square", color: cyan, alpha: 0.8, layer: 5
+}), "emblem")
+
+// Cyber traces inside the head.
+shape("trace-1", "path", still(1.0, table{
+  points: [152, -70, 180, -102, 214, -102],
+  width: 1.2, color: magenta, alpha: 0.5, layer: 6
+}), "emblem")
+shape("trace-node-1", "circle", still(1.0, table{x: 214, y: -102, r: 2.4, color: magenta, alpha: 0.8, layer: 6}), "emblem")
+
+shape("trace-2", "path", still(1.0, table{
+  points: [-122, 6, -92, -24, -92, -58],
+  width: 1.2, color: cyan, alpha: 0.32, layer: 6
+}), "emblem")
+shape("trace-node-2", "circle", still(1.0, table{x: -92, y: -58, r: 2.2, color: cyan, alpha: 0.6, layer: 6}), "emblem")
+
+shape("hinge-node", "circle", still(1.0, table{x: -136, y: 0, r: 5, color: cyan, alpha: 0.2, layer: 6}), "emblem")
+shape("hinge-core", "circle", still(1.0, table{x: -136, y: 0, r: 1.7, color: cyan, alpha: 0.8, layer: 6}), "emblem")
+
+// ---------------------------------------------------------------
+// Wordmark
+// ---------------------------------------------------------------
+text("wordmark", still(1.0, table{
+  x: 640, y: 1028, content: "DRAGON", size: 92,
+  font: display, color: white, layer: 4
+}))
+
+// Magenta period block.
+shape("wordmark-dot", "roundRect", still(1.0, table{
+  x: 866, y: 1028, w: 13, h: 13, radius: 2,
+  color: magenta, rotate: 45, layer: 4
+}))
+
+shape("rule-cyan", "line", still(1.0, table{
+  x1: 430, y1: 1072, x2: 824, y2: 1072,
+  width: 1, color: cyan, alpha: 0.28, layer: 4
+}))
+shape("rule-hot", "line", still(1.0, table{
+  x1: 824, y1: 1072, x2: 850, y2: 1072,
+  width: 1, color: magenta, alpha: 0.85, layer: 4
+}))
+
+text("tagline", still(1.0, table{
+  x: 640, y: 1106, content: "CYBER DEFENSE", size: 21,
+  font: techno, color: cyan, alpha: 0.82, layer: 4
+}))
+text("micro", still(1.0, table{
+  x: 640, y: 1144, content: "SECURE SYSTEMS / 2026", size: 11,
+  font: body, color: cyan, alpha: 0.34, layer: 4
+}))

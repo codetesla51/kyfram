@@ -1,0 +1,422 @@
+// burger-ad.lgv — 9s burger spot: hook, people, hero stack, logo.
+// Everything is vector; fonts are the repo's bundled faces.
+
+let tq = fn(t) { return format("%.3f", t) }
+let still = fn(dur, p) {
+  let k = table{}
+  k["0"] = p
+  k[tq(dur)] = p
+  return k
+}
+
+let cocoa = "#1D0F0A"
+let cream = "#F7E8CC"
+let orange = "#F26B2A"
+let mustard = "#F4B942"
+let burgundy = "#6B1F1F"
+let wood = "#8C4A2F"
+let woodDark = "#63331F"
+let green = "#5E8C45"
+let greenLight = "#6FA052"
+let ink = "#24160F"
+
+let display = "examples/assets/fonts/ArchivoBlack-Regular.ttf"
+let body = "examples/assets/fonts/Geist-Bold.ttf"
+let bodyRegular = "examples/assets/fonts/Geist-Regular.ttf"
+
+// Music bed + neural voiceover, mixed to the 13s picture.
+audio("examples/assets/burger-ad-audio.mp3")
+
+// Shared burger mark. The bite is cut out with a dot in the
+// background color, so the same glyph works on cream or burgundy.
+let addBurger = fn(g, biteColor, dur) {
+  shape(g + "-top", "path", still(dur, table{
+    points: [-62, -12, -58, -34, -42, -49, -20, -57, 0, -59, 20, -57, 42, -49, 58, -34, 62, -12],
+    filled: true, color: orange
+  }), g)
+  shape(g + "-seed1", "ellipse", still(dur, table{x: -31, y: -36, rx: 5, ry: 2.5, color: cream, rotate: 18}), g)
+  shape(g + "-seed2", "ellipse", still(dur, table{x: -8, y: -47, rx: 5, ry: 2.5, color: cream, rotate: -6}), g)
+  shape(g + "-seed3", "ellipse", still(dur, table{x: 17, y: -45, rx: 5, ry: 2.5, color: cream, rotate: 12}), g)
+  shape(g + "-seed4", "ellipse", still(dur, table{x: 39, y: -33, rx: 5, ry: 2.5, color: cream, rotate: -18}), g)
+  shape(g + "-cheese", "path", still(dur, table{
+    points: [-66, -12, 66, -12, 66, -2, 52, -2, 42, 12, 29, -2, 10, -2, 0, 10, -10, -2, -38, -2, -48, 10, -58, -2, -66, -2],
+    filled: true, color: mustard
+  }), g)
+  shape(g + "-lettuce", "ellipse", still(dur, table{x: 0, y: 5, rx: 64, ry: 7, color: green}), g)
+  shape(g + "-lettuce2", "ellipse", still(dur, table{x: 0, y: 7, rx: 58, ry: 5, color: greenLight}), g)
+  shape(g + "-patty", "roundRect", still(dur, table{x: -56, y: 10, w: 112, h: 16, radius: 8, color: "#3A1A10"}), g)
+  shape(g + "-bottom", "ellipse", still(dur, table{x: 0, y: 31, rx: 64, ry: 13, color: orange}), g)
+  shape(g + "-bottom-light", "ellipse", still(dur, table{x: 0, y: 27, rx: 51, ry: 6, color: "#F6C987", alpha: 0.7}), g)
+  shape(g + "-bite", "circle", still(dur, table{x: 54, y: -17, r: 15, color: biteColor}), g)
+}
+
+// ---------------------------------------------------------------
+// SCENE 1 — the hook
+// ---------------------------------------------------------------
+scene(2.311, 30)
+camera(table{
+  "0": table{x: 640, y: 360, zoom: 1.0, ease: "sine"},
+  "2.311": table{x: 650, y: 352, zoom: 1.045}
+})
+
+shape("bg", "rect", still(1.6, table{x: 0, y: 0, w: 1280, h: 720, color: cocoa}))
+shape("stripe", "rect", table{
+  "0": table{x: -100, y: 92, w: 1500, h: 96, color: orange, alpha: 0.13, rotate: -6, ease: "sine"},
+  "2.311": table{x: -150, y: 88, w: 1500, h: 96, color: orange, alpha: 0.13, rotate: -8.5}
+})
+shape("sun", "circle", table{
+  "0": table{x: 1130, y: 610, r: 360, color: "#32160E", ease: "sine"},
+  "2.311": table{x: 1094, y: 584, r: 376, color: "#32160E"}
+})
+
+text("hungry", table{
+  "0": table{x: 588, y: 366, content: "HUNGRY", size: 150, font: display, color: cream, scale: 1.10, alpha: 0, ease: "cubicOut"},
+  "0.26": table{x: 588, y: 356, content: "HUNGRY", size: 150, font: display, color: cream, scale: 1.0, alpha: 1},
+  "2.311": table{x: 588, y: 356, content: "HUNGRY", size: 150, font: display, color: cream, scale: 1.0, alpha: 1}
+})
+
+text("question", table{
+  "0": table{x: 998, y: 372, content: "?", size: 150, font: display, color: mustard, scale: 0.5, alpha: 0, ease: "cubicOut"},
+  "0.376": table{x: 998, y: 356, content: "?", size: 150, font: display, color: mustard, scale: 1.0, alpha: 1},
+  "2.311": table{x: 998, y: 356, content: "?", size: 150, font: display, color: mustard, scale: 1.0, alpha: 1}
+})
+
+shape("underline", "rect", table{
+  "0": table{x: 400, y: 486, w: 0, h: 7, color: orange, alpha: 1},
+  "0.722": table{x: 400, y: 486, w: 500, h: 7, color: orange, alpha: 1, ease: "cubicOut"},
+  "2.311": table{x: 400, y: 486, w: 500, h: 7, color: orange, alpha: 1}
+})
+
+text("hook-sub", table{
+  "0": table{x: 650, y: 558, content: "SMASH BURGERS / NO NONSENSE", size: 19, font: body, color: cream, alpha: 0, ease: "cubicOut"},
+  "1.083": table{x: 650, y: 548, content: "SMASH BURGERS / NO NONSENSE", size: 19, font: body, color: cream, alpha: 0.68},
+  "2.311": table{x: 650, y: 548, content: "SMASH BURGERS / NO NONSENSE", size: 19, font: body, color: cream, alpha: 0.68}
+})
+
+group("stamp", table{
+  "0": table{x: 1102, y: 178, scale: 0.33, rotate: 14, alpha: 0, ease: "cubicOut"},
+  "0.462": table{x: 1102, y: 170, scale: 0.56, rotate: 0, alpha: 1, ease: "sine"},
+  "1.733": table{x: 1100, y: 164, scale: 0.577, rotate: -4, alpha: 1, ease: "sine"},
+  "2.311": table{x: 1096, y: 158, scale: 0.585, rotate: -8, alpha: 1}
+})
+shape("stamp-out", "circle", still(1.6, table{x: 0, y: 0, r: 120, color: orange}), "stamp")
+shape("stamp-in", "circle", still(1.6, table{x: 0, y: 0, r: 108, color: burgundy}), "stamp")
+addBurger("stamp", burgundy, 1.6)
+
+// ---------------------------------------------------------------
+// SCENE 2 — people
+// ---------------------------------------------------------------
+scene(3.756, 30, "fade", 0.433)
+
+shape("bg", "rect", still(2.6, table{x: 0, y: 0, w: 1280, h: 720, color: cream}))
+shape("bg-sun", "circle", still(2.6, table{x: 1180, y: 86, r: 225, color: orange, alpha: 0.10}))
+shape("bg-dot", "circle", still(2.6, table{x: 96, y: 660, r: 190, color: mustard, alpha: 0.12}))
+
+text("brand-small", table{
+  "0": table{x: 640, y: 26, content: "BUN & BITE", size: 13, font: body, color: burgundy, alpha: 0},
+  "0.361": table{x: 640, y: 26, content: "BUN & BITE", size: 13, font: body, color: burgundy, alpha: 0.6},
+  "3.756": table{x: 640, y: 26, content: "BUN & BITE", size: 13, font: body, color: burgundy, alpha: 0.6}
+})
+
+text("head1", table{
+  "0": table{x: 640, y: 70, content: "REAL PEOPLE.", size: 52, font: display, color: cocoa, alpha: 0, ease: "cubicOut"},
+  "0.347": table{x: 640, y: 83, content: "REAL PEOPLE.", size: 52, font: display, color: cocoa, alpha: 1},
+  "3.756": table{x: 640, y: 83, content: "REAL PEOPLE.", size: 52, font: display, color: cocoa, alpha: 1}
+})
+
+text("head2", table{
+  "0": table{x: 640, y: 125, content: "REAL CRAVINGS.", size: 52, font: display, color: orange, alpha: 0, ease: "cubicOut"},
+  "0.491": table{x: 640, y: 139, content: "REAL CRAVINGS.", size: 52, font: display, color: orange, alpha: 1},
+  "3.756": table{x: 640, y: 139, content: "REAL CRAVINGS.", size: 52, font: display, color: orange, alpha: 1}
+})
+
+text("head-sub", table{
+  "0": table{x: 640, y: 194, content: "AT BUN & BITE", size: 15, font: body, color: burgundy, alpha: 0, ease: "cubicOut"},
+  "0.794": table{x: 640, y: 190, content: "AT BUN & BITE", size: 15, font: body, color: burgundy, alpha: 0.72},
+  "3.756": table{x: 640, y: 190, content: "AT BUN & BITE", size: 15, font: body, color: burgundy, alpha: 0.72}
+})
+
+// One reusable person. Local coordinates keep the group easy to bob.
+let addPerson = fn(name, px, shirt, skin, hair, lean, phase, lift) {
+  let bob = table{}
+  for i in range(0, 27) {
+    let t = i * 0.1444
+    let a = 6.28318 * t / 1.4444 + phase
+    bob[tq(t)] = table{x: px, y: 434 + 2.2 * sin(a), rotate: lean * sin(a), layer: 1}
+  }
+  group(name, bob)
+
+  let handX = 62
+  let handY = 28 - 100 * lift
+
+  shape(name + "-torso", "roundRect", still(2.6, table{x: -58, y: -20, w: 116, h: 200, radius: 48, color: shirt}), name)
+  shape(name + "-neck", "roundRect", still(2.6, table{x: -18, y: -58, w: 36, h: 52, radius: 16, color: skin}), name)
+  shape(name + "-arm-l", "path", still(2.6, table{points: [-40, -10, -76, 24, -64, 52], width: 15, cap: "round", join: "round", color: shirt}), name)
+  shape(name + "-arm-r", "path", still(2.6, table{points: [40, -10, 76, 10 - 30 * lift, handX, handY], width: 15, cap: "round", join: "round", color: shirt}), name)
+  shape(name + "-hand-l", "circle", still(2.6, table{x: -64, y: 52, r: 10, color: skin}), name)
+  shape(name + "-hand-r", "circle", still(2.6, table{x: handX, y: handY, r: 10, color: skin}), name)
+  shape(name + "-hair", "ellipse", still(2.6, table{x: 0, y: -117, rx: 51, ry: 49, color: hair}), name)
+  shape(name + "-head", "circle", still(2.6, table{x: 0, y: -105, r: 44, color: skin}), name)
+  shape(name + "-eye-l", "circle", still(2.6, table{x: -15, y: -110, r: 3.6, color: ink}), name)
+  shape(name + "-eye-r", "circle", still(2.6, table{x: 15, y: -110, r: 3.6, color: ink}), name)
+  shape(name + "-brow-l", "line", still(2.6, table{x1: -24, y1: -122, x2: -7, y2: -124, width: 3, color: hair}), name)
+  shape(name + "-brow-r", "line", still(2.6, table{x1: 7, y1: -124, x2: 24, y2: -122, width: 3, color: hair}), name)
+  shape(name + "-smile", "path", still(2.6, table{points: [-13, -88, 0, -80, 13, -88], width: 3, cap: "round", join: "round", color: "#7A3C23"}), name)
+}
+
+addPerson("p1", 350, mustard, "#C97B4A", "#2A1710", -1.4, 0.0, 0)
+addPerson("p2", 640, orange, "#8C4F2C", "#1B100B", 0.8, 2.1, 1)
+addPerson("p3", 930, green, "#E0A075", "#6B3B1F", 1.3, 4.2, 0)
+
+// Extra character details, drawn after the base body.
+shape("p1-glasses-l", "arc", still(2.6, table{x: -15, y: -110, r: 12, start: 0, end: 360, width: 2, color: "#2A1710"}), "p1")
+shape("p1-glasses-r", "arc", still(2.6, table{x: 15, y: -110, r: 12, start: 0, end: 360, width: 2, color: "#2A1710"}), "p1")
+shape("p1-glasses-bridge", "line", still(2.6, table{x1: -3, y1: -110, x2: 3, y2: -110, width: 2, color: "#2A1710"}), "p1")
+shape("p3-bun", "circle", still(2.6, table{x: 0, y: -162, r: 22, color: "#6B3B1F"}), "p3")
+
+// Table hides the lower bodies and makes the group read as one scene.
+shape("table-top", "rect", still(2.6, table{x: 0, y: 550, w: 1280, h: 64, color: wood, layer: 2}))
+shape("table-edge", "rect", still(2.6, table{x: 0, y: 550, w: 1280, h: 5, color: "#B56B44", layer: 2}))
+shape("table-front", "rect", still(2.6, table{x: 0, y: 614, w: 1280, h: 106, color: woodDark, layer: 2}))
+
+// A soda and a carton of fries on the table.
+group("cup", still(2.6, table{x: 432, y: 514, scale: 1, alpha: 1, layer: 3}))
+shape("cup-straw", "line", still(2.6, table{x1: 8, y1: -48, x2: 21, y2: -82, width: 5, color: burgundy}), "cup")
+shape("cup-body", "roundRect", still(2.6, table{x: -25, y: -38, w: 50, h: 76, radius: 7, color: orange}), "cup")
+shape("cup-band", "rect", still(2.6, table{x: -25, y: -10, w: 50, h: 14, color: cream, alpha: 0.85}), "cup")
+shape("cup-lid", "roundRect", still(2.6, table{x: -29, y: -46, w: 58, h: 11, radius: 4, color: burgundy}), "cup")
+
+group("fries", still(2.6, table{x: 855, y: 512, scale: 1, alpha: 1, layer: 3}))
+shape("fry1", "line", still(2.6, table{x1: -22, y1: -22, x2: -31, y2: -73, width: 7, color: mustard}), "fries")
+shape("fry2", "line", still(2.6, table{x1: -9, y1: -22, x2: -13, y2: -82, width: 7, color: mustard}), "fries")
+shape("fry3", "line", still(2.6, table{x1: 4, y1: -22, x2: 4, y2: -76, width: 7, color: mustard}), "fries")
+shape("fry4", "line", still(2.6, table{x1: 17, y1: -22, x2: 24, y2: -80, width: 7, color: mustard}), "fries")
+shape("fry5", "line", still(2.6, table{x1: 29, y1: -22, x2: 39, y2: -68, width: 7, color: mustard}), "fries")
+shape("fry-box", "roundRect", still(2.6, table{x: -38, y: -28, w: 76, h: 76, radius: 7, color: "#C8402E"}), "fries")
+shape("fry-mark", "circle", still(2.6, table{x: 0, y: 8, r: 9, color: mustard}), "fries")
+
+// The middle friend lifts a burger for a bite.
+group("bite-burger", table{
+  "0": table{x: 702, y: 396, scale: 0.92, rotate: -8, alpha: 1, layer: 4},
+  "1.184": table{x: 702, y: 396, scale: 0.92, rotate: -8, alpha: 1, layer: 4},
+  "1.618": table{x: 702, y: 338, scale: 1.0, rotate: 4, alpha: 1, layer: 4, ease: "cubicOut"},
+  "3.756": table{x: 702, y: 338, scale: 1.0, rotate: 4, alpha: 1, layer: 4}
+})
+shape("bb-top", "ellipse", still(2.6, table{x: 0, y: -13, rx: 32, ry: 13, color: "#E9A85A"}), "bite-burger")
+shape("bb-seed1", "ellipse", still(2.6, table{x: -10, y: -18, rx: 2.8, ry: 1.5, color: cream}), "bite-burger")
+shape("bb-seed2", "ellipse", still(2.6, table{x: 7, y: -19, rx: 2.8, ry: 1.5, color: cream}), "bite-burger")
+shape("bb-cheese", "roundRect", still(2.6, table{x: -28, y: -3, w: 56, h: 6, radius: 2, color: mustard}), "bite-burger")
+shape("bb-lettuce", "ellipse", still(2.6, table{x: 0, y: 2, rx: 30, ry: 5, color: greenLight}), "bite-burger")
+shape("bb-patty", "ellipse", still(2.6, table{x: 0, y: 8, rx: 27, ry: 6, color: "#4B2414"}), "bite-burger")
+shape("bb-bottom", "ellipse", still(2.6, table{x: 0, y: 16, rx: 30, ry: 8, color: "#E9A85A"}), "bite-burger")
+
+group("mmm", table{
+  "0": table{x: 760, y: 258, scale: 0.4, alpha: 0, layer: 5},
+  "1.704": table{x: 760, y: 258, scale: 0.4, alpha: 0, layer: 5},
+  "1.936": table{x: 760, y: 250, scale: 1.06, alpha: 1, layer: 5, ease: "cubicOut"},
+  "2.239": table{x: 760, y: 250, scale: 1.0, alpha: 1, layer: 5},
+  "3.756": table{x: 760, y: 250, scale: 1.0, alpha: 1, layer: 5}
+})
+shape("mmm-tail", "path", still(2.6, table{points: [-12, 18, 0, 38, 13, 18], filled: true, color: burgundy}), "mmm")
+shape("mmm-box", "roundRect", still(2.6, table{x: -48, y: -27, w: 96, h: 48, radius: 20, color: burgundy}), "mmm")
+text("mmm-text", still(2.6, table{x: 0, y: 0, content: "MMM.", size: 21, font: body, color: cream}), "mmm")
+
+// ---------------------------------------------------------------
+// SCENE 3 — the hero burger
+// ---------------------------------------------------------------
+scene(3.756, 30, "push-left", 0.506)
+camera(table{
+  "0": table{x: 640, y: 360, zoom: 1.0},
+  "3.756": table{x: 640, y: 360, zoom: 1.035}
+})
+
+shape("bg", "rect", still(2.6, table{x: 0, y: 0, w: 1280, h: 720, gradFrom: "#3A1B10", gradTo: "#120805", gradAngle: 90}))
+shape("spot", "circle", still(2.6, table{x: 640, y: 420, r: 330, color: "#552617", alpha: 0.48}))
+
+for i in range(0, 7) {
+  shape("grill" + toStr(i), "line", still(2.6, table{x1: 0, y1: 80 + i * 88, x2: 1280, y2: 38 + i * 88, width: 1, color: "#8C4A2F", alpha: 0.16}))
+}
+
+shape("burger-shadow", "ellipse", table{
+  "0": table{x: 640, y: 525, rx: 120, ry: 18, color: "#000000", alpha: 0},
+  "0.722": table{x: 640, y: 525, rx: 190, ry: 26, color: "#000000", alpha: 0.30, ease: "cubicOut"},
+  "3.756": table{x: 640, y: 525, rx: 190, ry: 26, color: "#000000", alpha: 0.30}
+})
+
+group("bun-bottom", table{
+  "0": table{x: 640, y: 620, scale: 1, layer: 1, ease: "cubicOut"},
+  "0.693": table{x: 640, y: 480, scale: 1, layer: 1},
+  "3.756": table{x: 640, y: 480, scale: 1, layer: 1}
+})
+shape("bun-bottom-main", "ellipse", still(2.6, table{x: 0, y: 0, rx: 158, ry: 34, color: "#E9A85A"}), "bun-bottom")
+shape("bun-bottom-light", "ellipse", still(2.6, table{x: 0, y: -8, rx: 130, ry: 18, color: "#F6C987", alpha: 0.9}), "bun-bottom")
+
+group("patty", table{
+  "0": table{x: 640, y: 580, scale: 1, layer: 2, ease: "cubicOut"},
+  "0.751": table{x: 640, y: 450, scale: 1, layer: 2},
+  "3.756": table{x: 640, y: 450, scale: 1, layer: 2}
+})
+shape("patty-main", "ellipse", still(2.6, table{x: 0, y: 0, rx: 150, ry: 24, color: "#4B2414"}), "patty")
+shape("patty-light", "ellipse", still(2.6, table{x: 0, y: -5, rx: 132, ry: 11, color: "#6A3520"}), "patty")
+
+group("cheese", table{
+  "0": table{x: 640, y: 530, scale: 1, layer: 3, ease: "cubicOut"},
+  "0.794": table{x: 640, y: 426, scale: 1, layer: 3},
+  "3.756": table{x: 640, y: 426, scale: 1, layer: 3}
+})
+shape("cheese-slice", "path", still(2.6, table{
+  points: [-152, -12, 152, -12, 152, 0, 132, 0, 120, 22, 106, 0, 72, 0, 61, 19, 47, 0, 4, 0, -7, 24, -21, 0, -78, 0, -90, 21, -105, 0, -152, 0],
+  filled: true, color: mustard
+}), "cheese")
+
+group("lettuce", table{
+  "0": table{x: 640, y: 480, scale: 1, layer: 4, ease: "cubicOut"},
+  "0.838": table{x: 640, y: 408, scale: 1, layer: 4},
+  "3.756": table{x: 640, y: 408, scale: 1, layer: 4}
+})
+shape("lettuce-main", "ellipse", still(2.6, table{x: 0, y: 0, rx: 162, ry: 14, color: green}), "lettuce")
+shape("lettuce-1", "circle", still(2.6, table{x: -135, y: 6, r: 12, color: greenLight}), "lettuce")
+shape("lettuce-2", "circle", still(2.6, table{x: -90, y: 10, r: 13, color: greenLight}), "lettuce")
+shape("lettuce-3", "circle", still(2.6, table{x: -45, y: 11, r: 12, color: greenLight}), "lettuce")
+shape("lettuce-4", "circle", still(2.6, table{x: 0, y: 12, r: 13, color: greenLight}), "lettuce")
+shape("lettuce-5", "circle", still(2.6, table{x: 45, y: 11, r: 12, color: greenLight}), "lettuce")
+shape("lettuce-6", "circle", still(2.6, table{x: 90, y: 10, r: 13, color: greenLight}), "lettuce")
+shape("lettuce-7", "circle", still(2.6, table{x: 135, y: 6, r: 12, color: greenLight}), "lettuce")
+
+group("tomato", table{
+  "0": table{x: 640, y: 440, scale: 1, layer: 5, ease: "cubicOut"},
+  "0.881": table{x: 640, y: 395, scale: 1, layer: 5},
+  "3.756": table{x: 640, y: 395, scale: 1, layer: 5}
+})
+shape("tomato-1", "circle", still(2.6, table{x: -92, y: 0, r: 22, color: "#B93628"}), "tomato")
+shape("tomato-1-in", "circle", still(2.6, table{x: -92, y: 0, r: 15, color: "#E05A44"}), "tomato")
+shape("tomato-2", "circle", still(2.6, table{x: 92, y: 0, r: 22, color: "#B93628"}), "tomato")
+shape("tomato-2-in", "circle", still(2.6, table{x: 92, y: 0, r: 15, color: "#E05A44"}), "tomato")
+
+group("bun-top", table{
+  "0": table{x: 640, y: 238, scale: 1, layer: 6, ease: "cubicOut"},
+  "0.953": table{x: 640, y: 350, scale: 1, layer: 6},
+  "3.756": table{x: 640, y: 350, scale: 1, layer: 6}
+})
+shape("bun-top-main", "ellipse", still(2.6, table{x: 0, y: 0, rx: 158, ry: 58, color: "#E9A85A"}), "bun-top")
+shape("bun-top-light", "ellipse", still(2.6, table{x: 0, y: -18, rx: 128, ry: 27, color: "#F6C987", alpha: 0.62}), "bun-top")
+shape("seed1", "ellipse", still(2.6, table{x: -70, y: -28, rx: 7, ry: 3.5, color: cream, rotate: 18}), "bun-top")
+shape("seed2", "ellipse", still(2.6, table{x: -30, y: -42, rx: 7, ry: 3.5, color: cream, rotate: -8}), "bun-top")
+shape("seed3", "ellipse", still(2.6, table{x: 14, y: -45, rx: 7, ry: 3.5, color: cream, rotate: 12}), "bun-top")
+shape("seed4", "ellipse", still(2.6, table{x: 55, y: -36, rx: 7, ry: 3.5, color: cream, rotate: -15}), "bun-top")
+shape("seed5", "ellipse", still(2.6, table{x: 92, y: -18, rx: 7, ry: 3.5, color: cream, rotate: 22}), "bun-top")
+shape("seed6", "ellipse", still(2.6, table{x: -100, y: -8, rx: 7, ry: 3.5, color: cream, rotate: -20}), "bun-top")
+
+// Steam above the stack.
+shape("steam1", "path", table{
+  "0": table{points: [588, 250, 578, 232, 590, 214, 580, 196], width: 3, cap: "round", join: "round", color: cream, alpha: 0},
+  "1.3": table{points: [592, 242, 582, 222, 596, 202, 586, 184], width: 3, cap: "round", join: "round", color: cream, alpha: 0.30},
+  "2.6": table{points: [596, 230, 586, 208, 600, 188, 590, 170], width: 3, cap: "round", join: "round", color: cream, alpha: 0.16},
+  "3.756": table{points: [600, 218, 590, 196, 604, 176, 594, 158], width: 3, cap: "round", join: "round", color: cream, alpha: 0}
+})
+shape("steam2", "path", table{
+  "0": table{points: [650, 248, 640, 228, 652, 210, 642, 190], width: 3, cap: "round", join: "round", color: cream, alpha: 0},
+  "1.589": table{points: [650, 238, 640, 216, 654, 196, 644, 176], width: 3, cap: "round", join: "round", color: cream, alpha: 0.28},
+  "2.889": table{points: [650, 226, 640, 204, 654, 184, 644, 164], width: 3, cap: "round", join: "round", color: cream, alpha: 0.14},
+  "3.756": table{points: [650, 214, 640, 192, 654, 172, 644, 152], width: 3, cap: "round", join: "round", color: cream, alpha: 0}
+})
+shape("steam3", "path", table{
+  "0": table{points: [710, 252, 700, 234, 712, 216, 702, 198], width: 3, cap: "round", join: "round", color: cream, alpha: 0},
+  "1.878": table{points: [710, 240, 700, 220, 714, 200, 704, 180], width: 3, cap: "round", join: "round", color: cream, alpha: 0.26},
+  "3.178": table{points: [710, 228, 700, 208, 714, 188, 704, 168], width: 3, cap: "round", join: "round", color: cream, alpha: 0.12},
+  "3.756": table{points: [710, 216, 700, 196, 714, 176, 704, 156], width: 3, cap: "round", join: "round", color: cream, alpha: 0}
+})
+
+text("hero-title", table{
+  "0": table{x: 640, y: 60, content: "THE SMASH STACK", size: 50, font: display, color: cream, alpha: 0, scale: 0.95, ease: "cubicOut"},
+  "0.361": table{x: 640, y: 76, content: "THE SMASH STACK", size: 50, font: display, color: cream, alpha: 1, scale: 1.0},
+  "3.756": table{x: 640, y: 76, content: "THE SMASH STACK", size: 50, font: display, color: cream, alpha: 1, scale: 1.0}
+})
+
+text("hero-sub", table{
+  "0": table{x: 640, y: 124, content: "DOUBLE PATTY / CHEDDAR / HOUSE SAUCE", size: 17, font: body, color: mustard, alpha: 0},
+  "0.65": table{x: 640, y: 124, content: "DOUBLE PATTY / CHEDDAR / HOUSE SAUCE", size: 17, font: body, color: mustard, alpha: 0.88},
+  "3.756": table{x: 640, y: 124, content: "DOUBLE PATTY / CHEDDAR / HOUSE SAUCE", size: 17, font: body, color: mustard, alpha: 0.88}
+})
+
+group("price", table{
+  "0": table{x: 1085, y: 584, scale: 0.4, alpha: 0, layer: 10},
+  "1.04": table{x: 1085, y: 584, scale: 0.4, alpha: 0, layer: 10},
+  "1.329": table{x: 1085, y: 584, scale: 1.08, alpha: 1, layer: 10, ease: "cubicOut"},
+  "1.56": table{x: 1085, y: 584, scale: 1.0, alpha: 1, layer: 10},
+  "3.756": table{x: 1085, y: 584, scale: 1.0, alpha: 1, layer: 10}
+})
+shape("price-disc", "circle", still(2.6, table{x: 0, y: 0, r: 62, color: mustard}), "price")
+text("price-only", still(2.6, table{x: 0, y: -28, content: "ONLY", size: 12, font: body, color: cocoa}), "price")
+text("price-value", still(2.6, table{x: 0, y: 7, content: "$9.90", size: 24, font: display, color: cocoa}), "price")
+
+text("hero-foot", table{
+  "0": table{x: 640, y: 662, content: "MADE FRESH WHEN YOU ORDER", size: 15, font: body, color: cream, alpha: 0},
+  "1.517": table{x: 640, y: 662, content: "MADE FRESH WHEN YOU ORDER", size: 15, font: body, color: cream, alpha: 0.58},
+  "3.756": table{x: 640, y: 662, content: "MADE FRESH WHEN YOU ORDER", size: 15, font: body, color: cream, alpha: 0.58}
+})
+
+// ---------------------------------------------------------------
+// SCENE 4 — end card
+// ---------------------------------------------------------------
+scene(3.178, 30, "fade", 0.433)
+camera(table{
+  "0": table{x: 640, y: 360, zoom: 1.0},
+  "3.178": table{x: 640, y: 360, zoom: 1.025}
+})
+
+shape("bg", "rect", still(2.2, table{x: 0, y: 0, w: 1280, h: 720, color: cream}))
+shape("sun", "circle", still(2.2, table{x: 1125, y: 100, r: 225, color: orange, alpha: 0.95}))
+shape("sun-cut", "circle", still(2.2, table{x: 1180, y: 40, r: 150, color: cream}))
+shape("dot", "circle", still(2.2, table{x: 92, y: 668, r: 160, color: mustard, alpha: 0.22}))
+
+group("badge", table{
+  "0": table{x: 640, y: 208, scale: 0.55, rotate: -8, alpha: 0, ease: "cubicOut"},
+  "0.433": table{x: 640, y: 208, scale: 1.04, rotate: 2, alpha: 1},
+  "0.607": table{x: 640, y: 208, scale: 1.0, rotate: 0, alpha: 1},
+  "3.178": table{x: 640, y: 208, scale: 1.0, rotate: 0, alpha: 1}
+})
+shape("badge-out", "circle", still(2.2, table{x: 0, y: 0, r: 120, color: orange}), "badge")
+shape("badge-in", "circle", still(2.2, table{x: 0, y: 0, r: 108, color: burgundy}), "badge")
+addBurger("badge", burgundy, 2.2)
+
+group("wordmark-icon", table{
+  "0": table{x: 640, y: 426, scale: 0.40, rotate: 0, alpha: 0, layer: 2},
+  "0.404": table{x: 640, y: 426, scale: 0.50, rotate: 0, alpha: 1, layer: 2, ease: "cubicOut"},
+  "3.178": table{x: 640, y: 426, scale: 0.50, rotate: 0, alpha: 1, layer: 2}
+})
+addBurger("wordmark-icon", cream, 2.2)
+
+text("wordmark-bun", table{
+  "0": table{x: 476, y: 426, content: "BUN", size: 82, font: display, color: cocoa, alpha: 0, scale: 0.9, layer: 2, ease: "cubicOut"},
+  "0.404": table{x: 476, y: 426, content: "BUN", size: 82, font: display, color: cocoa, alpha: 1, scale: 1.0, layer: 2},
+  "3.178": table{x: 476, y: 426, content: "BUN", size: 82, font: display, color: cocoa, alpha: 1, scale: 1.0, layer: 2}
+})
+
+text("wordmark-bite", table{
+  "0": table{x: 806, y: 426, content: "BITE", size: 82, font: display, color: cocoa, alpha: 0, scale: 0.9, layer: 2, ease: "cubicOut"},
+  "0.404": table{x: 806, y: 426, content: "BITE", size: 82, font: display, color: cocoa, alpha: 1, scale: 1.0, layer: 2},
+  "3.178": table{x: 806, y: 426, content: "BITE", size: 82, font: display, color: cocoa, alpha: 1, scale: 1.0, layer: 2}
+})
+
+text("tagline", table{
+  "0": table{x: 640, y: 492, content: "SMASHED FRESH. STACKED TALL.", size: 20, font: body, color: burgundy, alpha: 0},
+  "0.693": table{x: 640, y: 492, content: "SMASHED FRESH. STACKED TALL.", size: 20, font: body, color: burgundy, alpha: 1},
+  "3.178": table{x: 640, y: 492, content: "SMASHED FRESH. STACKED TALL.", size: 20, font: body, color: burgundy, alpha: 1}
+})
+
+group("cta", table{
+  "0": table{x: 640, y: 574, scale: 0.6, alpha: 0, layer: 3},
+  "0.896": table{x: 640, y: 574, scale: 0.6, alpha: 0, layer: 3},
+  "1.184": table{x: 640, y: 574, scale: 1.06, alpha: 1, layer: 3, ease: "cubicOut"},
+  "1.387": table{x: 640, y: 574, scale: 1.0, alpha: 1, layer: 3},
+  "3.178": table{x: 640, y: 574, scale: 1.0, alpha: 1, layer: 3}
+})
+shape("cta-pill", "roundRect", still(2.2, table{x: -150, y: -34, w: 300, h: 68, radius: 34, color: orange}), "cta")
+text("cta-text", still(2.2, table{x: 0, y: 2, content: "ORDER NOW", size: 24, font: body, color: cocoa}), "cta")
+
+text("footer", table{
+  "0": table{x: 640, y: 675, content: "BUNANDBITE.CO  /  OPEN LATE", size: 14, font: bodyRegular, color: cocoa, alpha: 0},
+  "1.444": table{x: 640, y: 675, content: "BUNANDBITE.CO  /  OPEN LATE", size: 14, font: bodyRegular, color: cocoa, alpha: 0.58},
+  "3.178": table{x: 640, y: 675, content: "BUNANDBITE.CO  /  OPEN LATE", size: 14, font: bodyRegular, color: cocoa, alpha: 0.58}
+})

@@ -1,0 +1,54 @@
+// fin — a smooth fish mark built from d paths.
+let still = fn(dur, p) {
+  let k = table{}
+  k["0"] = p
+  k[format("%.3f", dur)] = p
+  return k
+}
+
+scene(1, 30)
+
+let paper = "#F3EEE4"
+let ink = "#0D1B2A"
+let coral = "#FF5A3C"
+let body = "examples/assets/fonts/Geist-Regular.ttf"
+
+shape("bg", "rect", still(1.0, table{
+  x: 0, y: 0, w: 1024, h: 1024, color: paper
+}))
+
+// Tail and dorsal fin sit behind the body.
+shape("tail", "path", still(1.0, table{
+  d: "M 285 445 C 230 405 170 350 80 295 C 115 385 145 455 165 500 C 145 545 115 615 80 705 C 170 650 230 595 285 555 Z",
+  filled: true, color: coral
+}))
+
+shape("dorsal", "path", still(1.0, table{
+  d: "M 420 355 C 445 285 515 230 610 210 C 575 270 555 320 555 350 Z",
+  filled: true, color: coral
+}))
+
+// Body.
+shape("body", "path", still(1.0, table{
+  d: "M 810 500 C 780 420 700 365 590 345 C 480 325 370 355 300 425 C 270 455 255 480 255 500 C 255 520 270 545 300 575 C 370 645 480 675 590 655 C 700 635 780 580 810 500 Z",
+  filled: true, color: ink
+}))
+
+// Gill line.
+shape("gill", "path", still(1.0, table{
+  d: "M 640 420 C 615 445 615 510 640 540",
+  width: 9, cap: "round", color: paper, alpha: 0.65
+}))
+
+// Eye: paper cutout with an ink pupil.
+shape("eye", "circle", still(1.0, table{
+  x: 690, y: 465, r: 22, color: paper
+}))
+shape("pupil", "circle", still(1.0, table{
+  x: 698, y: 468, r: 8, color: ink
+}))
+
+text("caption", still(1.0, table{
+  content: "fin / d path study", x: 512, y: 970,
+  size: 14, color: "#8A8378", font: body
+}))

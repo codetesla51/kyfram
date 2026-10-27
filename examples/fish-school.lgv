@@ -1,0 +1,149 @@
+// fish-school.lgv — a school riding a sine current.
+// 28 fish, four depth bands, each on its own phase. Motion is generated:
+// x advances through a 1600px loop, y follows a sine path, rotation follows
+// the local slope. Everything repeats at 12s.
+
+let tq = fn(t) { return format("%.3f", t) }
+let still = fn(dur, p) {
+  let k = table{}
+  k["0"] = p
+  k[tq(dur)] = p
+  return k
+}
+
+let DUR = 12.0
+let CYCLE = 1600.0
+let speed = CYCLE / DUR
+
+let body = "examples/assets/fonts/Geist-Regular.ttf"
+
+scene(DUR, 30)
+
+// Deep-water gradient, then soft god rays.
+shape("bg", "rect", still(DUR, table{
+  x: 0, y: 0, w: 1280, h: 720,
+  gradFrom: "#06161C", gradTo: "#0B3038", gradAngle: 90, layer: 0
+}))
+
+let ray = fn(name, x1, x2, x3, x4, a) {
+  shape(name, "polygon", still(DUR, table{
+    points: [x1, 0, x2, 0, x3, 720, x4, 720],
+    filled: true, color: "#6FC7BE", alpha: a, blend: "screen", layer: 0.3
+  }))
+}
+ray("ray-a", 90, 240, 640, 380, 0.045)
+ray("ray-b", 470, 560, 940, 760, 0.030)
+ray("ray-c", 1050, 1140, 1280, 1080, 0.025)
+
+// Faint sine lines make the current visible behind the fish.
+let current = fn(name, y, amp, freq, phase, alpha) {
+  shape(name, "wave", table{
+    "0": table{x: 0, y: y, width: 1280, amplitude: amp, frequency: freq,
+      phase: phase, thickness: 1.4, color: "#8AD8CF", alpha: alpha, layer: 1},
+    "12": table{x: 0, y: y, width: 1280, amplitude: amp, frequency: freq,
+      phase: phase + 360, thickness: 1.4, color: "#8AD8CF", alpha: alpha, layer: 1}
+  })
+}
+current("current-a", 240, 16, 1.8, 0, 0.10)
+current("current-b", 420, 24, 1.4, 120, 0.07)
+current("current-c", 605, 18, 2.2, 240, 0.06)
+
+// Reusable fish. Local coords are centered on the body so group rotation
+// pivots at the fish's middle. Tail/dorsal sit behind the body.
+let addFish = fn(g, bodyC, finC, eyeC, hiC) {
+  shape(g + "-tail", "path", still(DUR, table{
+    d: "M -230 -55 C -285 -90 -345 -155 -430 -205 C -395 -110 -370 -50 -345 0 C -370 50 -395 110 -430 205 C -345 155 -285 90 -230 55 Z",
+    filled: true, color: finC
+  }), g)
+
+  shape(g + "-dorsal", "path", still(DUR, table{
+    d: "M 30 -145 C 10 -220 -30 -255 -95 -265 C -55 -205 -45 -165 -50 -140 Z",
+    filled: true, color: finC
+  }), g)
+
+  shape(g + "-body", "path", still(DUR, table{
+    d: "M 250 0 C 225 -85 155 -135 45 -150 C -75 -165 -190 -125 -245 -45 C -260 -25 -260 25 -245 45 C -190 125 -75 165 45 150 C 155 135 225 85 250 0 Z",
+    filled: true, color: bodyC
+  }), g)
+
+  shape(g + "-gill", "path", still(DUR, table{
+    d: "M 95 -80 C 70 -35 70 35 95 80",
+    width: 7, cap: "round", color: eyeC, alpha: 0.45
+  }), g)
+
+  shape(g + "-mouth", "path", still(DUR, table{
+    d: "M 248 3 C 230 9 214 6 202 -1",
+    width: 3.5, cap: "round", color: eyeC, alpha: 0.35
+  }), g)
+
+  shape(g + "-eye", "circle", still(DUR, table{
+    x: 145, y: -32, r: 15, color: eyeC
+  }), g)
+
+  shape(g + "-glint", "circle", still(DUR, table{
+    x: 150, y: -37, r: 4.5, color: hiC
+  }), g)
+}
+
+let bodies = ["#FF6B4A", "#F4B942", "#F4E6CE", "#5FD0C4", "#FF9A5A", "#FFD98E"]
+let fins   = ["#F4B942", "#FF6B4A", "#FF6B4A", "#F4B942", "#F4E6CE", "#FF6B4A"]
+let laneY     = [170.0, 305.0, 445.0, 590.0]
+let laneAmp   = [14.0, 22.0, 30.0, 38.0]
+let laneScale = [0.078, 0.105, 0.132, 0.168]
+let laneAlpha = [0.58, 0.72, 0.86, 1.0]
+let laneLayer = [2.0, 2.2, 2.4, 2.6]
+
+// Four loose depth bands. The x loop is wider than the frame so fish wrap
+// off-screen; sine keeps the school undulating instead of marching.
+for i in range(0, 28) {
+  let row = i % 4
+  let col = int(i / 4)
+  let x0 = -160.0 + (col * 196.0 + row * 83.0 + 37.0) + 14.0 * sin(i * 1.9)
+  let yy = laneY[row] + 18.0 * sin(i * 1.7)
+  let phase = i * 0.73
+  let sc = laneScale[row] * (0.88 + 0.12 * (i % 3))
+  let kf = table{}
+
+  for f in range(0, 121) {
+    let t = f * 0.1
+    let raw = x0 + speed * t + 14.0 * sin(6.28318 * t / 4.0 + phase * 0.5)
+    let x = raw > 1440.0 ? raw - CYCLE : raw
+    let a = 6.28318 * x / 460.0 + phase
+    let y = yy + laneAmp[row] * sin(a) + 4.0 * sin(6.28318 * t / 2.4 + phase * 0.7)
+    let rot = 17.0 * cos(a) + 2.0 * sin(6.28318 * t / 2.4 + phase * 0.5)
+    kf[tq(t)] = table{x: x, y: y, rotate: rot, scale: sc,
+      alpha: laneAlpha[row], layer: laneLayer[row]}
+  }
+
+  group("fish" + toStr(i), kf)
+  addFish("fish" + toStr(i), bodies[i % 6], fins[i % 6], "#08262D", "#FFF4DF")
+}
+
+// Slow bubbles, each on a different rise and sway.
+for i in range(0, 14) {
+  let bx = 60.0 + ((i * 197) % 1160)
+  let by = 700.0 - ((i * 83) % 700)
+  let rise = 16.0 + (i % 4) * 6.0
+  let r = 1.6 + (i % 3) * 1.4
+  let ph = i * 0.9
+  let kf = table{}
+  for f in range(0, 25) {
+    let t = f * 0.5
+    let x = bx + 7.0 * sin(6.28318 * t / 3.0 + ph)
+    let y = by - rise * t
+    let a = 0.20 + 0.08 * sin(6.28318 * t / 4.0 + ph)
+    kf[tq(t)] = table{x: x, y: y, r: r, color: "#A5E8DE", alpha: a, layer: 6}
+  }
+  shape("bubble" + toStr(i), "circle", kf)
+}
+
+// Gentle push-in.
+camera(table{
+  "0": table{x: 640, y: 360, zoom: 1.0, ease: "sine"},
+  "12": table{x: 640, y: 360, zoom: 1.035}
+})
+
+text("caption", still(DUR, table{
+  content: "SCHOOL / sine current", x: 112, y: 686,
+  size: 12, color: "#8FB9B5", alpha: 0.75, font: body, layer: 10
+}))
