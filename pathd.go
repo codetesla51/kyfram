@@ -22,8 +22,8 @@ type pathDEntry struct {
 // frames. The slices are read-only after construction.
 var pathDCache sync.Map
 
-// flattenPathD parses and flattens an SVG-style subset: M, L, C, Z
-// (absolute or relative). Curves are flattened adaptively at render
+// flattenPathD parses and flattens SVG path data: M/L/H/V/C/S/Q/T/A/Z,
+// absolute or relative. Curves and arcs are flattened adaptively at render
 // time so the script only declares control points.
 func flattenPathD(d string) ([]pathContour, error) {
 	if v, ok := pathDCache.Load(d); ok {
@@ -40,8 +40,9 @@ func parsePathD(d string) ([]pathContour, error) {
 	var contours []pathContour
 	var cur *pathContour
 	var cx, cy, sx, sy float64
-	var cmd byte
+	var cmd, prevCmd byte
 	var haveCmd, moved bool
+	var lastCubic, lastQuad [2]float64
 
 	finish := func() {
 		if cur != nil && len(cur.points) >= 4 {
@@ -63,9 +64,13 @@ func parsePathD(d string) ([]pathContour, error) {
 			return fmt.Errorf("d: command %q before M", cmd)
 		}
 		// After Z the current point is the subpath start; a following
-		// L/C continues from there in a fresh contour.
+		// draw command continues from there in a fresh contour.
 		cur = &pathContour{points: []float64{cx, cy}}
 		return nil
+	}
+	addPoint := func(x, y float64) {
+		cur.points = append(cur.points, x, y)
+		cx, cy = x, y
 	}
 
 	for {
@@ -85,6 +90,7 @@ func parsePathD(d string) ([]pathContour, error) {
 				cur.closed = true
 				finish()
 				cx, cy = sx, sy
+				prevCmd = 'Z'
 				continue
 			}
 		} else if !p.hasNumber() {
@@ -109,6 +115,7 @@ func parsePathD(d string) ([]pathContour, error) {
 				x, y = cx+x, cy+y
 			}
 			start(x, y)
+			prevCmd = 'M'
 			// Extra pairs after M are implicit L.
 			for p.nextIsNumber() {
 				x, err = p.number()
@@ -122,8 +129,8 @@ func parsePathD(d string) ([]pathContour, error) {
 				if rel {
 					x, y = cx+x, cy+y
 				}
-				cur.points = append(cur.points, x, y)
-				cx, cy = x, y
+				addPoint(x, y)
+				prevCmd = 'L'
 			}
 
 		case 'L', 'l':
@@ -145,8 +152,46 @@ func parsePathD(d string) ([]pathContour, error) {
 				if rel {
 					x, y = cx+x, cy+y
 				}
-				cur.points = append(cur.points, x, y)
-				cx, cy = x, y
+				addPoint(x, y)
+				prevCmd = 'L'
+			}
+
+		case 'H', 'h':
+			if err := ensure(); err != nil {
+				return nil, err
+			}
+			if !p.nextIsNumber() {
+				return nil, fmt.Errorf("d: H needs a coordinate")
+			}
+			for p.nextIsNumber() {
+				x, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				if rel {
+					x = cx + x
+				}
+				addPoint(x, cy)
+				prevCmd = 'H'
+			}
+
+		case 'V', 'v':
+			if err := ensure(); err != nil {
+				return nil, err
+			}
+			if !p.nextIsNumber() {
+				return nil, fmt.Errorf("d: V needs a coordinate")
+			}
+			for p.nextIsNumber() {
+				y, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				if rel {
+					y = cy + y
+				}
+				addPoint(cx, y)
+				prevCmd = 'V'
 			}
 
 		case 'C', 'c':
@@ -193,10 +238,164 @@ func parsePathD(d string) ([]pathContour, error) {
 					[2]float64{x, y},
 					0.35, 0)
 				cx, cy = x, y
+				lastCubic = [2]float64{x2, y2}
+				prevCmd = 'C'
 			}
 
-		case 'Z', 'z':
-			return nil, fmt.Errorf("d: Z takes no coordinates")
+		case 'S', 's':
+			if err := ensure(); err != nil {
+				return nil, err
+			}
+			if !p.nextIsNumber() {
+				return nil, fmt.Errorf("d: S needs coordinates")
+			}
+			for p.nextIsNumber() {
+				x2, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				y2, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				x, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				y, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				cp1 := [2]float64{cx, cy}
+				if prevCmd == 'C' || prevCmd == 'c' || prevCmd == 'S' || prevCmd == 's' {
+					cp1 = [2]float64{2*cx - lastCubic[0], 2*cy - lastCubic[1]}
+				}
+				if rel {
+					x2, y2 = cx+x2, cy+y2
+					x, y = cx+x, cy+y
+				}
+				flattenCubic(&cur.points,
+					[2]float64{cx, cy}, cp1,
+					[2]float64{x2, y2}, [2]float64{x, y},
+					0.35, 0)
+				cx, cy = x, y
+				lastCubic = [2]float64{x2, y2}
+				prevCmd = 'S'
+			}
+
+		case 'Q', 'q':
+			if err := ensure(); err != nil {
+				return nil, err
+			}
+			if !p.nextIsNumber() {
+				return nil, fmt.Errorf("d: Q needs coordinates")
+			}
+			for p.nextIsNumber() {
+				qx, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				qy, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				x, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				y, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				if rel {
+					qx, qy = cx+qx, cy+qy
+					x, y = cx+x, cy+y
+				}
+				quadToCubic(&cur.points, [2]float64{cx, cy}, [2]float64{qx, qy}, [2]float64{x, y})
+				cx, cy = x, y
+				lastQuad = [2]float64{qx, qy}
+				prevCmd = 'Q'
+			}
+
+		case 'T', 't':
+			if err := ensure(); err != nil {
+				return nil, err
+			}
+			if !p.nextIsNumber() {
+				return nil, fmt.Errorf("d: T needs coordinates")
+			}
+			for p.nextIsNumber() {
+				x, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				y, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				q := [2]float64{cx, cy}
+				if prevCmd == 'Q' || prevCmd == 'q' || prevCmd == 'T' || prevCmd == 't' {
+					q = [2]float64{2*cx - lastQuad[0], 2*cy - lastQuad[1]}
+				}
+				if rel {
+					x, y = cx+x, cy+y
+				}
+				quadToCubic(&cur.points, [2]float64{cx, cy}, q, [2]float64{x, y})
+				cx, cy = x, y
+				lastQuad = q
+				prevCmd = 'T'
+			}
+
+		case 'A', 'a':
+			if err := ensure(); err != nil {
+				return nil, err
+			}
+			if !p.nextIsNumber() {
+				return nil, fmt.Errorf("d: A needs parameters")
+			}
+			for {
+				rx, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				ry, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				rot, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				large, err := p.flag()
+				if err != nil {
+					return nil, err
+				}
+				sweep, err := p.flag()
+				if err != nil {
+					return nil, err
+				}
+				x, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				y, err := p.number()
+				if err != nil {
+					return nil, err
+				}
+				if rel {
+					x, y = cx+x, cy+y
+				}
+				if rx < 0 || ry < 0 {
+					return nil, fmt.Errorf("d: arc radii must not be negative")
+				}
+				appendArc(&cur.points, [2]float64{cx, cy}, [2]float64{x, y}, rx, ry, rot, large, sweep)
+				cx, cy = x, y
+				prevCmd = 'A'
+				if !p.nextIsNumber() {
+					break
+				}
+			}
+
 		default:
 			return nil, fmt.Errorf("d: unsupported command %q", string(cmd))
 		}
@@ -206,6 +405,104 @@ func parsePathD(d string) ([]pathContour, error) {
 		return nil, fmt.Errorf("d: no drawable path")
 	}
 	return contours, nil
+}
+
+// quadToCubic converts a quadratic Bézier to cubic and flattens it.
+func quadToCubic(out *[]float64, p0, q, p1 [2]float64) {
+	cp1 := [2]float64{p0[0] + 2.0/3.0*(q[0]-p0[0]), p0[1] + 2.0/3.0*(q[1]-p0[1])}
+	cp2 := [2]float64{p1[0] + 2.0/3.0*(q[0]-p1[0]), p1[1] + 2.0/3.0*(q[1]-p1[1])}
+	flattenCubic(out, p0, cp1, cp2, p1, 0.35, 0)
+}
+
+// appendArc converts an SVG endpoint-parameterized elliptical arc into
+// cubic segments, then flattens each segment. The endpoint is written
+// exactly so path bounds and later commands stay stable.
+func appendArc(out *[]float64, p0, p1 [2]float64, rx, ry, rotation float64, large, sweep bool) {
+	if rx == 0 || ry == 0 {
+		*out = append(*out, p1[0], p1[1])
+		return
+	}
+	if p0 == p1 {
+		return
+	}
+	rx, ry = math.Abs(rx), math.Abs(ry)
+	phi := rotation * math.Pi / 180
+	cos, sin := math.Cos(phi), math.Sin(phi)
+
+	dx := (p0[0] - p1[0]) / 2
+	dy := (p0[1] - p1[1]) / 2
+	x1p := cos*dx + sin*dy
+	y1p := -sin*dx + cos*dy
+
+	rx2, ry2 := rx*rx, ry*ry
+	lambda := x1p*x1p/rx2 + y1p*y1p/ry2
+	if lambda > 1 {
+		scale := math.Sqrt(lambda)
+		rx *= scale
+		ry *= scale
+		rx2, ry2 = rx*rx, ry*ry
+	}
+
+	num := rx2*ry2 - rx2*y1p*y1p - ry2*x1p*x1p
+	den := rx2*y1p*y1p + ry2*x1p*x1p
+	if den == 0 {
+		*out = append(*out, p1[0], p1[1])
+		return
+	}
+	coef := math.Sqrt(math.Max(0, num/den))
+	if large == sweep {
+		coef = -coef
+	}
+	cxp := coef * rx * y1p / ry
+	cyp := -coef * ry * x1p / rx
+	centerX := cos*cxp - sin*cyp + (p0[0]+p1[0])/2
+	centerY := sin*cxp + cos*cyp + (p0[1]+p1[1])/2
+
+	ux := (x1p - cxp) / rx
+	uy := (y1p - cyp) / ry
+	vx := (-x1p - cxp) / rx
+	vy := (-y1p - cyp) / ry
+	theta1 := math.Atan2(uy, ux)
+	dtheta := math.Atan2(ux*vy-uy*vx, ux*vx+uy*vy)
+	if !sweep && dtheta > 0 {
+		dtheta -= 2 * math.Pi
+	} else if sweep && dtheta < 0 {
+		dtheta += 2 * math.Pi
+	}
+
+	n := int(math.Ceil(math.Abs(dtheta) / (math.Pi / 2)))
+	if n < 1 {
+		n = 1
+	}
+	delta := dtheta / float64(n)
+	k := 4.0 / 3.0 * math.Tan(delta/4)
+	for i := 0; i < n; i++ {
+		t1 := theta1 + delta*float64(i)
+		t2 := t1 + delta
+		q0 := ellipsePoint(centerX, centerY, rx, ry, phi, t1)
+		q1 := ellipsePoint(centerX, centerY, rx, ry, phi, t2)
+		d0 := ellipseDerivative(rx, ry, phi, t1)
+		d1 := ellipseDerivative(rx, ry, phi, t2)
+		cp1 := [2]float64{q0[0] + k*d0[0], q0[1] + k*d0[1]}
+		cp2 := [2]float64{q1[0] - k*d1[0], q1[1] - k*d1[1]}
+		flattenCubic(out, q0, cp1, cp2, q1, 0.35, 0)
+	}
+	if len(*out) >= 2 {
+		(*out)[len(*out)-2] = p1[0]
+		(*out)[len(*out)-1] = p1[1]
+	}
+}
+
+func ellipsePoint(cx, cy, rx, ry, phi, t float64) [2]float64 {
+	cos, sin := math.Cos(phi), math.Sin(phi)
+	x, y := rx*math.Cos(t), ry*math.Sin(t)
+	return [2]float64{cos*x - sin*y + cx, sin*x + cos*y + cy}
+}
+
+func ellipseDerivative(rx, ry, phi, t float64) [2]float64 {
+	cos, sin := math.Cos(phi), math.Sin(phi)
+	x, y := -rx*math.Sin(t), ry*math.Cos(t)
+	return [2]float64{cos*x - sin*y, sin*x + cos*y}
 }
 
 type pathDParser struct {
@@ -284,9 +581,27 @@ func (p *pathDParser) number() (float64, error) {
 	return v, nil
 }
 
+func (p *pathDParser) flag() (bool, error) {
+	p.skip()
+	if p.eof() {
+		return false, fmt.Errorf("d: expected arc flag at end")
+	}
+	switch p.s[p.i] {
+	case '0':
+		p.i++
+		return false, nil
+	case '1':
+		p.i++
+		return true, nil
+	}
+	return false, fmt.Errorf("d: bad arc flag %q at byte %d", p.s[p.i], p.i)
+}
+
 func isPathCommand(c byte) bool {
 	switch c {
-	case 'M', 'm', 'L', 'l', 'C', 'c', 'Z', 'z':
+	case 'M', 'm', 'L', 'l', 'H', 'h', 'V', 'v',
+		'C', 'c', 'S', 's', 'Q', 'q', 'T', 't',
+		'A', 'a', 'Z', 'z':
 		return true
 	}
 	return false
