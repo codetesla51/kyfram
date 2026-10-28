@@ -23,8 +23,14 @@ import (
 func runView(cmd *cobra.Command, args []string) {
 	port, _ := cmd.Flags().GetInt("port")
 	font, _ := cmd.Flags().GetString("font")
+	width, _ := cmd.Flags().GetInt("width")
+	height, _ := cmd.Flags().GetInt("height")
 	if len(args) != 1 {
-		errln("usage: kyfram view [--port n] [--font f] <script.lgv>")
+		errln("usage: kyfram view [--port n] [--font f] [--width n] [--height n] <script.lgv>")
+		os.Exit(1)
+	}
+	if width < 0 || height < 0 {
+		errln("width and height must be positive")
 		os.Exit(1)
 	}
 	script := args[0]
@@ -41,7 +47,7 @@ func runView(cmd *cobra.Command, args []string) {
 		w.Write(kyfram.DisplayFont())
 	})
 	http.HandleFunc("/meta", func(w http.ResponseWriter, r *http.Request) {
-		tl, err := loadScript(script, font)
+		tl, err := loadScript(script, font, width, height)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -59,7 +65,7 @@ func runView(cmd *cobra.Command, args []string) {
 			http.Error(w, "bad t", http.StatusBadRequest)
 			return
 		}
-		tl, err := loadScript(script, font)
+		tl, err := loadScript(script, font, width, height)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -97,7 +103,7 @@ var (
 // loadScript runs the file fresh: declarations in, Timeline out. Errors
 // carry run/build context so the preview shows them instead of stale art.
 // It caches by file modtime so scrubbing 30fps doesn't re-run Edge TTS (2s) every frame.
-func loadScript(path, font string) (kyfram.Timeline, error) {
+func loadScript(path, font string, width, height int) (kyfram.Timeline, error) {
 	// fast path: same file + same font + modtime unchanged -> cached
 	if fi, err := os.Stat(path); err == nil {
 		mod := fi.ModTime()
@@ -125,6 +131,7 @@ func loadScript(path, font string) (kyfram.Timeline, error) {
 	vm := newVM()
 	var b kyfram.Builder
 	b.Bind(vm)
+	b.SetCanvas(width, height)
 	if err := vm.Run(string(source)); err != nil {
 		err = fmt.Errorf("run: %w", err)
 		if fi, serr := os.Stat(path); serr == nil {
@@ -146,6 +153,12 @@ func loadScript(path, font string) (kyfram.Timeline, error) {
 	}
 	if font != "" {
 		tl.Font = font
+	}
+	if width > 0 {
+		tl.Width = width
+	}
+	if height > 0 {
+		tl.Height = height
 	}
 	if fi, err := os.Stat(path); err == nil {
 		cacheMu.Lock()
@@ -459,6 +472,8 @@ fetch('/meta').then(async r=>{
   if(!r.ok) throw new Error(j.error || 'meta failed');
   setMeta(j.duration, j.fps);
   show();
+  // ?autoplay=1 is handy for opening a wall of previews at once.
+  if(new URLSearchParams(location.search).get('autoplay')==='1') toggle();
 }).catch(e=>{ err.textContent=e.message || 'Could not load script.'; });
 
 // hot reload: on focus, re-fetch meta; duration/fps changes apply live

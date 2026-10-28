@@ -184,6 +184,8 @@ func printHelpView() {
 	fmt.Println()
 	fmt.Println("OPTIONS:")
 	fmt.Println("  --port N       Preview port (default 7070)")
+	fmt.Println("  --width N      Override canvas width")
+	fmt.Println("  --height N     Override canvas height")
 	fmt.Println("  --font FILE    Default typeface")
 	fmt.Println("  -h, --help     Show this help")
 	fmt.Println()
@@ -297,6 +299,8 @@ func viewCommand() *cobra.Command {
 		},
 	}
 	cmd.Flags().Int("port", 7070, "preview server port")
+	cmd.Flags().Int("width", 0, "override canvas width")
+	cmd.Flags().Int("height", 0, "override canvas height")
 	cmd.Flags().String("font", "", "default typeface path")
 	return cmd
 }
