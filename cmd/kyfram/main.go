@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
+	kyfram "github.com/codetesla51/kyfram"
 	"github.com/codetesla51/logos/interpreter"
 	"github.com/spf13/cobra"
-	kyfram "gitlab.com/codetesla51/kyfram"
 	"golang.org/x/term"
 )
 
 // version is the only copy — help text and --version both read it.
-const version = "v0.4.1"
+const version = "v0.5.0"
 
 // paint wraps s in an ANSI code on terminals only — pipes and NO_COLOR
 // stay plain. A little color on results, none anywhere else.

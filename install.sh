@@ -3,9 +3,9 @@ set -e
 # kyfram installer — checks ffmpeg, downloads the prebuilt binary.
 # Nothing is auto-installed; missing ffmpeg is reported with a hint.
 # usage:
-#   curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh
-#   curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh -s -- v0.3.0
-#   VERSION=v0.3.0 sh install.sh
+#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh -s -- v0.5.0
+#   VERSION=v0.5.0 sh install.sh
 REPO="codetesla51/kyfram"
 VERSION="${VERSION:-${1:-latest}}"
 
@@ -36,16 +36,16 @@ else
   printf '  [no]  %-9s %s\n' ffmpeg "not found — $(pminstall ffmpeg)"
   printf '\nkyfram needs ffmpeg to encode mp4.\n'
   printf 'Install it (hint above), then re-run:\n'
-  printf '  curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh\n'
+  printf '  curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh\n'
   exit 1
 fi
 
-# resolve version: latest -> newest release tag
+# resolve version: latest -> newest GitHub release tag
 case "$VERSION" in
   latest)
-    api="https://gitlab.com/api/v4/projects/codetesla51%2Fkyfram/releases/permalink/latest"
-    TAG=$(curl -fsSL "$api" 2>/dev/null | sed -n 's/.*"tag_name":"\([^"]*\)".*/\1/p' 2>/dev/null)
-    [ -z "$TAG" ] && TAG="v0.4.1" # ponytail: offline fallback pin, bump when a release lands
+    api="https://api.github.com/repos/$REPO/releases/latest"
+    TAG=$(curl -fsSL "$api" 2>/dev/null | sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' 2>/dev/null)
+    [ -z "$TAG" ] && TAG="v0.5.0" # offline fallback pin, bump when a release lands
     ;;
   v*) TAG="$VERSION" ;;
   *)  TAG="v$VERSION" ;;
@@ -57,8 +57,8 @@ case "$(uname -s)-$(uname -m)" in
   Darwin-x86_64) osarch="darwin-amd64" ;;
   Darwin-arm64)  osarch="darwin-arm64" ;;
   *)
-    printf '\nno prebuilt binary for $(uname -s)-$(uname -m) — build from source instead:\n'
-    printf '  go install gitlab.com/codetesla51/kyfram/cmd/kyfram@%s\n' "$TAG"
+    printf '\nno prebuilt binary for %s-%s — build from source instead:\n' "$(uname -s)" "$(uname -m)"
+    printf '  go install github.com/codetesla51/kyfram/cmd/kyfram@%s\n' "$TAG"
     exit 1
     ;;
 esac
@@ -71,17 +71,21 @@ fi
 
 echo
 printf '  fetching  %s (%s)\n' kyfram "$TAG"
-url="https://gitlab.com/$REPO/-/jobs/artifacts/$TAG/raw/dist/kyfram-$osarch?job=build-binaries"
+url="https://github.com/$REPO/releases/download/$TAG/kyfram-$osarch"
+tmp="$bin_dir/.kyfram-download.$$"
+trap 'rm -f "$tmp"' EXIT INT TERM
+
 # loader: progress bar on terminals, silent in pipes
 [ -t 2 ] && bar="-#" || bar="-sS"
-if ! curl $bar -fL -o "$bin_dir/kyfram" "$url"; then
-  rm -f "$bin_dir/kyfram"
+if ! curl $bar -fL -o "$tmp" "$url"; then
+  rm -f "$tmp"
   printf 'download failed — release %s has no prebuilt binaries yet (they are published on new tags).\n' "$TAG" >&2
   printf 'try again after the next release, or build from source:\n' >&2
-  printf '  go install gitlab.com/codetesla51/kyfram/cmd/kyfram@%s\n' "$TAG" >&2
+  printf '  go install github.com/codetesla51/kyfram/cmd/kyfram@%s\n' "$TAG" >&2
   exit 1
 fi
-chmod +x "$bin_dir/kyfram"
+chmod +x "$tmp"
+mv "$tmp" "$bin_dir/kyfram"
 
 out=$("$bin_dir/kyfram" --version 2>/dev/null || echo kyfram)
 printf '  installed %s (%s)\n' "$bin_dir/kyfram" "$out"

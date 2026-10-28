@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	kyfram "gitlab.com/codetesla51/kyfram"
+	kyfram "github.com/codetesla51/kyfram"
 )
 
 func main() {

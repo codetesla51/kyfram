@@ -1,4 +1,4 @@
-module gitlab.com/codetesla51/kyfram
+module github.com/codetesla51/kyfram
 
 go 1.25.0
 

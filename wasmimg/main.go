@@ -18,8 +18,8 @@ import (
 	"image/png"
 	"syscall/js"
 
+	kyfram "github.com/codetesla51/kyfram"
 	"github.com/codetesla51/logos/interpreter"
-	kyfram "gitlab.com/codetesla51/kyfram"
 )
 
 func renderFunc(_ js.Value, args []js.Value) any {
@@ -65,7 +65,7 @@ func renderFunc(_ js.Value, args []js.Value) any {
 	}
 	bounds := frame.Image().Bounds()
 	return map[string]any{
-		"ok": true,
+		"ok":        true,
 		"pngBase64": base64.StdEncoding.EncodeToString(buf.Bytes()),
 		"w":         bounds.Dx(),
 		"h":         bounds.Dy(),
