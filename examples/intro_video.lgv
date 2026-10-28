@@ -132,9 +132,9 @@ text("w5-made", table{
 })
 // url below
 text("w5-url", table{
-  "19.0": table{content: "codetesla51.gitlab.io/kyfram", x: 320, y: 238, size: 10, color: "#3f3f46", alpha: 0},
-  "19.7": table{content: "codetesla51.gitlab.io/kyfram", x: 320, y: 238, size: 10, color: "#3f3f46", alpha: 1},
-  "22": table{content: "codetesla51.gitlab.io/kyfram", x: 320, y: 238, size: 10, color: "#3f3f46", alpha: 1},
+  "19.0": table{content: "github.com/codetesla51/kyfram", x: 320, y: 238, size: 10, color: "#3f3f46", alpha: 0},
+  "19.7": table{content: "github.com/codetesla51/kyfram", x: 320, y: 238, size: 10, color: "#3f3f46", alpha: 1},
+  "22": table{content: "github.com/codetesla51/kyfram", x: 320, y: 238, size: 10, color: "#3f3f46", alpha: 1},
 })
 // gentle closing pulse on a dot
 shape("w5-dot", "circle", table{

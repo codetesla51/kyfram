@@ -1,8 +1,9 @@
 # kyfram
 
-[![pipeline](https://gitlab.com/codetesla51/kyfram/badges/master/pipeline.svg)](https://gitlab.com/codetesla51/kyfram/-/pipelines)
-[![Go](https://img.shields.io/badge/go-1.25-blue)](https://go.dev)
-[![Release](https://img.shields.io/gitlab/v/release/codetesla51/kyfram)](https://gitlab.com/codetesla51/kyfram/-/releases)
+[![CI](https://github.com/codetesla51/kyfram/actions/workflows/ci.yml/badge.svg)](https://github.com/codetesla51/kyfram/actions/workflows/ci.yml)
+[![Go](https://img.shields.io/github/go-mod/go-version/codetesla51/kyfram)](https://go.dev)
+[![Release](https://img.shields.io/github/v/release/codetesla51/kyfram)](https://github.com/codetesla51/kyfram/releases)
+[![License](https://img.shields.io/github/license/codetesla51/kyfram)](LICENSE)
 
 <p align="center">
   <img src="assets/logo-bg.png" width="120" alt="kyfram logo — two states connected by an eased trail with frame ticks">
@@ -15,9 +16,13 @@
 
 ## What is kyfram?
 
-`kyfram` is a small, opinionated engine for motion graphics. You write a `.lgv` script in [Logos](https://gitlab.com/codetesla51/logos) declaring states-at-times — `scene()`, `shape()`, `text()`, `group()`, `camera()`, `audio()` — and Go owns the tweening: `Timeline → Interpolate(t) → gg canvas → ffmpeg`.
+`kyfram` is a small, opinionated engine for motion graphics. You write a `.lgv` script in [Logos](https://github.com/codetesla51/logos) declaring states-at-times — `scene()`, `shape()`, `text()`, `group()`, `camera()`, `audio()` — and Go owns the tweening: `Timeline → Interpolate(t) → gg canvas → ffmpeg`.
 
 Think CSS `@keyframes` for video: retiming is editing a number, not re-directing callbacks.
+
+## Why not After Effects, Remotion, or Manim?
+
+After Effects is a full timeline editor, Remotion is React-first, and Manim is Python and math-first. kyfram is narrower: a Go library and CLI for deterministic motion graphics. Scenes are plain code, renders are reproducible, and the output fits naturally into scripts and CI. It is not a replacement for an editor, and it does not try to be one.
 
 ## Pronunciation
 
@@ -44,22 +49,23 @@ See docs for the full scripting reference.
 ## Install
 
 ```sh
-curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh
 ```
 
 Specific version or update:
 
 ```sh
-curl -fsSL https://kyfram-site-68056d.gitlab.io/install.sh | sh -s -- v0.2.0
+curl -fsSL https://raw.githubusercontent.com/codetesla51/kyfram/master/install.sh | sh -s -- v0.5.0
 # or
-VERSION=v0.2.0 sh install.sh
+VERSION=v0.5.0 sh install.sh
 ```
 
 Prebuilt binaries for linux/darwin (amd64/arm64) are downloaded from the
-release assets; installing from source needs Go 1.25+:
+[GitHub release assets](https://github.com/codetesla51/kyfram/releases);
+installing from source needs Go 1.25+:
 
 ```sh
-# go install gitlab.com/codetesla51/kyfram/cmd/kyfram@latest
+go install github.com/codetesla51/kyfram/cmd/kyfram@latest
 ```
 
 ## Quick start
