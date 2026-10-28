@@ -410,9 +410,10 @@ func (b *Builder) addEntity(name, kind string, kfs []Keyframe, group string) {
 	b.tl.Entities = append(b.tl.Entities, Entity{Name: name, Kind: kind, Keyframes: kfs, Group: group})
 }
 
-// addLetters expands a line into one text entity per non-space glyph.
-// Advances are measured from the first keyframe's font/size, so the
-// caller should keep those constant when animating a line of letters.
+// addLetters expands content into one text entity per non-space glyph.
+// It supports explicit newlines and optional wrapping, measuring advances
+// from the first keyframe's font/size. Keep those constant while animating
+// a line so the per-glyph spacing stays stable.
 func (b *Builder) addLetters(name, content string, kfs []Keyframe, stagger float64, group string) error {
 	if content == "" {
 		return fmt.Errorf("content must not be empty")
@@ -420,15 +421,9 @@ func (b *Builder) addLetters(name, content string, kfs []Keyframe, stagger float
 	if stagger < 0 {
 		return fmt.Errorf("stagger must not be negative")
 	}
-	if strings.ContainsAny(content, "\r\n") {
-		return fmt.Errorf("multi-line content is not supported")
-	}
 	for _, kf := range kfs {
 		if _, ok := kf.Props["points"]; ok {
 			return fmt.Errorf("points is not supported (per-letter text is a flat line)")
-		}
-		if propNum(kf.Props, "wrap", 0) > 0 {
-			return fmt.Errorf("wrap is not supported (per-letter text is a flat line)")
 		}
 	}
 	fontPath := b.tl.Font
@@ -436,32 +431,48 @@ func (b *Builder) addLetters(name, content string, kfs []Keyframe, stagger float
 		fontPath = defaultFont
 	}
 	size := 28.0
+	wrapW := 0.0
+	lineHeight := 1.2
 	if len(kfs) > 0 {
 		fontPath = propStr(kfs[0].Props, "font", fontPath)
 		size = propNum(kfs[0].Props, "size", size)
+		wrapW = propNum(kfs[0].Props, "wrap", 0)
+		lineHeight = propNum(kfs[0].Props, "lineHeight", lineHeight)
+	}
+	if lineHeight <= 0 {
+		lineHeight = 1.2
 	}
 	measure := gg.NewContext(1, 1)
 	if !setFace(measure, fontPath, size) {
 		return fmt.Errorf("cannot load font %q", fontPath)
 	}
-	lineWidth, _ := measure.MeasureString(content)
-	if lineWidth <= 0 {
-		return fmt.Errorf("content has no measurable glyphs")
+	lines := textLines(measure, content, wrapW)
+	_, measuredH := measure.MeasureString("Mj")
+	if measuredH <= 0 {
+		measuredH = size
 	}
+	lineH := measuredH * lineHeight
 
 	type glyph struct {
-		text   string
-		offset float64
+		text string
+		x, y float64
 	}
 	var glyphs []glyph
-	cursor := 0.0
-	for _, r := range content {
-		ch := string(r)
-		adv, _ := measure.MeasureString(ch)
-		if !unicode.IsSpace(r) {
-			glyphs = append(glyphs, glyph{text: ch, offset: cursor + adv/2 - lineWidth/2})
+	for li, line := range lines {
+		lineWidth, _ := measure.MeasureString(line)
+		cursor := 0.0
+		for _, r := range line {
+			ch := string(r)
+			adv, _ := measure.MeasureString(ch)
+			if !unicode.IsSpace(r) {
+				glyphs = append(glyphs, glyph{
+					text: ch,
+					x:    cursor + adv/2 - lineWidth/2,
+					y:    (float64(li) - float64(len(lines)-1)/2) * lineH,
+				})
+			}
+			cursor += adv
 		}
-		cursor += adv
 	}
 	if len(glyphs) == 0 {
 		return fmt.Errorf("content has no non-space glyphs")
@@ -473,17 +484,14 @@ func (b *Builder) addLetters(name, content string, kfs []Keyframe, stagger float
 		for ki, kf := range kfs {
 			props := copyProps(kf.Props)
 			props["content"] = g.text
+			// One-glyph entities should not re-wrap themselves.
+			delete(props, "wrap")
 			if group != "" {
-				baseX := propNum(kf.Props, "x", 0)
-				props["x"] = baseX + g.offset
-				if _, ok := props["y"]; !ok {
-					props["y"] = 0.0
-				}
+				props["x"] = propNum(kf.Props, "x", 0) + g.x
+				props["y"] = propNum(kf.Props, "y", 0) + g.y
 			} else {
-				props["x"] = propNum(kf.Props, "x", float64(w)/2) + g.offset
-				if _, ok := props["y"]; !ok {
-					props["y"] = float64(h) / 2
-				}
+				props["x"] = propNum(kf.Props, "x", float64(w)/2) + g.x
+				props["y"] = propNum(kf.Props, "y", float64(h)/2) + g.y
 			}
 			letterKFs[ki] = Keyframe{
 				Time:  kf.Time + stagger*float64(gi),

@@ -28,12 +28,13 @@ Think CSS `@keyframes` for video: retiming is editing a number, not re-directing
 - **Declarative keyframes** — times are quoted strings (`"0"`, `"1.5"`), engine lerps numbers/colors/arrays and snaps text.
 - **Easing per segment** — `linear`, `easeIn/Out/InOut`, `cubicIn/Out/InOut`, `sine`, `spring`, `bounceIn/Out/InOut`.
 - **One-line entrances** — `fadeIn()`, `slideIn()`, `popIn()` synthesize keyframe tables; pass a start time and duration when needed.
-- **Per-letter text** — `letters()` measures glyph advances and staggers each letter.
+- **Per-letter text** — `letters()` measures glyph advances, staggers each letter, and supports newlines/wrapping.
 - **Stroke draw-on** — `trim` / `trimStart` reveal a `line` or `path` by length.
 - **Rich primitives** — `circle`, `rect`, `roundRect`, `polygon`, `star`, `ellipse`, `line`, `arc`, `wave`, `path`, `image`, `text`.
 - **Groups** — `group()` with local `x/y`, keyframed `x y scale rotate alpha layer`, and optional `parent` for nesting.
+- **Clipping** — crop groups and entities to `rect`, `roundRect`, `circle`, or `path` shapes.
 - **Camera** — keyframed pan/zoom for the whole scene.
-- **Style** — gradients (`gradFrom`/`gradTo`), blend modes, alpha/rotate/scale/layer per entity.
+- **Style** — gradients (`gradFrom`/`gradTo`), blend modes, shadows, blur, glow, alpha/rotate/scale/layer per entity.
 - **Audio + TTS** — `audio()` mux and `tts()` (Edge neural → `espeak-ng` → beeps) with word timings for synced text.
 - **Preview + templates** — `kyfram view` hot-reload, `render --var k=v` and `text_file()` for batch renders.
 
@@ -96,11 +97,12 @@ scene.
 
 ### Per-letter text
 
-`letters(name, content, keyframes, stagger, group)` expands a line into one
+`letters(name, content, keyframes, stagger, group)` expands content into one
 `text` entity per non-space glyph. It measures advances with the first
-keyframe's `font` and `size`, centers the measured line on `x`, and delays
-each glyph by `stagger` seconds. Keep `font` and `size` constant across the
-animation so the spacing stays stable.
+keyframe's `font` and `size`, centers each line on `x`, and delays each glyph
+by `stagger` seconds. Explicit `\n` breaks start new lines; a `wrap` value
+also wraps each line at that pixel width. Keep `font` and `size` constant
+across the animation so the spacing stays stable.
 
 ```js
 letters("title", "MOTION", table{
@@ -145,6 +147,67 @@ shape("chip", "rect", table{
 
 Parents can be declared before or after children. Build rejects missing
 parents and cycles.
+
+### Clipping
+
+`clip` crops a group or entity to a shape. Clipping happens in local
+coordinates, so it moves with the group and composes through nested groups.
+Available shapes are `rect`, `roundRect`, `circle`, and `path`. Use `none`
+to turn a clip off again.
+
+```js
+group("window", table{
+    "0": table{x: 320, y: 180, clip: "rect", clipW: 0, clipH: 220},
+    "1": table{x: 320, y: 180, clip: "rect", clipW: 480, clipH: 220},
+})
+shape("photo", "image", table{
+    "0": table{path: "examples/assets/photo.jpg", x: 0, y: 0},
+}, "window")
+```
+
+`clipX`/`clipY` center the rectangle or circle (default `0,0` in local
+space). A path clip uses `clipD` (SVG path data) or `clipPoints` and is
+translated by `clipX`/`clipY`. For example, `clip: "circle", clipR: 120`
+reveals only a circular region around the group origin.
+
+### Shadows, blur, and glow
+
+Effects are per entity: shadows and glows are silhouettes of the entity's
+own alpha, so transparent text and images keep their edges.
+
+```js
+shape("title", "text", table{
+    "0": table{
+        content: "GLOW", x: 320, y: 180, size: 72, color: "#ffffff",
+        shadowColor: "#000000", shadowBlur: 12, shadowX: 0, shadowY: 8,
+        glow: "#f4b942", glowBlur: 18,
+    },
+})
+```
+
+- `shadowColor` turns on a shadow; `shadowBlur` defaults to `10`, and
+  `shadowX`/`shadowY` offset it.
+- `glow` turns on a colored halo; `glowBlur` defaults to `16`.
+- `blur` blurs the entity itself.
+
+Effects render through an offscreen layer, so they are more expensive than
+plain shapes. They can be combined with blend modes and clipping.
+
+### Multiline text
+
+`text` breaks on explicit `\n` and, when `wrap` is nonzero, wraps words to
+that pixel width. The block stays centered on `x/y`. `lineHeight` is a
+multiplier on the measured font height (default `1.2`).
+
+```js
+text("body", table{
+    "0": table{
+        content: "A title line\nand a wrapped second paragraph",
+        x: 640, y: 360, size: 32, color: "#f6f1e7",
+        wrap: 520, lineHeight: 1.35,
+    },
+})
+```
 
 ### Rotation pivot
 

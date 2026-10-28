@@ -15,10 +15,13 @@ var knownKinds = []string{
 // this set is a typo the renderer would silently ignore (defaulting),
 // so Build rejects it with a suggestion.
 var knownProps = []string{
-	"alpha", "amplitude", "blend", "cap", "closed", "color", "content",
-	"d", "end", "filled", "font", "frequency", "gradAngle", "gradFrom",
-	"gradTo", "h", "inner", "join", "layer", "path", "phase", "points",
-	"r", "radius", "rotate", "rx", "ry", "scale", "size", "start",
+	"alpha", "amplitude", "blend", "blur", "cap", "clip", "clipD",
+	"clipH", "clipPoints", "clipR", "clipRadius", "clipW", "clipX",
+	"clipY", "closed", "color", "content", "d", "end", "filled", "font",
+	"frequency", "glow", "glowAlpha", "glowBlur", "gradAngle", "gradFrom",
+	"gradTo", "h", "inner", "join", "layer", "lineHeight", "path", "phase",
+	"points", "r", "radius", "rotate", "rx", "ry", "scale", "shadowAlpha",
+	"shadowBlur", "shadowColor", "shadowX", "shadowY", "size", "start",
 	"thickness", "trim", "trimStart", "w", "width", "wrap",
 	"x", "x1", "x2", "y", "y1", "y2",
 }
@@ -26,28 +29,31 @@ var knownProps = []string{
 // numProps must hold numbers; a wrong-typed value would silently fall
 // back to the renderer default (e.g. x: "left" draws at center).
 var numProps = []string{
-	"alpha", "amplitude", "end", "frequency", "gradAngle", "h",
-	"inner", "layer", "phase", "r", "radius", "rotate", "rx", "ry",
-	"scale", "size", "start", "thickness", "trim", "trimStart",
+	"alpha", "amplitude", "blur", "clipH", "clipR", "clipRadius", "clipW",
+	"clipX", "clipY", "end", "frequency", "glowAlpha", "glowBlur",
+	"gradAngle", "h", "inner", "layer", "lineHeight", "phase", "r",
+	"radius", "rotate", "rx", "ry", "scale", "shadowAlpha", "shadowBlur",
+	"shadowX", "shadowY", "size", "start", "thickness", "trim", "trimStart",
 	"w", "width", "wrap", "x", "x1", "x2", "y", "y1", "y2",
 }
 
 // strProps must hold strings. font/path get existence checks below;
 // color/gradFrom/gradTo must additionally parse as colors.
 var strProps = []string{
-	"blend", "cap", "color", "content", "d", "font",
-	"gradFrom", "gradTo", "join", "path",
+	"blend", "cap", "clip", "clipD", "color", "content", "d", "font",
+	"glow", "gradFrom", "gradTo", "join", "path", "shadowColor",
 }
 
 // colorProps must parse via parseColor (hex or named); anything else
 // silently snaps to a default instead of blending.
-var colorProps = []string{"color", "gradFrom", "gradTo"}
+var colorProps = []string{"color", "glow", "gradFrom", "gradTo", "shadowColor"}
 
 // enumProps lists the accepted values for string enums the renderer
 // otherwise degrades to a default without a word.
 var enumProps = map[string][]string{
 	"blend": {"add", "multiply", "screen"},
 	"cap":   {"butt", "round", "square"},
+	"clip":  {"circle", "none", "path", "rect", "roundRect"},
 	"join":  {"bevel", "miter", "round"},
 }
 
@@ -204,6 +210,18 @@ func checkValue(where string, e Entity, t float64, p string, v any) error {
 		}
 		return nil
 	}
+	if p == "clipPoints" {
+		raw, ok := v.([]any)
+		if !ok {
+			return bad("a number list")
+		}
+		for _, n := range raw {
+			if _, ok := toFloat(n); !ok {
+				return bad("a number list")
+			}
+		}
+		return nil
+	}
 	if contains(strProps, p) {
 		s, ok := v.(string)
 		if !ok {
@@ -226,9 +244,9 @@ func checkValue(where string, e Entity, t float64, p string, v any) error {
 				return err
 			}
 		}
-		if p == "d" {
+		if p == "d" || p == "clipD" {
 			if _, err := flattenPathD(s); err != nil {
-				return fmt.Errorf("%s entity %q: invalid d at t=%g: %w", where, e.Name, t, err)
+				return fmt.Errorf("%s entity %q: invalid %s at t=%g: %w", where, e.Name, p, t, err)
 			}
 		}
 	}

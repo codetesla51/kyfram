@@ -206,6 +206,7 @@ func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group,
 		x, y   float64
 		rotate float64
 		scale  float64
+		clip   map[string]any
 	}
 	type drawItem struct {
 		isGroup bool
@@ -222,7 +223,11 @@ func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group,
 		if inGroup {
 			groupChildDefaults(f.kind, props)
 		}
-		if mode, ok := props["blend"].(string); ok && blendModes[mode] {
+		mode := ""
+		if m, ok := props["blend"].(string); ok && blendModes[m] {
+			mode = m
+		}
+		if mode != "" || hasEffects(props) {
 			layer := gg.NewContext(w, h)
 			frameCamera(layer, cam, w, h, t)
 			layer.Push()
@@ -230,10 +235,22 @@ func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group,
 				layer.Translate(xf.x, xf.y)
 				layer.Rotate(gg.Radians(xf.rotate))
 				layer.Scale(xf.scale, xf.scale)
+				if hasClip(xf.clip) {
+					applyClip(layer, xf.clip)
+				}
 			}
 			drawEntity(layer, w, h, f.kind, props, defaultFace(tl))
 			layer.Pop()
-			composite(dc.Image().(*image.RGBA), layer.Image().(*image.RGBA), mode)
+			img := layer.Image().(*image.RGBA)
+			if hasEffects(props) {
+				img = applyEffects(img, props)
+			}
+			dst := dc.Image().(*image.RGBA)
+			if mode != "" {
+				composite(dst, img, mode)
+			} else {
+				draw.Draw(dst, dst.Bounds(), img, image.Point{}, draw.Over)
+			}
 			return
 		}
 		drawEntity(dc, w, h, f.kind, props, defaultFace(tl))
@@ -254,7 +271,7 @@ func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group,
 		gy = propNum(props, "y", gy)
 		gRot := propNum(props, "rotate", 0)
 		gScale := propNum(props, "scale", 1)
-		gt := groupXform{x: gx, y: gy, rotate: gRot, scale: gScale}
+		gt := groupXform{x: gx, y: gy, rotate: gRot, scale: gScale, clip: props}
 		next := append(append([]groupXform{}, chain...), gt)
 		cumAlpha := alpha * propNum(props, "alpha", 1)
 
@@ -262,6 +279,9 @@ func renderScene(dc *gg.Context, tl Timeline, entities []Entity, groups []Group,
 		dc.Translate(gx, gy)
 		dc.Rotate(gg.Radians(gRot))
 		dc.Scale(gScale, gScale)
+		if hasClip(props) {
+			applyClip(dc, props)
+		}
 
 		var items []drawItem
 		for _, f := range grouped[name] {
@@ -368,8 +388,9 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 				drawTextOnPath(dc, content, pts)
 				return
 			}
-			if wrapW := propNum(props, "wrap", 0); wrapW > 0 {
-				drawWrappedText(dc, content, cx, cy, wrapW)
+			wrapW := propNum(props, "wrap", 0)
+			if wrapW > 0 || strings.ContainsAny(content, "\r\n") {
+				drawWrappedText(dc, content, cx, cy, wrapW, propNum(props, "lineHeight", 1.2))
 			} else {
 				dc.DrawStringAnchored(content, cx, cy, 0.5, 0.5)
 			}
@@ -539,17 +560,22 @@ func drawWave(dc *gg.Context, props map[string]any, canvasW float64) {
 	}
 }
 
-// drawWrappedText breaks content on spaces to fit within wrapW pixels,
-// centering the block vertically around cy.
-func drawWrappedText(dc *gg.Context, content string, cx, cy, wrapW float64) {
-	lines := wrapLines(dc, content, wrapW)
+// drawWrappedText lays out explicit newlines and optionally wraps each
+// paragraph to wrapW pixels, centering the block vertically around cy.
+// A horizontal wrap value of zero means "only break on newlines".
+func drawWrappedText(dc *gg.Context, content string, cx, cy, wrapW, lineHeight float64) {
+	lines := textLines(dc, content, wrapW)
 	// estimate line height from current font size (gg has no FontMetrics)
 	lineH := 0.0
 	if _, h := dc.MeasureString("Mj"); h > 0 {
-		lineH = h * 1.2
+		lineH = h
 	} else {
 		lineH = 28 // fallback
 	}
+	if lineHeight <= 0 {
+		lineHeight = 1.2
+	}
+	lineH *= lineHeight
 	blockH := lineH * float64(len(lines))
 	y := cy - blockH/2 + lineH/2
 	for _, line := range lines {
@@ -558,25 +584,37 @@ func drawWrappedText(dc *gg.Context, content string, cx, cy, wrapW float64) {
 	}
 }
 
-// wrapLines greedily breaks s on spaces so each line fits within maxW.
-func wrapLines(dc *gg.Context, s string, maxW float64) []string {
-	words := strings.Fields(s)
-	if len(words) == 0 {
+// textLines splits on explicit newlines first, then greedily breaks each
+// paragraph on spaces when maxW > 0. Blank lines and single words longer
+// than maxW are kept rather than silently dropped.
+func textLines(dc *gg.Context, s string, maxW float64) []string {
+	var lines []string
+	for _, para := range strings.Split(strings.ReplaceAll(s, "\r\n", "\n"), "\n") {
+		if maxW <= 0 || strings.TrimSpace(para) == "" {
+			lines = append(lines, para)
+			continue
+		}
+		words := strings.Fields(para)
+		if len(words) == 0 {
+			lines = append(lines, "")
+			continue
+		}
+		cur := words[0]
+		for _, w := range words[1:] {
+			try := cur + " " + w
+			tw, _ := dc.MeasureString(try)
+			if tw > maxW && cur != "" {
+				lines = append(lines, cur)
+				cur = w
+			} else {
+				cur = try
+			}
+		}
+		lines = append(lines, cur)
+	}
+	if len(lines) == 0 {
 		return []string{""}
 	}
-	var lines []string
-	cur := words[0]
-	for _, w := range words[1:] {
-		try := cur + " " + w
-		tw, _ := dc.MeasureString(try)
-		if tw > maxW {
-			lines = append(lines, cur)
-			cur = w
-		} else {
-			cur = try
-		}
-	}
-	lines = append(lines, cur)
 	return lines
 }
 
@@ -586,7 +624,8 @@ func wrapLines(dc *gg.Context, s string, maxW float64) []string {
 func spin(dc *gg.Context, cx, cy float64, props map[string]any, draw func()) {
 	rot := propNum(props, "rotate", 0)
 	sc := propNum(props, "scale", 1)
-	if rot == 0 && sc == 1 {
+	clip := hasClip(props)
+	if rot == 0 && sc == 1 && !clip {
 		draw()
 		return
 	}
@@ -595,6 +634,9 @@ func spin(dc *gg.Context, cx, cy float64, props map[string]any, draw func()) {
 	dc.Rotate(gg.Radians(rot))
 	dc.Scale(sc, sc)
 	dc.Translate(-cx, -cy)
+	if clip {
+		applyClip(dc, props)
+	}
 	draw()
 	dc.Pop()
 }
