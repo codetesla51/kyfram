@@ -871,7 +871,7 @@ func encodeFrames(tl Timeline, workers int, write func(int, []byte) error) error
 	for i := 0; i < workers; i++ {
 		go func() {
 			defer wg.Done()
-			if err := frameWorker(ctx, tl, jobs, results, slots); err != nil {
+			if err := frameWorker(ctx, tl, jobs, results); err != nil {
 				fail(err)
 			}
 		}()
@@ -887,9 +887,19 @@ func encodeFrames(tl Timeline, workers int, write func(int, []byte) error) error
 
 feed:
 	for i := 0; i < n; i++ {
+		// Reserve a bounded slot before handing out the job. Without this,
+		// workers can paint a full window of later frames while the frame the
+		// writer needs is still in flight, leaving no slot for that frame and
+		// deadlocking the pipeline.
+		select {
+		case slots <- struct{}{}:
+		case <-ctx.Done():
+			break feed
+		}
 		select {
 		case jobs <- i:
 		case <-ctx.Done():
+			<-slots
 			break feed
 		}
 	}
@@ -907,7 +917,7 @@ feed:
 // frameWorker paints jobs forever with one canvas. Draw state is reset at
 // the start of each frame by drawFrame, and the completed pixels are
 // copied because the canvas is cleared for the next frame.
-func frameWorker(ctx context.Context, tl Timeline, jobs <-chan int, results chan<- frameResult, slots chan struct{}) (err error) {
+func frameWorker(ctx context.Context, tl Timeline, jobs <-chan int, results chan<- frameResult) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("render frame: %v", r)
@@ -920,13 +930,6 @@ func frameWorker(ctx context.Context, tl Timeline, jobs <-chan int, results chan
 			return nil
 		case idx, ok := <-jobs:
 			if !ok {
-				return nil
-			}
-			// Hold a slot while the frame is in flight, not just while
-			// queued, so memory stays bounded when ffmpeg falls behind.
-			select {
-			case slots <- struct{}{}:
-			case <-ctx.Done():
 				return nil
 			}
 			drawFrame(dc, tl, float64(idx)/float64(tl.FPS))
