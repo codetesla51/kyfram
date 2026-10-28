@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-# local CI gate — mirrors .gitlab-ci.yml (build, vet, test, lint if installed)
+# local CI gate — mirrors .github/workflows/ci.yml (build, vet, test, lint if installed)
 go mod download
 go build ./...
 go vet ./...
