@@ -1,0 +1,60 @@
+// effects.lgv — side-by-side shadow, blur, and glow.
+scene(6, 30)
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 1280, h: 720, color: "#0b0b0f"},
+})
+
+text("title", table{
+  "0": table{content: "SHADOW / BLUR / GLOW", x: 640, y: 74, size: 52, color: "#f6f1e7"},
+})
+
+shape("card1", "roundRect", table{
+  "0": table{x: 60, y: 150, w: 340, h: 330, radius: 24, color: "#14141c"},
+})
+shape("card2", "roundRect", table{
+  "0": table{x: 470, y: 150, w: 340, h: 330, radius: 24, color: "#14141c"},
+})
+shape("card3", "roundRect", table{
+  "0": table{x: 880, y: 150, w: 340, h: 330, radius: 24, color: "#14141c"},
+})
+
+text("label1", table{
+  "0": table{content: "SHADOW", x: 230, y: 195, size: 26, color: "#8f8f86"},
+})
+text("label2", table{
+  "0": table{content: "BLUR", x: 640, y: 195, size: 26, color: "#8f8f86"},
+})
+text("label3", table{
+  "0": table{content: "GLOW", x: 1050, y: 195, size: 26, color: "#8f8f86"},
+})
+
+// Shadow: offset and blurred silhouette.
+shape("shadow", "circle", table{
+  "0": table{x: 230, y: 330, r: 62, color: "#f6f1e7",
+    shadowColor: "#ff4d3d", shadowBlur: 18, shadowX: 22, shadowY: 22},
+})
+
+// Blur: the entity itself goes soft.
+shape("blur", "circle", table{
+  "0": table{x: 640, y: 330, r: 62, color: "#5fd0c4", blur: 12},
+})
+
+// Glow: colored halo outside the entity.
+shape("glow", "circle", table{
+  "0": table{x: 1050, y: 330, r: 62, color: "#f6f1e7",
+    glow: "#f4b942", glowBlur: 26},
+})
+
+// All three together, with a pulse so the effects are obvious in motion.
+text("combo", table{
+  "0": table{content: "ALL THREE", x: 640, y: 600, size: 64, color: "#f6f1e7",
+    shadowColor: "#000000", shadowBlur: 14, shadowX: 0, shadowY: 10,
+    glow: "#5fd0c4", glowBlur: 18, blur: 2, scale: 0.98},
+  "2": table{content: "ALL THREE", x: 640, y: 600, size: 64, color: "#f6f1e7",
+    shadowColor: "#000000", shadowBlur: 14, shadowX: 0, shadowY: 10,
+    glow: "#5fd0c4", glowBlur: 18, blur: 2, scale: 1.02},
+  "4": table{content: "ALL THREE", x: 640, y: 600, size: 64, color: "#f6f1e7",
+    shadowColor: "#000000", shadowBlur: 14, shadowX: 0, shadowY: 10,
+    glow: "#5fd0c4", glowBlur: 18, blur: 2, scale: 0.98},
+})
