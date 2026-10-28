@@ -335,7 +335,7 @@ func groupParentOf(g Group) string {
 // the canvas-center defaults used by root entities.
 func groupChildDefaults(kind string, props map[string]any) {
 	switch kind {
-	case "circle", "star", "ellipse", "text":
+	case "circle", "star", "ellipse", "text", "svg":
 		if _, ok := props["x"]; !ok {
 			props["x"] = 0.0
 		}
@@ -443,6 +443,33 @@ func drawEntity(dc *gg.Context, w, h int, kind string, props map[string]any, fac
 		}
 		spin(dc, cx, cy, props, func() {
 			dc.DrawImageAnchored(im, int(cx), int(cy), 0.5, 0.5)
+		})
+	case "svg":
+		// A static SVG file becomes one entity. x,y is the center, w/h the
+		// target box; the document's viewBox and preserveAspectRatio handle
+		// fitting. Colors, groups, transforms, and basic gradients are kept,
+		// while text/scripts/filters are ignored by the importer.
+		path := propStr(props, "path", "")
+		if path == "" {
+			return
+		}
+		doc, err := loadSVG(path)
+		if err != nil || doc == nil {
+			return
+		}
+		dw := propNum(props, "w", doc.Width)
+		dh := propNum(props, "h", doc.Height)
+		if dw <= 0 {
+			dw = doc.ViewBox[2]
+		}
+		if dh <= 0 {
+			dh = doc.ViewBox[3]
+		}
+		if dw <= 0 || dh <= 0 {
+			return
+		}
+		spin(dc, cx, cy, props, func() {
+			drawSVGDoc(dc, doc, cx-dw/2, cy-dh/2, dw, dh, propNum(props, "alpha", 1))
 		})
 	case "wave":
 		// The engine owns the sine: scripts declare endpoints and

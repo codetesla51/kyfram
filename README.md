@@ -30,7 +30,8 @@ Think CSS `@keyframes` for video: retiming is editing a number, not re-directing
 - **One-line entrances** — `fadeIn()`, `slideIn()`, `popIn()` synthesize keyframe tables; pass a start time and duration when needed.
 - **Per-letter text** — `letters()` measures glyph advances, staggers each letter, and supports newlines/wrapping.
 - **Stroke draw-on** — `trim` / `trimStart` reveal a `line` or `path` by length.
-- **Rich primitives** — `circle`, `rect`, `roundRect`, `polygon`, `star`, `ellipse`, `line`, `arc`, `wave`, `path`, `image`, `text`.
+- **Rich primitives** — `circle`, `rect`, `roundRect`, `polygon`, `star`, `ellipse`, `line`, `arc`, `wave`, `path`, `image`, `svg`, `text`.
+- **SVG import** — `svg()` loads a static SVG document as one animatable entity; paths, groups, transforms, solid fills, and linear/radial gradients are preserved.
 - **Groups** — `group()` with local `x/y`, keyframed `x y scale rotate alpha layer`, and optional `parent` for nesting.
 - **Clipping** — crop groups and entities to `rect`, `roundRect`, `circle`, or `path` shapes.
 - **Camera** — keyframed pan/zoom for the whole scene.
@@ -208,6 +209,32 @@ text("body", table{
     },
 })
 ```
+
+### SVG import
+
+`svg(name, path, keyframes, group)` loads a static SVG file as one entity.
+`x/y` is the center of the target box and `w/h` is its size; the document's
+`viewBox` and `preserveAspectRatio` handle fitting. Rotation, scale, alpha,
+clipping, and the effect props work exactly like any other entity.
+
+```js
+svg("mark", "examples/assets/kyfram-mark.svg", table{
+    "0": table{x: 640, y: 320, w: 360, h: 360, scale: 0.7, alpha: 0},
+    "0.9": table{x: 640, y: 320, w: 360, h: 360, scale: 1, alpha: 1,
+        ease: "easeOut"},
+})
+```
+
+You can also use `shape(name, "svg", keyframes)` with a `path` prop. The
+importer understands `path`, `rect`, `circle`, `ellipse`, `line`,
+`polyline`, and `polygon`; nested groups and `<use>` references; `translate`/
+`scale`/`rotate`/`skewX`/`skewY`/`matrix` transforms; presentation attributes
+and inline `style`; solid colors; and linear/radial gradients. SVG path data
+supports `M/L/H/V/C/S/Q/T/A/Z`, absolute and relative.
+
+Text, CSS selectors, clip paths, masks, filters, patterns, and external
+images are ignored. Convert those to paths or draw them with kyfram
+primitives when possible.
 
 ### Rotation pivot
 

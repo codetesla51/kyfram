@@ -116,6 +116,40 @@ func (b *Builder) Bind(vm *interpreter.Interpreter) {
 		b.addEntity(name, "text", kfs, group)
 		return interpreter.NULL
 	})
+	vm.Register("svg", func(args ...interpreter.Object) interpreter.Object {
+		if len(args) < 3 || len(args) > 4 {
+			return &interpreter.Error{Message: fmt.Sprintf("svg() takes name, path, keyframes, optional group; got %d arguments", len(args))}
+		}
+		name, err := strArg(args[0], "name")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		path, err := strArg(args[1], "path")
+		if err != nil {
+			return &interpreter.Error{Message: err.Error()}
+		}
+		if strings.TrimSpace(path) == "" {
+			return &interpreter.Error{Message: fmt.Sprintf("svg %q: path must not be empty", name)}
+		}
+		kfs, err := keyframesArg(args[2])
+		if err != nil {
+			return &interpreter.Error{Message: fmt.Sprintf("svg %q: %v", name, err)}
+		}
+		for i := range kfs {
+			if _, ok := kfs[i].Props["path"]; !ok {
+				kfs[i].Props["path"] = path
+			}
+		}
+		group := ""
+		if len(args) == 4 {
+			group, err = strArg(args[3], "group")
+			if err != nil {
+				return &interpreter.Error{Message: fmt.Sprintf("svg %q: %v", name, err)}
+			}
+		}
+		b.addEntity(name, "svg", kfs, group)
+		return interpreter.NULL
+	})
 	vm.Register("letters", func(args ...interpreter.Object) interpreter.Object {
 		if len(args) < 3 || len(args) > 5 {
 			return &interpreter.Error{Message: fmt.Sprintf("letters() takes name, content, keyframes, optional stagger, optional group; got %d arguments", len(args))}

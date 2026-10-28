@@ -7,7 +7,7 @@ import (
 
 // knownKinds is every kind drawEntity understands.
 var knownKinds = []string{
-	"circle", "text", "rect", "line", "arc", "image", "wave",
+	"circle", "text", "rect", "line", "arc", "image", "svg", "wave",
 	"path", "polygon", "roundRect", "star", "ellipse",
 }
 
@@ -144,16 +144,22 @@ func (b *Builder) validate() error {
 				return fmt.Errorf("%s entity %q: path cannot set both \"d\" and \"points\"", where, e.Name)
 			}
 		}
-		if e.Kind == "image" {
+		if e.Kind == "image" || e.Kind == "svg" {
 			for _, kf := range e.Keyframes {
 				p, ok := kf.Props["path"]
 				if !ok {
-					return fmt.Errorf("%s entity %q: image needs a \"path\" prop at t=%g (without one it draws nothing)",
-						where, e.Name, kf.Time)
+					return fmt.Errorf("%s entity %q: %s needs a \"path\" prop at t=%g (without one it draws nothing)",
+						where, e.Name, e.Kind, kf.Time)
 				}
 				// Type already proven string by checkValue above.
-				if err := checkAsset(where, e.Name, kf.Time, "image", p.(string)); err != nil {
+				if err := checkAsset(where, e.Name, kf.Time, e.Kind, p.(string)); err != nil {
 					return err
+				}
+				if e.Kind == "svg" {
+					if _, err := loadSVG(p.(string)); err != nil {
+						return fmt.Errorf("%s entity %q: svg %q at t=%g: %v",
+							where, e.Name, p.(string), kf.Time, err)
+					}
 				}
 			}
 		}

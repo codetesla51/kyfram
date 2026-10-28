@@ -1,0 +1,88 @@
+// svg-import.lgv — a real SVG document imported as one animatable entity.
+// The mark uses groups, transforms, gradients, rounded rects, circles, and
+// path commands (H/V/L/Q/Z), all resolved by the importer.
+scene(5, 30)
+
+let bg = "#07070B"
+let card = "#101018"
+let white = "#F6F1E7"
+let muted = "#8F8F86"
+let cyan = "#5FD0C4"
+let gold = "#F4B942"
+let display = "examples/assets/fonts/Geist-Bold.ttf"
+let body = "examples/assets/fonts/Geist-Regular.ttf"
+
+shape("bg", "rect", table{
+  "0": table{x: 0, y: 0, w: 1280, h: 720, color: bg},
+})
+
+shape("card", "roundRect", table{
+  "0": table{x: 400, y: 96, w: 480, h: 448, radius: 32, color: card},
+})
+
+// The whole file is one entity: x,y is its center and w,h its target box.
+// Rotation and scale stay keyframeable like any other shape.
+svg("mark", "examples/assets/kyfram-mark.svg", table{
+  "0.0": table{x: 640, y: 320, w: 360, h: 360, rotate: -14, scale: 0.72, alpha: 0},
+  "0.9": table{x: 640, y: 320, w: 360, h: 360, rotate: 0, scale: 1, alpha: 1, ease: "easeOut"},
+  "3.8": table{x: 640, y: 320, w: 360, h: 360, rotate: 3, scale: 1.04, alpha: 1},
+  "5.0": table{x: 640, y: 320, w: 360, h: 360, rotate: 0, scale: 1, alpha: 1},
+})
+
+text("kicker", table{
+  "0.5": table{content: "SVG IMPORT", x: 640, y: 574, size: 18,
+    color: cyan, font: display, alpha: 0},
+  "1.1": table{content: "SVG IMPORT", x: 640, y: 574, size: 18,
+    color: cyan, font: display, alpha: 1, ease: "easeOut"},
+  "5.0": table{content: "SVG IMPORT", x: 640, y: 574, size: 18,
+    color: cyan, font: display, alpha: 1},
+})
+
+text("title", table{
+  "0.7": table{content: "one file, one entity", x: 640, y: 612, size: 36,
+    color: white, font: display, alpha: 0},
+  "1.3": table{content: "one file, one entity", x: 640, y: 612, size: 36,
+    color: white, font: display, alpha: 1, ease: "easeOut"},
+  "5.0": table{content: "one file, one entity", x: 640, y: 612, size: 36,
+    color: white, font: display, alpha: 1},
+})
+
+text("footnote", table{
+  "0.9": table{content: "paths · groups · transforms · gradients · solid fills", x: 640, y: 654,
+    size: 15, color: muted, font: body, alpha: 0},
+  "1.5": table{content: "paths · groups · transforms · gradients · solid fills", x: 640, y: 654,
+    size: 15, color: muted, font: body, alpha: 1, ease: "easeOut"},
+  "5.0": table{content: "paths · groups · transforms · gradients · solid fills", x: 640, y: 654,
+    size: 15, color: muted, font: body, alpha: 1},
+})
+
+// A few small proof marks: the same imported SVG can be reused at any size.
+svg("left", "examples/assets/kyfram-mark.svg", table{
+  "1.4": table{x: 210, y: 180, w: 92, h: 92, rotate: -12, alpha: 0},
+  "2.0": table{x: 210, y: 180, w: 92, h: 92, rotate: -8, alpha: 1, ease: "easeOut"},
+  "5.0": table{x: 210, y: 180, w: 92, h: 92, rotate: -8, alpha: 1},
+})
+svg("right", "examples/assets/kyfram-mark.svg", table{
+  "1.5": table{x: 1070, y: 180, w: 92, h: 92, rotate: 12, alpha: 0},
+  "2.1": table{x: 1070, y: 180, w: 92, h: 92, rotate: 8, alpha: 1, ease: "easeOut"},
+  "5.0": table{x: 1070, y: 180, w: 92, h: 92, rotate: 8, alpha: 1},
+})
+
+text("left-label", table{
+  "2.0": table{content: "92 px", x: 210, y: 246, size: 13, color: muted, font: body, alpha: 0},
+  "2.5": table{content: "92 px", x: 210, y: 246, size: 13, color: muted, font: body, alpha: 1},
+  "5.0": table{content: "92 px", x: 210, y: 246, size: 13, color: muted, font: body, alpha: 1},
+})
+text("right-label", table{
+  "2.0": table{content: "92 px", x: 1070, y: 246, size: 13, color: muted, font: body, alpha: 0},
+  "2.5": table{content: "92 px", x: 1070, y: 246, size: 13, color: muted, font: body, alpha: 1},
+  "5.0": table{content: "92 px", x: 1070, y: 246, size: 13, color: muted, font: body, alpha: 1},
+})
+
+// A soft halo ties the composition together without touching the SVG.
+shape("halo", "circle", table{
+  "0.8": table{x: 640, y: 320, r: 190, color: gold, alpha: 0},
+  "1.6": table{x: 640, y: 320, r: 190, color: gold, alpha: 0.05},
+  "3.8": table{x: 640, y: 320, r: 230, color: cyan, alpha: 0.10},
+  "5.0": table{x: 640, y: 320, r: 190, color: gold, alpha: 0.05},
+})
