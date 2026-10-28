@@ -938,7 +938,7 @@ func drawSVGDoc(dc *gg.Context, doc *svgDoc, x, y, w, h, alpha float64) {
 	}
 	layer := gg.NewContext(iw, ih)
 	drawSVGVector(layer, doc, float64(iw), float64(ih), 1)
-	var im image.Image = layer.Image()
+	im := layer.Image()
 	if alpha < 1 {
 		// Apply entity alpha once to the finished layer, not to each shape;
 		// otherwise overlapping parts of the SVG would darken differently.
