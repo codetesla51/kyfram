@@ -10,6 +10,11 @@
 </p>
 <p align="center"><sub>Logo made with kyfram</sub></p>
 
+<p align="center">
+  <a href="examples/kyfram-promo.mp4"><img src="examples/kyfram-promo.png" width="760" alt="kyfram promo film — logo, keyframes, SVG import, and camera"></a>
+</p>
+<p align="center"><sub><a href="examples/kyfram-promo.mp4">Watch the 25-second promo</a> · rendered with kyfram from <a href="examples/kyfram-promo.lgv"><code>examples/kyfram-promo.lgv</code></a></sub></p>
+
 > Keyframe-driven rendering engine — declare what shapes look like at specific times, Go renders to `mp4`/`png` via `gg` + `ffmpeg`.
 
 **Docs → [kyfram-site-68056d.gitlab.io](https://kyfram-site-68056d.gitlab.io/index.html)** — install, quickstart, and reference. This README is the quick pitch.

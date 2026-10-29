@@ -1,0 +1,600 @@
+// kyfram-promo.lgv — a 25.6s launch film for kyfram.
+// Everything here is rendered by kyfram itself: SVG import, keyframes,
+// letters, stroke trim, nested groups, clipping, effects, and camera.
+audio("examples/assets/kyfram-promo.mp3")
+
+let still = fn(dur, p) {
+  let k = table{}
+  k["0"] = p
+  k[str(dur)] = p
+  return k
+}
+
+let bg = "#07070B"
+let panel = "#0E0E16"
+let panel2 = "#12121C"
+let white = "#F6F1E7"
+let muted = "#8F8F86"
+let cyan = "#5FD0C4"
+let gold = "#F4B942"
+let coral = "#FF6B4A"
+let display = "examples/assets/fonts/Geist-Bold.ttf"
+let body = "examples/assets/fonts/Geist-Regular.ttf"
+
+// A faint grid runs under every scene, so cuts and camera moves feel
+// like they happen inside one continuous space.
+shape("grid-v1", "line", still(25.6, table{x1: 240, y1: 0, x2: 240, y2: 1080, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-v2", "line", still(25.6, table{x1: 480, y1: 0, x2: 480, y2: 1080, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-v3", "line", still(25.6, table{x1: 720, y1: 0, x2: 720, y2: 1080, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-v4", "line", still(25.6, table{x1: 960, y1: 0, x2: 960, y2: 1080, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-v5", "line", still(25.6, table{x1: 1200, y1: 0, x2: 1200, y2: 1080, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-v6", "line", still(25.6, table{x1: 1440, y1: 0, x2: 1440, y2: 1080, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-v7", "line", still(25.6, table{x1: 1680, y1: 0, x2: 1680, y2: 1080, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-h1", "line", still(25.6, table{x1: 0, y1: 180, x2: 1920, y2: 180, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-h2", "line", still(25.6, table{x1: 0, y1: 360, x2: 1920, y2: 360, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-h3", "line", still(25.6, table{x1: 0, y1: 540, x2: 1920, y2: 540, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-h4", "line", still(25.6, table{x1: 0, y1: 720, x2: 1920, y2: 720, width: 1, color: "#8F8F86", alpha: 0.035}))
+shape("grid-h5", "line", still(25.6, table{x1: 0, y1: 900, x2: 1920, y2: 900, width: 1, color: "#8F8F86", alpha: 0.035}))
+
+// ─────────────────────────────────────────────────────────────────────────
+// 01 — brand reveal
+// ─────────────────────────────────────────────────────────────────────────
+scene(3.8, 30)
+
+shape("s1-bg", "rect", still(3.8, table{
+  x: 0, y: 0, w: 1920, h: 1080,
+  gradFrom: "#0D0D16", gradTo: "#060609", gradAngle: 120,
+}))
+shape("s1-halo-cyan", "circle", still(3.8, table{
+  x: 960, y: 420, r: 380, color: cyan, alpha: 0.03,
+}))
+shape("s1-halo-gold", "circle", still(3.8, table{
+  x: 1200, y: 700, r: 300, color: gold, alpha: 0.025,
+}))
+
+shape("s1-arc-a", "arc", table{
+  "0.5": table{x: 960, y: 430, r: 245, start: 200, end: 200, width: 2, color: gold, alpha: 0.0},
+  "1.7": table{x: 960, y: 430, r: 245, start: 200, end: 342, width: 2, color: gold, alpha: 0.55, ease: "sine"},
+  "3.8": table{x: 960, y: 430, r: 255, start: 200, end: 342, width: 2, color: gold, alpha: 0.35},
+})
+shape("s1-arc-b", "arc", table{
+  "0.7": table{x: 960, y: 430, r: 300, start: 20, end: 20, width: 1, color: cyan, alpha: 0.0},
+  "1.9": table{x: 960, y: 430, r: 300, start: 20, end: 158, width: 1, color: cyan, alpha: 0.45, ease: "sine"},
+  "3.8": table{x: 960, y: 430, r: 290, start: 20, end: 158, width: 1, color: cyan, alpha: 0.25},
+})
+
+svg("s1-mark", "examples/assets/kyfram-mark.svg", table{
+  "0": table{x: 960, y: 470, w: 330, h: 330, rotate: -20, scale: 0.55, alpha: 0},
+  "0.65": table{x: 960, y: 430, w: 330, h: 330, rotate: -4, scale: 1, alpha: 1, ease: "spring"},
+  "1.4": table{x: 960, y: 430, w: 330, h: 330, rotate: 0, scale: 1.02, alpha: 1},
+  "2.5": table{x: 960, y: 424, w: 330, h: 330, rotate: 2, scale: 1.04, alpha: 1},
+  "3.8": table{x: 960, y: 430, w: 330, h: 330, rotate: 0, scale: 1, alpha: 1},
+})
+
+shape("s1-dot-gold", "circle", table{
+  "0.9": table{x: 756, y: 522, r: 0, color: gold, alpha: 0},
+  "1.5": table{x: 756, y: 510, r: 9, color: gold, alpha: 0.95, ease: "easeOut"},
+  "2.6": table{x: 748, y: 500, r: 9, color: gold, alpha: 0.95},
+  "3.8": table{x: 756, y: 510, r: 9, color: gold, alpha: 0.95},
+})
+shape("s1-dot-coral", "circle", table{
+  "1.2": table{x: 1170, y: 342, r: 0, color: coral, alpha: 0},
+  "1.8": table{x: 1170, y: 332, r: 7, color: coral, alpha: 0.9, ease: "easeOut"},
+  "2.9": table{x: 1178, y: 320, r: 7, color: coral, alpha: 0.9},
+  "3.8": table{x: 1170, y: 332, r: 7, color: coral, alpha: 0.9},
+})
+
+letters("s1-brand", "kyfram", table{
+  "0.55": table{x: 960, y: 724, size: 154, color: white, font: display, alpha: 0, scale: 0.92},
+  "1.15": table{x: 960, y: 700, size: 154, color: white, font: display, alpha: 1, scale: 1, ease: "spring"},
+  "2.4": table{x: 960, y: 696, size: 154, color: white, font: display, alpha: 1, scale: 1},
+  "3.8": table{x: 960, y: 700, size: 154, color: white, font: display, alpha: 1, scale: 1},
+}, 0.055)
+
+text("s1-tag", table{
+  "0.95": table{content: "MOTION GRAPHICS FOR GO", x: 960, y: 792, size: 23, color: muted, font: body, alpha: 0},
+  "1.45": table{content: "MOTION GRAPHICS FOR GO", x: 960, y: 788, size: 23, color: muted, font: body, alpha: 1, ease: "easeOut"},
+  "3.8": table{content: "MOTION GRAPHICS FOR GO", x: 960, y: 788, size: 23, color: muted, font: body, alpha: 1},
+})
+
+shape("s1-rule", "rect", table{
+  "1.1": table{x: 960, y: 842, w: 0, h: 3, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 0},
+  "2.0": table{x: 760, y: 842, w: 400, h: 3, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 1, ease: "easeOut"},
+  "3.8": table{x: 760, y: 842, w: 400, h: 3, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 1},
+})
+
+text("s1-version", table{
+  "2.3": table{content: "v0.5.0  ·  OPEN SOURCE", x: 960, y: 982, size: 14, color: muted, font: body, alpha: 0},
+  "2.8": table{content: "v0.5.0  ·  OPEN SOURCE", x: 960, y: 978, size: 14, color: muted, font: body, alpha: 0.8, ease: "easeOut"},
+  "3.8": table{content: "v0.5.0  ·  OPEN SOURCE", x: 960, y: 978, size: 14, color: muted, font: body, alpha: 0.8},
+})
+
+// ─────────────────────────────────────────────────────────────────────────
+// 02 — declare states at times
+// ─────────────────────────────────────────────────────────────────────────
+scene(4.2, 30, "fade", 0.5)
+
+shape("s2-bg", "rect", still(4.2, table{
+  x: 0, y: 0, w: 1920, h: 1080,
+  gradFrom: "#0B0B13", gradTo: "#060609", gradAngle: 90,
+}))
+shape("s2-halo", "circle", still(4.2, table{
+  x: 1480, y: 520, r: 420, color: cyan, alpha: 0.025,
+}))
+
+text("s2-kicker", table{
+  "0": table{content: "01  /  DECLARE", x: 960, y: 188, size: 19, color: cyan, font: display, alpha: 0},
+  "0.45": table{content: "01  /  DECLARE", x: 960, y: 188, size: 19, color: cyan, font: display, alpha: 1, ease: "easeOut"},
+  "4.2": table{content: "01  /  DECLARE", x: 960, y: 188, size: 19, color: cyan, font: display, alpha: 1},
+})
+
+letters("s2-title", "states at times", table{
+  "0.1": table{x: 960, y: 276, size: 86, color: white, font: display, alpha: 0, scale: 0.96},
+  "0.7": table{x: 960, y: 276, size: 86, color: white, font: display, alpha: 1, scale: 1, ease: "spring"},
+  "4.2": table{x: 960, y: 276, size: 86, color: white, font: display, alpha: 1, scale: 1},
+}, 0.032)
+
+text("s2-sub", table{
+  "0.55": table{content: "No callbacks. No timeline editor. Just keyframes.", x: 960, y: 354, size: 25, color: muted, font: body, alpha: 0},
+  "1.05": table{content: "No callbacks. No timeline editor. Just keyframes.", x: 960, y: 350, size: 25, color: muted, font: body, alpha: 1, ease: "easeOut"},
+  "4.2": table{content: "No callbacks. No timeline editor. Just keyframes.", x: 960, y: 350, size: 25, color: muted, font: body, alpha: 1},
+})
+
+shape("s2-panel-edge", "roundRect", still(4.2, table{
+  x: 268, y: 458, w: 1384, h: 324, radius: 36, gradFrom: "#1A1A26", gradTo: "#101018", gradAngle: 90, alpha: 0.55,
+}))
+shape("s2-panel", "roundRect", still(4.2, table{
+  x: 280, y: 470, w: 1360, h: 300, radius: 30, gradFrom: "#11111A", gradTo: "#0A0A11", gradAngle: 90,
+}))
+
+text("s2-panel-label", table{
+  "0.7": table{content: "KEYFRAME TABLE", x: 480, y: 522, size: 15, color: muted, font: display, alpha: 0},
+  "1.1": table{content: "KEYFRAME TABLE", x: 480, y: 522, size: 15, color: muted, font: display, alpha: 0.8, ease: "easeOut"},
+  "4.2": table{content: "KEYFRAME TABLE", x: 480, y: 522, size: 15, color: muted, font: display, alpha: 0.8},
+})
+
+shape("s2-track", "line", still(4.2, table{
+  x1: 420, y1: 650, x2: 1500, y2: 650, width: 2, color: "#2B2B38",
+}))
+shape("s2-progress", "rect", table{
+  "0.7": table{x: 420, y: 648, w: 0, h: 3, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 0},
+  "1.2": table{x: 420, y: 648, w: 0, h: 3, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 1},
+  "3.4": table{x: 420, y: 648, w: 1080, h: 3, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 1, ease: "sine"},
+  "4.2": table{x: 420, y: 648, w: 1080, h: 3, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 1},
+})
+
+// Ticks and labels.
+shape("s2-tick1", "line", still(4.2, table{x1: 420, y1: 638, x2: 420, y2: 662, width: 2, color: "#4A4A58"}))
+shape("s2-tick2", "line", still(4.2, table{x1: 690, y1: 638, x2: 690, y2: 662, width: 2, color: "#4A4A58"}))
+shape("s2-tick3", "line", still(4.2, table{x1: 960, y1: 638, x2: 960, y2: 662, width: 2, color: "#4A4A58"}))
+shape("s2-tick4", "line", still(4.2, table{x1: 1230, y1: 638, x2: 1230, y2: 662, width: 2, color: "#4A4A58"}))
+shape("s2-tick5", "line", still(4.2, table{x1: 1500, y1: 638, x2: 1500, y2: 662, width: 2, color: "#4A4A58"}))
+
+text("s2-t1", still(4.2, table{content: "0.0", x: 420, y: 704, size: 14, color: muted, font: body, alpha: 0.8}))
+text("s2-t2", still(4.2, table{content: "0.6", x: 690, y: 704, size: 14, color: muted, font: body, alpha: 0.8}))
+text("s2-t3", still(4.2, table{content: "1.2", x: 960, y: 704, size: 14, color: muted, font: body, alpha: 0.8}))
+text("s2-t4", still(4.2, table{content: "1.8", x: 1230, y: 704, size: 14, color: muted, font: body, alpha: 0.8}))
+text("s2-t5", still(4.2, table{content: "2.4", x: 1500, y: 704, size: 14, color: muted, font: body, alpha: 0.8}))
+
+// The three keyframes.
+shape("s2-kf1", "circle", table{
+  "0.8": table{x: 420, y: 650, r: 0, color: cyan, alpha: 0},
+  "1.15": table{x: 420, y: 650, r: 10, color: cyan, alpha: 1, ease: "spring"},
+  "4.2": table{x: 420, y: 650, r: 10, color: cyan, alpha: 1},
+})
+shape("s2-kf2", "circle", table{
+  "1.05": table{x: 960, y: 650, r: 0, color: gold, alpha: 0},
+  "1.4": table{x: 960, y: 650, r: 10, color: gold, alpha: 1, ease: "spring"},
+  "4.2": table{x: 960, y: 650, r: 10, color: gold, alpha: 1},
+})
+shape("s2-kf3", "circle", table{
+  "1.3": table{x: 1500, y: 650, r: 0, color: coral, alpha: 0},
+  "1.65": table{x: 1500, y: 650, r: 10, color: coral, alpha: 1, ease: "spring"},
+  "4.2": table{x: 1500, y: 650, r: 10, color: coral, alpha: 1},
+})
+
+// A drawn motion path and a ball riding it.
+shape("s2-path", "path", table{
+  "1.1": table{points: [420,650, 500,618, 580,600, 660,592, 740,600, 820,625, 900,644, 960,650, 1040,642, 1120,625, 1200,600, 1280,590, 1360,600, 1440,625, 1500,650], width: 2, color: cyan, alpha: 0, trim: 0, cap: "round", join: "round"},
+  "2.9": table{points: [420,650, 500,618, 580,600, 660,592, 740,600, 820,625, 900,644, 960,650, 1040,642, 1120,625, 1200,600, 1280,590, 1360,600, 1440,625, 1500,650], width: 2, color: cyan, alpha: 0.35, trim: 1, cap: "round", join: "round", ease: "sine"},
+  "4.2": table{points: [420,650, 500,618, 580,600, 660,592, 740,600, 820,625, 900,644, 960,650, 1040,642, 1120,625, 1200,600, 1280,590, 1360,600, 1440,625, 1500,650], width: 2, color: cyan, alpha: 0.35, trim: 1, cap: "round", join: "round"},
+})
+shape("s2-ball", "circle", table{
+  "1.0": table{x: 420, y: 650, r: 0, color: coral, alpha: 0},
+  "1.25": table{x: 420, y: 650, r: 16, color: coral, alpha: 1, ease: "spring"},
+  "1.8": table{x: 740, y: 600, r: 16, color: coral, alpha: 1, ease: "sine"},
+  "2.3": table{x: 1060, y: 636, r: 16, color: coral, alpha: 1, ease: "sine"},
+  "2.9": table{x: 1360, y: 600, r: 16, color: coral, alpha: 1, ease: "sine"},
+  "3.4": table{x: 1500, y: 650, r: 16, color: coral, alpha: 1, ease: "sine"},
+  "4.2": table{x: 1500, y: 650, r: 16, color: coral, alpha: 1},
+})
+shape("s2-ball-glow", "circle", table{
+  "1.1": table{x: 420, y: 650, r: 34, color: coral, alpha: 0},
+  "1.5": table{x: 740, y: 600, r: 34, color: coral, alpha: 0.08},
+  "2.9": table{x: 1360, y: 600, r: 34, color: coral, alpha: 0.08},
+  "3.4": table{x: 1500, y: 650, r: 34, color: coral, alpha: 0.08},
+  "4.2": table{x: 1500, y: 650, r: 34, color: coral, alpha: 0.08},
+})
+
+text("s2-foot", table{
+  "1.9": table{content: "declare  →  interpolate  →  render", x: 960, y: 878, size: 21, color: muted, font: body, alpha: 0},
+  "2.4": table{content: "declare  →  interpolate  →  render", x: 960, y: 874, size: 21, color: muted, font: body, alpha: 0.9, ease: "easeOut"},
+  "4.2": table{content: "declare  →  interpolate  →  render", x: 960, y: 874, size: 21, color: muted, font: body, alpha: 0.9},
+})
+
+// ─────────────────────────────────────────────────────────────────────────
+// 03 — SVG import
+// ─────────────────────────────────────────────────────────────────────────
+scene(4.4, 30, "fade", 0.4)
+
+shape("s3-bg", "rect", still(4.4, table{
+  x: 0, y: 0, w: 1920, h: 1080,
+  gradFrom: "#0B0B12", gradTo: "#060609", gradAngle: 120,
+}))
+shape("s3-halo-gold", "circle", still(4.4, table{
+  x: 720, y: 640, r: 400, color: gold, alpha: 0.025,
+}))
+shape("s3-halo-cyan", "circle", still(4.4, table{
+  x: 1260, y: 460, r: 360, color: cyan, alpha: 0.03,
+}))
+
+text("s3-kicker", table{
+  "0": table{content: "02  /  IMPORT", x: 960, y: 178, size: 19, color: gold, font: display, alpha: 0},
+  "0.4": table{content: "02  /  IMPORT", x: 960, y: 178, size: 19, color: gold, font: display, alpha: 1, ease: "easeOut"},
+  "4.4": table{content: "02  /  IMPORT", x: 960, y: 178, size: 19, color: gold, font: display, alpha: 1},
+})
+letters("s3-title", "SVG, intact.", table{
+  "0.1": table{x: 960, y: 258, size: 82, color: white, font: display, alpha: 0, scale: 0.96},
+  "0.65": table{x: 960, y: 258, size: 82, color: white, font: display, alpha: 1, scale: 1, ease: "spring"},
+  "4.4": table{x: 960, y: 258, size: 82, color: white, font: display, alpha: 1, scale: 1},
+}, 0.028)
+text("s3-sub", table{
+  "0.5": table{content: "Paths, groups, transforms, gradients.", x: 960, y: 336, size: 24, color: muted, font: body, alpha: 0},
+  "1.0": table{content: "Paths, groups, transforms, gradients.", x: 960, y: 332, size: 24, color: muted, font: body, alpha: 1, ease: "easeOut"},
+  "4.4": table{content: "Paths, groups, transforms, gradients.", x: 960, y: 332, size: 24, color: muted, font: body, alpha: 1},
+})
+
+shape("s3-card-shadow", "roundRect", still(4.4, table{
+  x: 712, y: 406, w: 496, h: 456, radius: 42, color: "#000000", alpha: 0.35,
+}))
+shape("s3-card", "roundRect", table{
+  "0.3": table{x: 720, y: 398, w: 480, h: 440, radius: 40, gradFrom: "#15151F", gradTo: "#0B0B12", gradAngle: 90, alpha: 0},
+  "0.9": table{x: 720, y: 398, w: 480, h: 440, radius: 40, gradFrom: "#15151F", gradTo: "#0B0B12", gradAngle: 90, alpha: 1, ease: "easeOut"},
+  "4.4": table{x: 720, y: 398, w: 480, h: 440, radius: 40, gradFrom: "#15151F", gradTo: "#0B0B12", gradAngle: 90, alpha: 1},
+})
+
+shape("s3-dot1", "circle", still(4.4, table{x: 752, y: 432, r: 5, color: coral, alpha: 0.7}))
+shape("s3-dot2", "circle", still(4.4, table{x: 772, y: 432, r: 5, color: gold, alpha: 0.7}))
+shape("s3-dot3", "circle", still(4.4, table{x: 792, y: 432, r: 5, color: cyan, alpha: 0.7}))
+text("s3-file", still(4.4, table{
+  content: "kyfram-mark.svg", x: 980, y: 432, size: 14, color: muted, font: body, alpha: 0.7,
+}))
+
+group("s3-reveal", table{
+  "0.35": table{x: 960, y: 640, clip: "circle", clipR: 0, alpha: 1},
+  "1.35": table{x: 960, y: 640, clip: "circle", clipR: 212, alpha: 1, ease: "easeOut"},
+  "4.4": table{x: 960, y: 640, clip: "circle", clipR: 212, alpha: 1},
+})
+svg("s3-mark", "examples/assets/kyfram-mark.svg", table{
+  "0.35": table{x: 0, y: 0, w: 350, h: 350, rotate: -10, scale: 0.94, alpha: 1},
+  "1.35": table{x: 0, y: 0, w: 350, h: 350, rotate: 0, scale: 1, alpha: 1, ease: "easeOut"},
+  "2.8": table{x: 0, y: -4, w: 350, h: 350, rotate: 3, scale: 1.03, alpha: 1},
+  "4.4": table{x: 0, y: 0, w: 350, h: 350, rotate: 0, scale: 1, alpha: 1},
+}, "s3-reveal")
+
+shape("s3-arc", "arc", table{
+  "1.2": table{x: 960, y: 640, r: 235, start: 205, end: 205, width: 2, color: cyan, alpha: 0},
+  "2.4": table{x: 960, y: 640, r: 235, start: 205, end: 335, width: 2, color: cyan, alpha: 0.55, ease: "sine"},
+  "4.4": table{x: 960, y: 640, r: 243, start: 205, end: 335, width: 2, color: cyan, alpha: 0.35},
+})
+
+svg("s3-left", "examples/assets/kyfram-mark.svg", table{
+  "1.5": table{x: 426, y: 610, w: 142, h: 142, rotate: -18, alpha: 0, scale: 0.8},
+  "2.1": table{x: 426, y: 590, w: 142, h: 142, rotate: -12, alpha: 0.92, scale: 1, ease: "spring"},
+  "3.2": table{x: 426, y: 584, w: 142, h: 142, rotate: -12, alpha: 0.92, scale: 1},
+  "4.4": table{x: 426, y: 590, w: 142, h: 142, rotate: -12, alpha: 0.92, scale: 1},
+})
+svg("s3-right", "examples/assets/kyfram-mark.svg", table{
+  "1.7": table{x: 1494, y: 610, w: 142, h: 142, rotate: 18, alpha: 0, scale: 0.8},
+  "2.3": table{x: 1494, y: 590, w: 142, h: 142, rotate: 12, alpha: 0.92, scale: 1, ease: "spring"},
+  "3.4": table{x: 1494, y: 584, w: 142, h: 142, rotate: 12, alpha: 0.92, scale: 1},
+  "4.4": table{x: 1494, y: 590, w: 142, h: 142, rotate: 12, alpha: 0.92, scale: 1},
+})
+text("s3-left-label", table{
+  "2.1": table{content: "any size", x: 426, y: 692, size: 16, color: muted, font: body, alpha: 0},
+  "2.5": table{content: "any size", x: 426, y: 688, size: 16, color: muted, font: body, alpha: 0.85, ease: "easeOut"},
+  "4.4": table{content: "any size", x: 426, y: 688, size: 16, color: muted, font: body, alpha: 0.85},
+})
+text("s3-right-label", table{
+  "2.3": table{content: "any rotation", x: 1494, y: 692, size: 16, color: muted, font: body, alpha: 0},
+  "2.7": table{content: "any rotation", x: 1494, y: 688, size: 16, color: muted, font: body, alpha: 0.85, ease: "easeOut"},
+  "4.4": table{content: "any rotation", x: 1494, y: 688, size: 16, color: muted, font: body, alpha: 0.85},
+})
+
+text("s3-note", table{
+  "2.5": table{content: "one static file, fully keyframed", x: 960, y: 920, size: 18, color: muted, font: body, alpha: 0},
+  "3.0": table{content: "one static file, fully keyframed", x: 960, y: 916, size: 18, color: muted, font: body, alpha: 0.8, ease: "easeOut"},
+  "4.4": table{content: "one static file, fully keyframed", x: 960, y: 916, size: 18, color: muted, font: body, alpha: 0.8},
+})
+
+// ─────────────────────────────────────────────────────────────────────────
+// 04 — the motion toolkit
+// ─────────────────────────────────────────────────────────────────────────
+scene(4.2, 30, "fade", 0.4)
+
+shape("s4-bg", "rect", still(4.2, table{
+  x: 0, y: 0, w: 1920, h: 1080,
+  gradFrom: "#0B0B12", gradTo: "#060609", gradAngle: 90,
+}))
+shape("s4-halo", "circle", still(4.2, table{
+  x: 960, y: 600, r: 500, color: coral, alpha: 0.02,
+}))
+
+text("s4-kicker", table{
+  "0": table{content: "03  /  MOTION", x: 960, y: 154, size: 19, color: coral, font: display, alpha: 0},
+  "0.4": table{content: "03  /  MOTION", x: 960, y: 154, size: 19, color: coral, font: display, alpha: 1, ease: "easeOut"},
+  "4.2": table{content: "03  /  MOTION", x: 960, y: 154, size: 19, color: coral, font: display, alpha: 1},
+})
+letters("s4-title", "the toolkit", table{
+  "0.05": table{x: 960, y: 230, size: 78, color: white, font: display, alpha: 0, scale: 0.96},
+  "0.6": table{x: 960, y: 230, size: 78, color: white, font: display, alpha: 1, scale: 1, ease: "spring"},
+  "4.2": table{x: 960, y: 230, size: 78, color: white, font: display, alpha: 1, scale: 1},
+}, 0.032)
+text("s4-sub", table{
+  "0.45": table{content: "Text, strokes, groups — all keyframes.", x: 960, y: 306, size: 23, color: muted, font: body, alpha: 0},
+  "0.95": table{content: "Text, strokes, groups — all keyframes.", x: 960, y: 302, size: 23, color: muted, font: body, alpha: 1, ease: "easeOut"},
+  "4.2": table{content: "Text, strokes, groups — all keyframes.", x: 960, y: 302, size: 23, color: muted, font: body, alpha: 1},
+})
+
+// Card A — per-letter text.
+group("s4-cardA", table{
+  "0.15": table{x: 200, y: 430, alpha: 0},
+  "0.7": table{x: 200, y: 390, alpha: 1, ease: "easeOut"},
+  "4.2": table{x: 200, y: 390, alpha: 1},
+})
+shape("s4-cardA-bg", "roundRect", still(4.2, table{
+  x: 0, y: 0, w: 480, h: 460, radius: 28, gradFrom: "#15151F", gradTo: "#0B0B12", gradAngle: 90,
+}), "s4-cardA")
+shape("s4-cardA-rule", "rect", still(4.2, table{
+  x: 30, y: 0, w: 130, h: 3, gradFrom: cyan, gradTo: "#2A7F78", gradAngle: 0,
+}), "s4-cardA")
+text("s4-cardA-label", still(4.2, table{
+  content: "01  /  TEXT", x: 240, y: 54, size: 17, color: cyan, font: display, alpha: 0.95,
+}), "s4-cardA")
+letters("s4-cardA-word", "MOTION", table{
+  "0.65": table{x: 240, y: 252, size: 62, color: white, font: display, alpha: 0, scale: 0.82},
+  "1.05": table{x: 240, y: 252, size: 62, color: white, font: display, alpha: 1, scale: 1, ease: "spring"},
+  "4.2": table{x: 240, y: 252, size: 62, color: white, font: display, alpha: 1, scale: 1},
+}, 0.055, "s4-cardA")
+text("s4-cardA-cap", still(4.2, table{
+  content: "per-letter stagger", x: 240, y: 402, size: 16, color: muted, font: body, alpha: 0.9,
+}), "s4-cardA")
+
+// Card B — stroke draw-on.
+group("s4-cardB", table{
+  "0.3": table{x: 720, y: 430, alpha: 0},
+  "0.85": table{x: 720, y: 390, alpha: 1, ease: "easeOut"},
+  "4.2": table{x: 720, y: 390, alpha: 1},
+})
+shape("s4-cardB-bg", "roundRect", still(4.2, table{
+  x: 0, y: 0, w: 480, h: 460, radius: 28, gradFrom: "#15151F", gradTo: "#0B0B12", gradAngle: 90,
+}), "s4-cardB")
+shape("s4-cardB-rule", "rect", still(4.2, table{
+  x: 30, y: 0, w: 130, h: 3, gradFrom: gold, gradTo: "#8A6420", gradAngle: 0,
+}), "s4-cardB")
+text("s4-cardB-label", still(4.2, table{
+  content: "02  /  TRIM", x: 240, y: 54, size: 17, color: gold, font: display, alpha: 0.95,
+}), "s4-cardB")
+shape("s4-cardB-ghost", "path", still(4.2, table{
+  points: [62,286, 112,218, 162,286, 212,218, 262,286, 312,218, 362,286, 412,232], width: 3, color: "#3A3A48", alpha: 0.55, cap: "round", join: "round",
+}), "s4-cardB")
+shape("s4-cardB-line", "path", table{
+  "0.8": table{points: [62,286, 112,218, 162,286, 212,218, 262,286, 312,218, 362,286, 412,232], width: 5, color: gold, alpha: 1, trim: 0, cap: "round", join: "round"},
+  "2.1": table{points: [62,286, 112,218, 162,286, 212,218, 262,286, 312,218, 362,286, 412,232], width: 5, color: gold, alpha: 1, trim: 1, cap: "round", join: "round", ease: "sine"},
+  "4.2": table{points: [62,286, 112,218, 162,286, 212,218, 262,286, 312,218, 362,286, 412,232], width: 5, color: gold, alpha: 1, trim: 1, cap: "round", join: "round"},
+}, "s4-cardB")
+shape("s4-cardB-tip", "circle", table{
+  "1.9": table{x: 412, y: 232, r: 0, color: coral, alpha: 0},
+  "2.2": table{x: 412, y: 232, r: 7, color: coral, alpha: 1, ease: "spring"},
+  "4.2": table{x: 412, y: 232, r: 7, color: coral, alpha: 1},
+}, "s4-cardB")
+text("s4-cardB-cap", still(4.2, table{
+  content: "stroke draw-on", x: 240, y: 402, size: 16, color: muted, font: body, alpha: 0.9,
+}), "s4-cardB")
+
+// Card C — nested group rig.
+group("s4-cardC", table{
+  "0.45": table{x: 1240, y: 430, alpha: 0},
+  "1.0": table{x: 1240, y: 390, alpha: 1, ease: "easeOut"},
+  "4.2": table{x: 1240, y: 390, alpha: 1},
+})
+shape("s4-cardC-bg", "roundRect", still(4.2, table{
+  x: 0, y: 0, w: 480, h: 460, radius: 28, gradFrom: "#15151F", gradTo: "#0B0B12", gradAngle: 90,
+}), "s4-cardC")
+shape("s4-cardC-rule", "rect", still(4.2, table{
+  x: 30, y: 0, w: 130, h: 3, gradFrom: coral, gradTo: "#8E3327", gradAngle: 0,
+}), "s4-cardC")
+text("s4-cardC-label", still(4.2, table{
+  content: "03  /  RIG", x: 240, y: 54, size: 17, color: coral, font: display, alpha: 0.95,
+}), "s4-cardC")
+shape("s4-cardC-hub", "circle", still(4.2, table{
+  x: 240, y: 252, r: 24, color: "#20202C", alpha: 1,
+}), "s4-cardC")
+shape("s4-cardC-hub-dot", "circle", still(4.2, table{
+  x: 240, y: 252, r: 7, color: white, alpha: 0.8,
+}), "s4-cardC")
+group("s4-cardC-rig", table{
+  "0": table{x: 240, y: 252, rotate: -24, alpha: 1, parent: "s4-cardC"},
+  "1.3": table{x: 240, y: 252, rotate: 24, alpha: 1, parent: "s4-cardC", ease: "sine"},
+  "2.7": table{x: 240, y: 252, rotate: -24, alpha: 1, parent: "s4-cardC", ease: "sine"},
+  "4.2": table{x: 240, y: 252, rotate: 0, alpha: 1, parent: "s4-cardC", ease: "sine"},
+})
+shape("s4-cardC-arm", "roundRect", still(4.2, table{
+  x: -92, y: -17, w: 184, h: 34, radius: 17, gradFrom: cyan, gradTo: gold, gradAngle: 0,
+}), "s4-cardC-rig")
+shape("s4-cardC-tip", "circle", still(4.2, table{
+  x: 92, y: 0, r: 13, color: coral, alpha: 1,
+}), "s4-cardC-rig")
+text("s4-cardC-cap", still(4.2, table{
+  content: "nested groups", x: 240, y: 402, size: 16, color: muted, font: body, alpha: 0.9,
+}), "s4-cardC")
+
+// ─────────────────────────────────────────────────────────────────────────
+// 05 — camera + light
+// ─────────────────────────────────────────────────────────────────────────
+scene(4.0, 30, "fade", 0.5)
+camera(table{
+  "0": table{x: 960, y: 550, zoom: 1},
+  "1.2": table{x: 900, y: 545, zoom: 1.12, ease: "sine"},
+  "2.4": table{x: 1020, y: 560, zoom: 1.28, ease: "sine"},
+  "3.2": table{x: 960, y: 550, zoom: 1.08, ease: "sine"},
+  "4.0": table{x: 960, y: 550, zoom: 1},
+})
+
+shape("s5-bg", "rect", still(4.0, table{
+  x: 0, y: 0, w: 1920, h: 1080,
+  gradFrom: "#0D0D18", gradTo: "#060609", gradAngle: 120,
+}))
+shape("s5-halo-cyan", "circle", still(4.0, table{
+  x: 760, y: 470, r: 420, color: cyan, alpha: 0.04,
+}))
+shape("s5-halo-gold", "circle", still(4.0, table{
+  x: 1200, y: 700, r: 340, color: gold, alpha: 0.03,
+}))
+
+text("s5-kicker", table{
+  "0": table{content: "04  /  CAMERA", x: 380, y: 220, size: 19, color: cyan, font: display, alpha: 0},
+  "0.45": table{content: "04  /  CAMERA", x: 380, y: 220, size: 19, color: cyan, font: display, alpha: 1, ease: "easeOut"},
+  "4.0": table{content: "04  /  CAMERA", x: 380, y: 220, size: 19, color: cyan, font: display, alpha: 1},
+})
+text("s5-kicker-sub", table{
+  "0.2": table{content: "pan, zoom, light", x: 380, y: 252, size: 16, color: muted, font: body, alpha: 0},
+  "0.65": table{content: "pan, zoom, light", x: 380, y: 252, size: 16, color: muted, font: body, alpha: 0.8, ease: "easeOut"},
+  "4.0": table{content: "pan, zoom, light", x: 380, y: 252, size: 16, color: muted, font: body, alpha: 0.8},
+})
+
+text("s5-bigword", still(4.0, table{
+  content: "MOVE", x: 960, y: 556, size: 340, color: "#11111B", font: display, alpha: 1,
+}))
+shape("s5-panel", "roundRect", still(4.0, table{
+  x: 520, y: 270, w: 880, h: 560, radius: 44, gradFrom: "#1A1A28", gradTo: "#0A0A11", gradAngle: 120, rotate: -4,
+}))
+shape("s5-panel-rule", "rect", still(4.0, table{
+  x: 590, y: 344, w: 200, h: 4, gradFrom: cyan, gradTo: gold, gradAngle: 0, rotate: -4, alpha: 0.9,
+}))
+text("s5-label", still(4.0, table{
+  content: "CAMERA  /  LIGHT", x: 960, y: 328, size: 17, color: muted, font: display, alpha: 0.85, rotate: -4,
+}))
+
+shape("s5-orb-cyan", "circle", table{
+  "0.05": table{x: 760, y: 590, r: 0, color: "#1B6F6A", gradFrom: cyan, gradTo: "#174C4A", gradAngle: 120, glow: cyan, glowBlur: 34, alpha: 0},
+  "0.55": table{x: 760, y: 590, r: 154, color: "#1B6F6A", gradFrom: cyan, gradTo: "#174C4A", gradAngle: 120, glow: cyan, glowBlur: 34, alpha: 1, ease: "spring"},
+  "2.8": table{x: 748, y: 580, r: 166, color: "#1B6F6A", gradFrom: cyan, gradTo: "#174C4A", gradAngle: 120, glow: cyan, glowBlur: 34, alpha: 1},
+  "4.0": table{x: 760, y: 590, r: 154, color: "#1B6F6A", gradFrom: cyan, gradTo: "#174C4A", gradAngle: 120, glow: cyan, glowBlur: 34, alpha: 1},
+})
+shape("s5-orb-gold", "circle", table{
+  "0.1": table{x: 1204, y: 524, r: 0, color: "#8A6420", gradFrom: gold, gradTo: coral, gradAngle: 120, shadowColor: "#000000", shadowBlur: 28, shadowX: 16, shadowY: 22, alpha: 0},
+  "0.6": table{x: 1204, y: 524, r: 106, color: "#8A6420", gradFrom: gold, gradTo: coral, gradAngle: 120, shadowColor: "#000000", shadowBlur: 28, shadowX: 16, shadowY: 22, alpha: 1, ease: "spring"},
+  "2.8": table{x: 1216, y: 534, r: 114, color: "#8A6420", gradFrom: gold, gradTo: coral, gradAngle: 120, shadowColor: "#000000", shadowBlur: 28, shadowX: 16, shadowY: 22, alpha: 1},
+  "4.0": table{x: 1204, y: 524, r: 106, color: "#8A6420", gradFrom: gold, gradTo: coral, gradAngle: 120, shadowColor: "#000000", shadowBlur: 28, shadowX: 16, shadowY: 22, alpha: 1},
+})
+shape("s5-ring", "arc", table{
+  "0.35": table{x: 980, y: 646, r: 104, start: 0, end: 360, width: 3, color: white, alpha: 0},
+  "0.95": table{x: 980, y: 646, r: 104, start: 0, end: 360, width: 3, color: white, alpha: 0.45, ease: "easeOut"},
+  "2.8": table{x: 980, y: 646, r: 122, start: 0, end: 360, width: 3, color: white, alpha: 0.25},
+  "4.0": table{x: 980, y: 646, r: 104, start: 0, end: 360, width: 3, color: white, alpha: 0.35},
+})
+shape("s5-spark", "circle", table{
+  "0.8": table{x: 1360, y: 420, r: 0, color: cyan, alpha: 0},
+  "1.3": table{x: 1360, y: 420, r: 7, color: cyan, alpha: 0.95, ease: "spring"},
+  "4.0": table{x: 1360, y: 420, r: 7, color: cyan, alpha: 0.95},
+})
+shape("s5-spark2", "circle", table{
+  "1.1": table{x: 604, y: 700, r: 0, color: coral, alpha: 0},
+  "1.6": table{x: 604, y: 700, r: 5, color: coral, alpha: 0.9, ease: "spring"},
+  "4.0": table{x: 604, y: 700, r: 5, color: coral, alpha: 0.9},
+})
+
+text("s5-zoom", table{
+  "0": table{content: "1.00x", x: 1700, y: 196, size: 19, color: cyan, font: display, alpha: 0},
+  "0.5": table{content: "1.00x", x: 1700, y: 196, size: 19, color: cyan, font: display, alpha: 0.85, ease: "easeOut"},
+  "1.2": table{content: "1.12x", x: 1700, y: 196, size: 19, color: cyan, font: display, alpha: 0.85},
+  "2.4": table{content: "1.28x", x: 1700, y: 196, size: 19, color: cyan, font: display, alpha: 0.85},
+  "3.2": table{content: "1.08x", x: 1700, y: 196, size: 19, color: cyan, font: display, alpha: 0.85},
+  "4.0": table{content: "1.00x", x: 1700, y: 196, size: 19, color: cyan, font: display, alpha: 0.85},
+})
+text("s5-foot", table{
+  "0.8": table{content: "depth, without a timeline.", x: 480, y: 890, size: 18, color: muted, font: body, alpha: 0},
+  "1.3": table{content: "depth, without a timeline.", x: 480, y: 886, size: 18, color: muted, font: body, alpha: 0.8, ease: "easeOut"},
+  "4.0": table{content: "depth, without a timeline.", x: 480, y: 886, size: 18, color: muted, font: body, alpha: 0.8},
+})
+
+// ─────────────────────────────────────────────────────────────────────────
+// 06 — end card
+// ─────────────────────────────────────────────────────────────────────────
+scene(5.0, 30, "fade", 0.5)
+
+shape("s6-bg", "rect", still(5.0, table{
+  x: 0, y: 0, w: 1920, h: 1080,
+  gradFrom: "#0D0D16", gradTo: "#060609", gradAngle: 120,
+}))
+shape("s6-halo-cyan", "circle", still(5.0, table{
+  x: 760, y: 420, r: 360, color: cyan, alpha: 0.03,
+}))
+shape("s6-halo-gold", "circle", still(5.0, table{
+  x: 1220, y: 700, r: 300, color: gold, alpha: 0.025,
+}))
+
+shape("s6-ripple", "circle", table{
+  "2.8": table{x: 960, y: 352, r: 90, color: cyan, alpha: 0},
+  "3.3": table{x: 960, y: 352, r: 120, color: cyan, alpha: 0.18, ease: "easeOut"},
+  "4.6": table{x: 960, y: 352, r: 280, color: cyan, alpha: 0},
+})
+shape("s6-arc-a", "arc", table{
+  "0.3": table{x: 960, y: 352, r: 154, start: 200, end: 200, width: 2, color: gold, alpha: 0},
+  "1.2": table{x: 960, y: 352, r: 154, start: 200, end: 340, width: 2, color: gold, alpha: 0.5, ease: "sine"},
+  "5.0": table{x: 960, y: 352, r: 164, start: 200, end: 340, width: 2, color: gold, alpha: 0.28},
+})
+shape("s6-arc-b", "arc", table{
+  "0.5": table{x: 960, y: 352, r: 196, start: 20, end: 20, width: 1, color: cyan, alpha: 0},
+  "1.4": table{x: 960, y: 352, r: 196, start: 20, end: 160, width: 1, color: cyan, alpha: 0.45, ease: "sine"},
+  "5.0": table{x: 960, y: 352, r: 204, start: 20, end: 160, width: 1, color: cyan, alpha: 0.24},
+})
+
+svg("s6-mark", "examples/assets/kyfram-mark.svg", table{
+  "0.15": table{x: 960, y: 368, w: 218, h: 218, rotate: -10, scale: 0.72, alpha: 0},
+  "0.8": table{x: 960, y: 352, w: 218, h: 218, rotate: 0, scale: 1, alpha: 1, ease: "spring"},
+  "2.8": table{x: 960, y: 346, w: 218, h: 218, rotate: 2, scale: 1.03, alpha: 1},
+  "5.0": table{x: 960, y: 352, w: 218, h: 218, rotate: 0, scale: 1, alpha: 1},
+})
+
+letters("s6-brand", "kyfram", table{
+  "0.35": table{x: 960, y: 610, size: 104, color: white, font: display, alpha: 0, scale: 0.92},
+  "0.9": table{x: 960, y: 598, size: 104, color: white, font: display, alpha: 1, scale: 1, ease: "spring"},
+  "5.0": table{x: 960, y: 598, size: 104, color: white, font: display, alpha: 1, scale: 1},
+}, 0.05)
+text("s6-tag", table{
+  "0.7": table{content: "motion graphics for Go", x: 960, y: 664, size: 27, color: muted, font: body, alpha: 0},
+  "1.2": table{content: "motion graphics for Go", x: 960, y: 660, size: 27, color: muted, font: body, alpha: 1, ease: "easeOut"},
+  "5.0": table{content: "motion graphics for Go", x: 960, y: 660, size: 27, color: muted, font: body, alpha: 1},
+})
+text("s6-url", table{
+  "1.0": table{content: "github.com/codetesla51/kyfram", x: 960, y: 764, size: 26, color: cyan, font: body, alpha: 0},
+  "1.5": table{content: "github.com/codetesla51/kyfram", x: 960, y: 760, size: 26, color: cyan, font: body, alpha: 1, ease: "easeOut"},
+  "5.0": table{content: "github.com/codetesla51/kyfram", x: 960, y: 760, size: 26, color: cyan, font: body, alpha: 1},
+})
+shape("s6-rule", "rect", table{
+  "1.3": table{x: 960, y: 816, w: 0, h: 2, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 0},
+  "2.1": table{x: 760, y: 816, w: 400, h: 2, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 0.9, ease: "easeOut"},
+  "5.0": table{x: 760, y: 816, w: 400, h: 2, gradFrom: cyan, gradTo: gold, gradAngle: 0, alpha: 0.9},
+})
+text("s6-small", table{
+  "1.6": table{content: "v0.5.0  ·  MIT  ·  made with kyfram", x: 960, y: 854, size: 15, color: muted, font: body, alpha: 0},
+  "2.1": table{content: "v0.5.0  ·  MIT  ·  made with kyfram", x: 960, y: 850, size: 15, color: muted, font: body, alpha: 0.75, ease: "easeOut"},
+  "5.0": table{content: "v0.5.0  ·  MIT  ·  made with kyfram", x: 960, y: 850, size: 15, color: muted, font: body, alpha: 0.75},
+})
+text("s6-cta", table{
+  "2.2": table{content: "make something that moves.", x: 960, y: 936, size: 20, color: white, font: body, alpha: 0},
+  "2.7": table{content: "make something that moves.", x: 960, y: 932, size: 20, color: white, font: body, alpha: 0.8, ease: "easeOut"},
+  "5.0": table{content: "make something that moves.", x: 960, y: 932, size: 20, color: white, font: body, alpha: 0.8},
+})
